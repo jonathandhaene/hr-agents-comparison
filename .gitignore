@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# Node (Agents Toolkit ships JS bits)
+node_modules/
+npm-debug.log*
+
+# IDE
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.recommended.json
+
+# Env / secrets
+.env
+.env.local
+*.pem
+*.pfx
+.azure/
+env/.env.*.user
+
+# Azure / Bicep
+*.bicep.json
+.terraform/
+
+# Power Platform
+*.cdsproj.user
+obj/
+out/
+
+# OS
+.DS_Store
+Thumbs.db

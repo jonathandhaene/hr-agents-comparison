@@ -1,0 +1,13 @@
+{
+  "name": "hr-policies",
+  "fields": [
+    {"name": "id", "type": "Edm.String", "key": true},
+    {"name": "policy", "type": "Edm.String", "filterable": true, "facetable": true},
+    {"name": "content", "type": "Edm.String", "searchable": true},
+    {"name": "contentVector", "type": "Collection(Edm.Single)", "searchable": true, "vectorSearchDimensions": 1536, "vectorSearchProfileName": "default-profile"}
+  ],
+  "vectorSearch": {
+    "profiles": [{"name": "default-profile", "algorithm": "hnsw"}],
+    "algorithms": [{"name": "hnsw", "kind": "hnsw"}]
+  }
+}

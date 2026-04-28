@@ -1,0 +1,47 @@
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/docs.yml'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'README.md'
+      - '.github/workflows/docs.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g markdownlint-cli@0.41.0
+      - run: markdownlint "docs/**/*.md" "README.md" --disable MD013 MD033 MD041
+      - name: Render Mermaid → SVG
+        run: |
+          npm install -g @mermaid-js/mermaid-cli@10.9.1
+          mkdir -p docs/architecture/img docs/img
+          render_block() {
+            local src=$1 out=$2
+            awk '/^```mermaid$/{flag=1;next}/^```$/{flag=0}flag' "$src" > /tmp/d.mmd
+            mmdc -i /tmp/d.mmd -o "$out" -b transparent
+          }
+          render_block docs/architecture/m365-agent.md   docs/architecture/img/m365-agent.svg
+          render_block docs/architecture/copilot-studio.md docs/architecture/img/copilot-studio.svg
+          render_block docs/architecture/foundry.md      docs/architecture/img/foundry.svg
+          render_block docs/decision-tree.md             docs/img/decision-tree.svg
+      - name: Fail if SVGs out of date
+        run: |
+          if [[ -n "$(git status --porcelain docs)" ]]; then
+            echo "Pre-rendered SVGs are out of sync with Mermaid sources. Re-run rendering locally."
+            git --no-pager diff -- docs
+            exit 1
+          fi

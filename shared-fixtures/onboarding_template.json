@@ -1,0 +1,71 @@
+{
+  "templateId": "OB-STD-2026",
+  "name": "Standard New Hire Onboarding",
+  "description": "Default onboarding plan for all new individual contributors.",
+  "tasks": [
+    {
+      "id": "T01",
+      "title": "Provision laptop & accounts",
+      "owner": "it",
+      "dueOffsetDays": -3,
+      "critical": true,
+      "description": "Order standard hardware kit and provision M365, GitHub, VPN."
+    },
+    {
+      "id": "T02",
+      "title": "Send welcome email & day-1 schedule",
+      "owner": "manager",
+      "dueOffsetDays": -1,
+      "critical": true,
+      "description": "Personalized welcome from hiring manager with day-1 agenda."
+    },
+    {
+      "id": "T03",
+      "title": "Schedule buddy intro chat",
+      "owner": "buddy",
+      "dueOffsetDays": 0,
+      "critical": false,
+      "description": "30-min intro chat between buddy and new hire on day 1."
+    },
+    {
+      "id": "T04",
+      "title": "Complete required compliance training",
+      "owner": "new-hire",
+      "dueOffsetDays": 7,
+      "critical": true,
+      "description": "Code of Conduct, Information Security, Privacy Foundations."
+    },
+    {
+      "id": "T05",
+      "title": "Set 30-60-90 day goals with manager",
+      "owner": "manager",
+      "dueOffsetDays": 14,
+      "critical": true,
+      "description": "Co-create written 30-60-90 day plan."
+    },
+    {
+      "id": "T06",
+      "title": "Introductions across team & adjacent teams",
+      "owner": "buddy",
+      "dueOffsetDays": 14,
+      "critical": false,
+      "description": "Schedule intro 1:1s with at least 5 colleagues."
+    },
+    {
+      "id": "T07",
+      "title": "First production change shipped",
+      "owner": "new-hire",
+      "dueOffsetDays": 30,
+      "critical": false,
+      "description": "Small but meaningful first ship to celebrate week 4."
+    },
+    {
+      "id": "T08",
+      "title": "30-day onboarding check-in with HR",
+      "owner": "hr-partner",
+      "dueOffsetDays": 30,
+      "critical": true,
+      "description": "Confirm onboarding success and surface blockers."
+    }
+  ]
+}

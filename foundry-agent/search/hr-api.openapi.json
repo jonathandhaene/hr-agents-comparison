@@ -1,0 +1,14 @@
+{
+  "openapi": "3.0.1",
+  "info": {"title": "Contoso HR API (Foundry)", "version": "1.0.0"},
+  "servers": [{"url": "${HR_API_BASE}"}],
+  "paths": {
+    "/employees/{id}": {"get": {"operationId": "getEmployee", "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/leave/request": {"post": {"operationId": "requestLeave", "requestBody": {"required": true, "content": {"application/json": {"schema": {"type": "object", "properties": {"employeeId": {"type": "string"}, "startDate": {"type": "string"}, "endDate": {"type": "string"}, "type": {"type": "string"}}}}}}, "responses": {"200": {"description": "OK"}}}},
+    "/leave/{id}/approve": {"post": {"operationId": "approveLeave", "parameters": [{"name": "id", "in": "path", "required": true, "schema": {"type": "string"}}], "responses": {"200": {"description": "OK"}}}},
+    "/onboarding/start": {"post": {"operationId": "startOnboarding", "responses": {"200": {"description": "OK"}}}},
+    "/jobs/search": {"post": {"operationId": "searchJobs", "responses": {"200": {"description": "OK"}}}},
+    "/tickets/classify": {"post": {"operationId": "classifyTicket", "responses": {"200": {"description": "OK"}}}},
+    "/tickets/create": {"post": {"operationId": "createTicket", "responses": {"200": {"description": "OK"}}}}
+  }
+}

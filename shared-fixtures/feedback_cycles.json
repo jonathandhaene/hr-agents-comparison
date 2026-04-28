@@ -1,0 +1,16 @@
+{
+  "cycles": [
+    {
+      "id": "FB-H1-2026",
+      "name": "H1 2026 360° Review",
+      "openFrom": "2026-05-01",
+      "openUntil": "2026-05-31",
+      "questions": [
+        { "id": "Q1", "text": "What are this person's biggest strengths?", "type": "longText" },
+        { "id": "Q2", "text": "What is one thing they could do differently to be more effective?", "type": "longText" },
+        { "id": "Q3", "text": "How effective is their collaboration on a 1–5 scale?", "type": "scale1to5" },
+        { "id": "Q4", "text": "Describe a moment where they had outsized impact.", "type": "longText" }
+      ]
+    }
+  ]
+}

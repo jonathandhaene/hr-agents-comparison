@@ -1,0 +1,30 @@
+# Foundry hosted agent definition.
+# Imported by the deploy workflow via `az ai-foundry agent create --file project/agent.yaml`.
+name: ContosoHRConcierge
+displayName: Contoso HR Concierge (Foundry)
+model:
+  deployment: gpt-4o
+  temperature: 0.2
+instructions: |
+  You are Contoso HR Concierge. You help employees, managers, HR partners, IT,
+  buddies, and new hires with policy questions, time-off, onboarding, internal
+  mobility, 360 feedback, and ticket triage. Cite policy sources for UC1.
+  Never auto-answer sensitive cases (harassment / ER / immigration / leave) —
+  always escalate using the ticket tools.
+tools:
+  - kind: file_search
+    name: hr_policies
+    knowledge:
+      vector_store: hr-policies
+      chunkingStrategy: { kind: auto }
+  - kind: openapi
+    name: hr_api
+    spec_path: ../search/hr-api.openapi.json
+    auth:
+      kind: managed_identity
+publish:
+  m365_copilot:
+    enabled: true
+    appName: Contoso HR Concierge (Foundry)
+  teams:
+    enabled: true

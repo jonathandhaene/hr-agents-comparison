@@ -1,0 +1,54 @@
+{
+  "categories": [
+    {
+      "id": "POLICY",
+      "label": "Policy question",
+      "sensitivity": "low",
+      "autoAnswer": true,
+      "examples": ["how many vacation days", "parental leave eligibility", "dress code"]
+    },
+    {
+      "id": "PAYROLL",
+      "label": "Payroll / pay question",
+      "sensitivity": "medium",
+      "autoAnswer": false,
+      "examples": ["paycheck wrong", "bonus not paid", "tax form"]
+    },
+    {
+      "id": "BENEFITS",
+      "label": "Benefits enrollment / change",
+      "sensitivity": "low",
+      "autoAnswer": true,
+      "examples": ["enroll dental", "add dependent", "401k change"]
+    },
+    {
+      "id": "ER",
+      "label": "Employee relations / interpersonal concern",
+      "sensitivity": "high",
+      "autoAnswer": false,
+      "examples": ["conflict with manager", "uncomfortable comment", "bullying"]
+    },
+    {
+      "id": "HARASSMENT",
+      "label": "Harassment / discrimination claim",
+      "sensitivity": "critical",
+      "autoAnswer": false,
+      "escalateImmediately": true,
+      "examples": ["harassed", "discriminated", "retaliation"]
+    },
+    {
+      "id": "IMMIGRATION",
+      "label": "Immigration / visa question",
+      "sensitivity": "high",
+      "autoAnswer": false,
+      "examples": ["visa renewal", "green card", "work permit"]
+    },
+    {
+      "id": "LEAVE",
+      "label": "Leave of absence / accommodation",
+      "sensitivity": "high",
+      "autoAnswer": false,
+      "examples": ["medical leave", "FMLA", "accommodation request"]
+    }
+  ]
+}

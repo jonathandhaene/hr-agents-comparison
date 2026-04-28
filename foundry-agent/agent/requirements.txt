@@ -1,0 +1,7 @@
+azure-ai-projects>=1.0.0
+azure-ai-agents>=1.0.0
+azure-identity>=1.17.1
+agent-framework>=0.1.0
+openai>=1.51.0
+httpx>=0.27.2
+pydantic>=2.9.2

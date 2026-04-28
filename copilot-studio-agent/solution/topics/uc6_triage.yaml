@@ -1,0 +1,51 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc6_triage
+  intent:
+    triggerQueries:
+      - I need to report something
+      - I have a payroll issue
+      - I want to raise a concern
+      - There's a problem with my paycheck
+  actions:
+    # UC6 — Ticket triage & escalation
+    # Strategy:
+    # 1. Call the classifier endpoint via the Custom Connector.
+    # 2. If sensitive (harassment / ER / immigration / leave) — create a
+    #    ticket and ESCALATE using Copilot Studio's built-in human handoff
+    #    (`TransferConversation`) to the HR queue in Teams.
+    # 3. If autoAnswer — let generative answers handle it.
+    - kind: InvokeConnectorAction
+      id: classify
+      connectionReference: HR_API_Connection
+      operationId: classifyTicket
+      input: { binding: { description: =System.Activity.Text } }
+      output: { binding: { value: Topic.classification } }
+    - kind: ConditionGroup
+      id: branch_on_sensitivity
+      conditions:
+        - id: sensitive
+          condition: =Topic.classification.escalateImmediately or Topic.classification.sensitivity == 'critical' or Topic.classification.sensitivity == 'high'
+          actions:
+            - kind: InvokeConnectorAction
+              id: create_ticket
+              connectionReference: HR_API_Connection
+              operationId: createTicket
+              input:
+                binding:
+                  employeeId: =System.User.Email
+                  description: =System.Activity.Text
+              output: { binding: { value: Topic.ticket } }
+            - kind: SendActivity
+              activity: |
+                I've created case **{Topic.ticket.id}** ({Topic.classification.categoryLabel}) and I'm connecting you to an HR Partner now.
+            - kind: TransferConversation
+              id: handoff_to_hr
+              transferTo: HR_Partner_Queue
+      elseActions:
+        - kind: SearchAndSummarizeContent
+          id: auto_answer
+          userInput: =System.Activity.Text
+          moderateResponse: true
+          enableGenerativeAnswers: true

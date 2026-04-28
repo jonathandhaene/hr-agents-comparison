@@ -1,0 +1,26 @@
+{
+  "$comment": "Agent Flow — UC5 Open or summarize 360 feedback.",
+  "name": "HR_FeedbackOpenOrSummarize",
+  "type": "AgentFlow",
+  "trigger": { "kind": "Manual", "inputs": { "subjectEmail": "string", "mode": "string" } },
+  "actions": [
+    {
+      "name": "Branch",
+      "type": "Switch",
+      "on": "@if(contains(toLower(triggerOutputs()['mode']), 'summar'), 'summary', 'open')",
+      "cases": {
+        "open": [
+          { "name": "Open_request", "type": "Connector", "connector": "HR_API_Connection", "operationId": "openFeedbackRequest", "inputs": { "cycleId": "FB-H1-2026", "subjectEmployeeId": "@triggerOutputs()['subjectEmail']", "requestedReviewerIds": [] } },
+          { "name": "Send_invites", "type": "Connector", "connector": "shared_office365", "operationId": "SendEmailV2", "inputs": { "To": "@join(outputs('Open_request')['reviewerIds'], ';')", "Subject": "360 feedback request", "Body": "Please share feedback on @{triggerOutputs()['subjectEmail']}" } }
+        ],
+        "summary": [
+          { "name": "Get_summary", "type": "Connector", "connector": "HR_API_Connection", "operationId": "getFeedbackSummary", "inputs": { "requestId": "FBR-LATEST" } }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "requestId": "@coalesce(outputs('Open_request')?['id'], '')",
+    "summary": "@coalesce(outputs('Get_summary')?['responses'], '')"
+  }
+}

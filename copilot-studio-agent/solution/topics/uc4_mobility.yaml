@@ -1,0 +1,30 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc4_mobility
+  intent:
+    triggerQueries:
+      - What internal jobs match my profile?
+      - Help me find my next role
+      - Career options for me
+  actions:
+    # UC4 — Internal mobility
+    # Strategy: a single Custom Connector call to the FastAPI backend's
+    # /jobs/search endpoint, then a generative response with citations.
+    - kind: InvokeConnectorAction
+      id: search_jobs
+      connectionReference: HR_API_Connection
+      operationId: searchJobs
+      input:
+        binding:
+          employeeId: =System.User.Email
+          interests: =System.Activity.Text
+      output:
+        binding: { value: Topic.jobs }
+    - kind: SearchAndSummarizeContent
+      id: pitch
+      userInput: |
+        Draft a 90-word internal-mobility pitch for the top role in {Topic.jobs}
+        speaking in first person. Be candid and specific.
+      moderateResponse: true
+      enableGenerativeAnswers: true

@@ -1,0 +1,51 @@
+{
+  "$schema": "https://developer.microsoft.com/json-schemas/teams/v1.19/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.19",
+  "version": "1.0.0",
+  "id": "${{TEAMS_APP_ID}}",
+  "developer": {
+    "name": "Contoso HR",
+    "websiteUrl": "https://contoso.example.com",
+    "privacyUrl": "https://contoso.example.com/privacy",
+    "termsOfUseUrl": "https://contoso.example.com/terms"
+  },
+  "icons": { "color": "color.png", "outline": "outline.png" },
+  "name": {
+    "short": "HR Concierge (M365 SDK)",
+    "full": "Contoso HR Concierge — Microsoft 365 Agents SDK build"
+  },
+  "description": {
+    "short": "HR companion for employees and managers.",
+    "full": "Contoso HR Concierge built on the Microsoft 365 Agents SDK. Six HR use cases including time-off approval, onboarding orchestration, and sensitive-case escalation."
+  },
+  "accentColor": "#0078D4",
+  "bots": [
+    {
+      "botId": "${{BOT_ID}}",
+      "scopes": ["personal", "team", "groupChat"],
+      "supportsFiles": false,
+      "isNotificationOnly": false,
+      "commandLists": [
+        {
+          "scopes": ["personal"],
+          "commands": [
+            { "title": "Ask a policy question", "description": "Get answers from the HR handbook" },
+            { "title": "Request time off", "description": "Submit a vacation request" },
+            { "title": "Find my next role", "description": "Browse internal openings" }
+          ]
+        }
+      ]
+    }
+  ],
+  "copilotAgents": {
+    "customEngineAgents": [
+      {
+        "id": "hr-concierge",
+        "type": "bot",
+        "botId": "${{BOT_ID}}"
+      }
+    ]
+  },
+  "permissions": ["identity", "messageTeamMembers"],
+  "validDomains": ["${{BOT_DOMAIN}}"]
+}

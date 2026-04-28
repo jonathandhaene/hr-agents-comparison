@@ -1,0 +1,32 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc1_policy_qa
+  intent:
+    triggerQueries:
+      - What's our parental leave policy?
+      - How many vacation days do I get?
+      - Show me the code of conduct
+      - What's the 401k match?
+      - Can I work remotely from another country?
+  actions:
+    # UC1 — Policy Q&A
+    # Strategy: rely on Copilot Studio's generative answers grounded on
+    # SharePoint knowledge sources. The policies live in a SharePoint site
+    # provisioned via `infra/main.bicep` and seeded with shared-fixtures/policies/.
+    - kind: SearchAndSummarizeContent
+      id: ground_on_sharepoint
+      userInput: =System.Activity.Text
+      moderateResponse: true
+      enableGenerativeAnswers: true
+      generativeAnswersConfiguration:
+        knowledgeSources:
+          kind: KnowledgeSourceList
+          knowledgeSources:
+            - kind: SearchSharePoint
+              sites:
+                - https://contoso.sharepoint.com/sites/HRPolicies
+            - kind: KnowledgeSourceUploadedFile
+              dataSourceName: hr-policy-docs
+        responseStyle: Concise
+        citationStyle: Numbered

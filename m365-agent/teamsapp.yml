@@ -1,0 +1,50 @@
+# Microsoft 365 Agents Toolkit project file
+# Defines provision/deploy/publish lifecycle for the M365 Agents SDK solution.
+version: v1.7
+
+environmentFolderPath: ./env
+
+provision:
+  - uses: arm/deploy
+    with:
+      subscriptionId: ${{AZURE_SUBSCRIPTION_ID}}
+      resourceGroupName: ${{AZURE_RESOURCE_GROUP_NAME}}
+      templates:
+        - path: ./infra/main.bicep
+          parameters: ./infra/main.parameters.json
+          deploymentName: hr-agents-m365
+      bicepCliVersion: v0.31.34
+
+  - uses: teamsApp/create
+    with:
+      name: HR Concierge (M365 SDK)
+    writeToEnvironmentFile:
+      teamsAppId: TEAMS_APP_ID
+
+  - uses: teamsApp/zipAppPackage
+    with:
+      manifestPath: ./appPackage/manifest.json
+      outputZipPath: ./appPackage/build/appPackage.zip
+      outputJsonPath: ./appPackage/build/manifest.json
+
+  - uses: teamsApp/update
+    with:
+      appPackagePath: ./appPackage/build/appPackage.zip
+
+deploy:
+  - uses: cli/runNpxCommand
+    name: build container
+    with:
+      args: az acr build --registry ${{AZURE_REGISTRY_NAME}} --image hr-agent:${{GITHUB_SHA}} ./src
+
+  - uses: cli/runNpxCommand
+    name: update container app image
+    with:
+      args: az containerapp update -n ${{AGENT_APP_NAME}} -g ${{AZURE_RESOURCE_GROUP_NAME}} --image ${{AZURE_REGISTRY_NAME}}.azurecr.io/hr-agent:${{GITHUB_SHA}}
+
+publish:
+  - uses: teamsApp/publishAppPackage
+    with:
+      appPackagePath: ./appPackage/build/appPackage.zip
+    writeToEnvironmentFile:
+      publishedAppId: TEAMS_APP_PUBLISHED_APP_ID

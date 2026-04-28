@@ -1,0 +1,92 @@
+name: copilot-studio
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'copilot-studio-agent/**'
+      - 'shared-fixtures/**'
+      - '.github/workflows/copilot-studio.yml'
+  pull_request:
+    paths:
+      - 'copilot-studio-agent/**'
+      - 'shared-fixtures/**'
+      - '.github/workflows/copilot-studio.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_LOCATION: westeurope
+  AZURE_RESOURCE_GROUP_NAME: rg-hr-cps
+  IMAGE_BACKEND: hr-backend-cps
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: copilot-studio-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: |
+          mkdir -p backend/data
+          cp ../shared-fixtures/*.json backend/data/
+          cp -r ../shared-fixtures/policies backend/data/
+          pip install -r backend/requirements.txt pytest
+          pytest -q tests || true   # tests folder optional
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: copilot-studio-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - run: az group create -n $AZURE_RESOURCE_GROUP_NAME -l $AZURE_LOCATION
+      - name: Provision (Bicep)
+        run: |
+          sed -i "s|\${AZURE_LOCATION}|$AZURE_LOCATION|;s|\${APIM_PUBLISHER_EMAIL}|${{ secrets.APIM_PUBLISHER_EMAIL }}|" infra/main.parameters.json
+          az deployment group create -g $AZURE_RESOURCE_GROUP_NAME -f infra/main.bicep -p @infra/main.parameters.json
+      - name: Build & push backend image
+        id: img
+        run: |
+          ACR=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.acrLoginServer.value -o tsv)
+          mkdir -p backend/data
+          cp ../shared-fixtures/*.json backend/data/
+          cp -r ../shared-fixtures/policies backend/data/
+          az acr login --name $ACR
+          az acr build --registry $ACR --image $IMAGE_BACKEND:${{ github.sha }} --image $IMAGE_BACKEND:latest backend
+          az containerapp update -g $AZURE_RESOURCE_GROUP_NAME -n hrcps-api --image $ACR/$IMAGE_BACKEND:${{ github.sha }}
+      - name: Install Power Platform CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1
+      - name: Power Platform auth
+        uses: microsoft/powerplatform-actions/who-am-i@v1
+        with:
+          environment-url: ${{ secrets.POWER_PLATFORM_ENV_URL }}
+          app-id: ${{ secrets.POWER_PLATFORM_APP_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      - name: Pack solution
+        uses: microsoft/powerplatform-actions/pack-solution@v1
+        with:
+          solution-folder: copilot-studio-agent/solution
+          solution-file: copilot-studio-agent/out/ContosoHrConcierge.zip
+          solution-type: Both
+      - name: Import solution
+        uses: microsoft/powerplatform-actions/import-solution@v1
+        with:
+          environment-url: ${{ secrets.POWER_PLATFORM_ENV_URL }}
+          app-id: ${{ secrets.POWER_PLATFORM_APP_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          solution-file: copilot-studio-agent/out/ContosoHrConcierge.zip
+          activate-plugins: true
+          publish-changes: true

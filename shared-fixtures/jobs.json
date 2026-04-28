@@ -1,0 +1,62 @@
+[
+  {
+    "id": "JOB-1001",
+    "title": "Senior Product Manager — Platform",
+    "department": "Product",
+    "location": "Seattle, US",
+    "remote": "Hybrid",
+    "level": "L5",
+    "skills": ["Product Management", "Platform Strategy", "Stakeholder Mgmt"],
+    "summary": "Drive the platform product roadmap, partnering closely with engineering and design.",
+    "minTenureMonths": 12,
+    "openSince": "2026-03-01"
+  },
+  {
+    "id": "JOB-1002",
+    "title": "Associate Product Manager",
+    "department": "Product",
+    "location": "Berlin, DE",
+    "remote": "Hybrid",
+    "level": "L3",
+    "skills": ["Product Management", "Analytics", "Customer Discovery"],
+    "summary": "Entry-level PM role on the growth squad. Mobility-friendly: open to engineers/designers.",
+    "minTenureMonths": 12,
+    "openSince": "2026-04-10"
+  },
+  {
+    "id": "JOB-1003",
+    "title": "Staff Software Engineer",
+    "department": "Engineering",
+    "location": "Seattle, US",
+    "remote": "Hybrid",
+    "level": "L6",
+    "skills": ["Distributed Systems", "Go", "Architecture"],
+    "summary": "Lead architecture for the next-gen data platform.",
+    "minTenureMonths": 24,
+    "openSince": "2026-02-14"
+  },
+  {
+    "id": "JOB-1004",
+    "title": "UX Researcher",
+    "department": "Design",
+    "location": "Dublin, IE",
+    "remote": "Remote",
+    "level": "L4",
+    "skills": ["User Research", "Qualitative Methods"],
+    "summary": "Embedded researcher for the Design Systems team.",
+    "minTenureMonths": 6,
+    "openSince": "2026-04-01"
+  },
+  {
+    "id": "JOB-1005",
+    "title": "Data Scientist — Personalization",
+    "department": "Analytics",
+    "location": "Tokyo, JP",
+    "remote": "Hybrid",
+    "level": "L4",
+    "skills": ["ML", "Python", "Personalization"],
+    "summary": "Own personalization models for the consumer surface.",
+    "minTenureMonths": 12,
+    "openSince": "2026-03-20"
+  }
+]

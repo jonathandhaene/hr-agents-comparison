@@ -1,0 +1,80 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Contoso HR API (Copilot Studio Custom Connector)",
+    "version": "1.0.0",
+    "description": "Slimmed schema friendly to Power Platform Custom Connector limits."
+  },
+  "host": "${HR_API_HOST}",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "paths": {
+    "/employees/{id}": {
+      "get": {
+        "operationId": "getEmployee",
+        "summary": "Get an employee by id or email",
+        "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}],
+        "responses": {"200": {"description": "OK"}}
+      }
+    },
+    "/employees/byName": {
+      "get": {
+        "operationId": "findEmployeeByName",
+        "parameters": [{"name": "name", "in": "query", "required": true, "type": "string"}],
+        "responses": {"200": {"description": "OK"}}
+      }
+    },
+    "/employees/byPersona": {
+      "get": {
+        "operationId": "findEmployeeByPersona",
+        "parameters": [{"name": "persona", "in": "query", "required": true, "type": "string"}],
+        "responses": {"200": {"description": "OK"}}
+      }
+    },
+    "/leave/request": {
+      "post": {
+        "operationId": "requestLeave",
+        "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"employeeId": {"type": "string"}, "startDate": {"type": "string"}, "endDate": {"type": "string"}, "type": {"type": "string"}}}}],
+        "responses": {"200": {"description": "OK"}}
+      }
+    },
+    "/leave/{id}/approve": {"post": {"operationId": "approveLeave", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/leave/{id}/reject": {"post": {"operationId": "rejectLeave", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/onboarding/start": {
+      "post": {
+        "operationId": "startOnboarding",
+        "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"newHireId": {"type": "string"}, "startDate": {"type": "string"}, "managerId": {"type": "string"}, "buddyId": {"type": "string"}}}}],
+        "responses": {"200": {"description": "OK"}}
+      }
+    },
+    "/onboarding/{planId}": {"get": {"operationId": "getOnboarding", "parameters": [{"name": "planId", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/onboarding/{planId}/task/{taskId}/status": {
+      "post": {
+        "operationId": "setOnboardingTaskStatus",
+        "parameters": [
+          {"name": "planId", "in": "path", "required": true, "type": "string"},
+          {"name": "taskId", "in": "path", "required": true, "type": "string"},
+          {"name": "status", "in": "query", "required": true, "type": "string"}
+        ],
+        "responses": {"200": {"description": "OK"}}
+      }
+    },
+    "/jobs/search": {
+      "post": {
+        "operationId": "searchJobs",
+        "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"employeeId": {"type": "string"}, "interests": {"type": "array", "items": {"type": "string"}}, "location": {"type": "string"}}}}],
+        "responses": {"200": {"description": "OK"}}
+      }
+    },
+    "/feedback/request": {"post": {"operationId": "openFeedbackRequest", "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
+    "/feedback/{requestId}/summary": {"get": {"operationId": "getFeedbackSummary", "parameters": [{"name": "requestId", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/tickets/classify": {"post": {"operationId": "classifyTicket", "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"description": {"type": "string"}}}}], "responses": {"200": {"description": "OK"}}}},
+    "/tickets/create": {"post": {"operationId": "createTicket", "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"employeeId": {"type": "string"}, "description": {"type": "string"}}}}], "responses": {"200": {"description": "OK"}}}}
+  },
+  "securityDefinitions": {
+    "apim_subscription_key": {"type": "apiKey", "in": "header", "name": "Ocp-Apim-Subscription-Key"}
+  },
+  "security": [{"apim_subscription_key": []}]
+}

@@ -1,0 +1,29 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc5_feedback
+  intent:
+    triggerQueries:
+      - Open a 360 feedback request
+      - Start performance review
+      - Summarize my 360 feedback
+  actions:
+    # UC5 — 360° feedback
+    # Strategy: an Agent Flow fans out reviewer invitations via Outlook +
+    # collects answers in Dataverse; the topic asks Copilot Studio's
+    # generative engine to produce the narrative summary.
+    - kind: InvokeFlowAction
+      id: open_or_summarize_feedback
+      input:
+        binding:
+          subjectEmail: =System.User.Email
+          mode: =System.Activity.Text
+      output:
+        binding:
+          requestId: Topic.requestId
+          summary: Topic.summary
+      flowName: HR_FeedbackOpenOrSummarize
+    - kind: SendActivity
+      id: reply
+      activity: |
+        {if(empty(Topic.summary), concat('360 request **', Topic.requestId, '** opened — invitations sent.'), Topic.summary)}

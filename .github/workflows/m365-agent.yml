@@ -1,0 +1,90 @@
+name: m365-agent
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'm365-agent/**'
+      - 'shared-fixtures/**'
+      - '.github/workflows/m365-agent.yml'
+  pull_request:
+    paths:
+      - 'm365-agent/**'
+      - 'shared-fixtures/**'
+      - '.github/workflows/m365-agent.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_LOCATION: westeurope
+  AZURE_RESOURCE_GROUP_NAME: rg-hr-m365
+  IMAGE_BACKEND: hr-backend
+  IMAGE_AGENT: hr-agent
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: m365-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Seed fixtures
+        run: |
+          mkdir -p backend/data
+          cp ../shared-fixtures/*.json backend/data/
+          cp -r ../shared-fixtures/policies backend/data/
+      - name: Install + test
+        run: |
+          pip install -r backend/requirements.txt -r src/requirements.txt pytest pytest-asyncio
+          pytest -q tests
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: m365-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Ensure resource group
+        run: az group create -n $AZURE_RESOURCE_GROUP_NAME -l $AZURE_LOCATION
+      - name: Provision (Bicep)
+        run: |
+          sed -i "s|\${AZURE_LOCATION}|$AZURE_LOCATION|;s|\${BOT_APP_ID}|${{ secrets.BOT_APP_ID }}|" infra/main.parameters.json
+          az deployment group create -g $AZURE_RESOURCE_GROUP_NAME -f infra/main.bicep -p @infra/main.parameters.json
+      - name: Read outputs
+        id: out
+        run: |
+          ACR=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.acrLoginServer.value -o tsv)
+          echo "acr=$ACR" >> $GITHUB_OUTPUT
+      - name: Seed fixtures into backend
+        run: |
+          mkdir -p backend/data
+          cp ../shared-fixtures/*.json backend/data/
+          cp -r ../shared-fixtures/policies backend/data/
+      - name: Build & push images
+        run: |
+          az acr login --name ${{ steps.out.outputs.acr }}
+          az acr build --registry ${{ steps.out.outputs.acr }} --image $IMAGE_BACKEND:${{ github.sha }} --image $IMAGE_BACKEND:latest backend
+          az acr build --registry ${{ steps.out.outputs.acr }} --image $IMAGE_AGENT:${{ github.sha }} --image $IMAGE_AGENT:latest src
+      - name: Roll Container Apps
+        run: |
+          az containerapp update -g $AZURE_RESOURCE_GROUP_NAME -n hrm365-api  --image ${{ steps.out.outputs.acr }}/$IMAGE_BACKEND:${{ github.sha }}
+          az containerapp update -g $AZURE_RESOURCE_GROUP_NAME -n hrm365-agent --image ${{ steps.out.outputs.acr }}/$IMAGE_AGENT:${{ github.sha }}
+      - name: Setup Node + Toolkit
+        uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: npm install -g @microsoft/teamsapp-cli
+      - name: Publish via M365 Agents Toolkit
+        env:
+          TEAMSFX_M365_USER: ${{ secrets.M365_USER }}
+          TEAMSFX_M365_PASSWORD: ${{ secrets.M365_PASSWORD }}
+        run: teamsapp deploy --env prod

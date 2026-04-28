@@ -1,0 +1,26 @@
+{
+  "$comment": "Scheduled (every 15 min) — advances onboarding plans, posts proactive Teams reminders.",
+  "name": "HR_OnboardingTick",
+  "type": "ScheduledFlow",
+  "trigger": { "kind": "Recurrence", "frequency": "Minute", "interval": 15 },
+  "actions": [
+    { "name": "List_active_plans", "type": "Dataverse", "operation": "List", "table": "cra5e_onboardingplans", "filter": "cra5e_status eq 'active'" },
+    {
+      "name": "For_each_plan",
+      "type": "Foreach",
+      "items": "@outputs('List_active_plans')['value']",
+      "actions": [
+        { "name": "Get_plan", "type": "Connector", "connector": "HR_API_Connection", "operationId": "getOnboarding", "inputs": { "planId": "@items('For_each_plan')['cra5e_planid']" } },
+        {
+          "name": "For_each_due_task",
+          "type": "Foreach",
+          "items": "@filter(outputs('Get_plan')['tasks'], item => item['status'] == 'not-started' && item['dueDate'] <= utcNow())",
+          "actions": [
+            { "name": "Notify_owner_in_teams", "type": "Connector", "connector": "shared_teams", "operationId": "PostMessageToUser", "inputs": { "recipient": "@items('For_each_due_task')['ownerEmployeeId']", "messageBody": "@concat('Reminder: ', items('For_each_due_task')['title'], ' is due today. (Plan ', items('For_each_plan')['cra5e_planid'], ')')" } },
+            { "name": "Mark_in_progress", "type": "Connector", "connector": "HR_API_Connection", "operationId": "setOnboardingTaskStatus", "inputs": { "planId": "@items('For_each_plan')['cra5e_planid']", "taskId": "@items('For_each_due_task')['id']", "status": "in-progress" } }
+          ]
+        }
+      ]
+    }
+  ]
+}

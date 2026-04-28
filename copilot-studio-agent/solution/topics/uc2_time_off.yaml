@@ -1,0 +1,48 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc2_time_off
+  intent:
+    triggerQueries:
+      - I want to request time off
+      - Book vacation
+      - Take 3 days off next week
+      - Can I have PTO from June 10 to June 14
+  inputs:
+    - kind: AutomaticTaskFlow
+      propertyName: Topic.startDate
+      variable: Topic.startDate
+      type: DateTime
+      promptDefinition:
+        prompt:
+          kind: MessageActivityTemplate
+          text: When would you like the time off to start?
+    - kind: AutomaticTaskFlow
+      propertyName: Topic.endDate
+      variable: Topic.endDate
+      type: DateTime
+      promptDefinition:
+        prompt:
+          kind: MessageActivityTemplate
+          text: And the last day off?
+  actions:
+    # UC2 — Time-off approval
+    # Strategy: use a Copilot Studio Topic to gather inputs, then call an
+    # Agent Flow that uses the Approvals connector for the manager HITL step.
+    - kind: InvokeFlowAction
+      id: call_request_leave_flow
+      input:
+        binding:
+          employeeId: =System.User.Email
+          startDate: =Topic.startDate
+          endDate: =Topic.endDate
+      output:
+        binding:
+          requestId: Topic.requestId
+          status: Topic.status
+      flowName: HR_RequestLeaveAndApprove
+    - kind: SendActivity
+      id: confirm
+      activity: |
+        I sent your request for {Topic.startDate} – {Topic.endDate} to your manager.
+        Approval ID: **{Topic.requestId}** (current status: {Topic.status}).

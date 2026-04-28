@@ -1,0 +1,53 @@
+{
+  "$comment": "Agent Flow — UC2 Request leave + manager approval. Triggered by Copilot Studio topic uc2_time_off. Uses the Approvals connector for the HITL step and the HR API Custom Connector for backend calls.",
+  "name": "HR_RequestLeaveAndApprove",
+  "type": "AgentFlow",
+  "trigger": { "kind": "Manual", "inputs": { "employeeId": "string", "startDate": "string", "endDate": "string" } },
+  "actions": [
+    {
+      "name": "Create_leave_request",
+      "type": "Connector",
+      "connector": "HR_API_Connection",
+      "operationId": "requestLeave",
+      "inputs": {
+        "employeeId": "@triggerOutputs()['employeeId']",
+        "startDate": "@triggerOutputs()['startDate']",
+        "endDate": "@triggerOutputs()['endDate']",
+        "type": "vacation"
+      }
+    },
+    {
+      "name": "Get_manager",
+      "type": "Connector",
+      "connector": "HR_API_Connection",
+      "operationId": "getEmployee",
+      "inputs": { "id": "@outputs('Create_leave_request')['managerId']" }
+    },
+    {
+      "name": "Approve_or_reject",
+      "type": "Approval",
+      "approvalType": "Custom",
+      "title": "Time-off approval",
+      "details": "@concat(triggerOutputs()['employeeId'], ' is requesting ', outputs('Create_leave_request')['days'], ' day(s) from ', triggerOutputs()['startDate'], ' to ', triggerOutputs()['endDate'])",
+      "options": [ "Approve", "Reject", "Need more info" ],
+      "assignedTo": "@outputs('Get_manager')['email']"
+    },
+    {
+      "name": "Branch",
+      "type": "Switch",
+      "on": "@outputs('Approve_or_reject')['selectedOption']",
+      "cases": {
+        "Approve": [
+          { "name": "Approve_in_HR", "type": "Connector", "connector": "HR_API_Connection", "operationId": "approveLeave", "inputs": { "id": "@outputs('Create_leave_request')['id']" } }
+        ],
+        "Reject": [
+          { "name": "Reject_in_HR", "type": "Connector", "connector": "HR_API_Connection", "operationId": "rejectLeave", "inputs": { "id": "@outputs('Create_leave_request')['id']" } }
+        ]
+      }
+    }
+  ],
+  "outputs": {
+    "requestId": "@outputs('Create_leave_request')['id']",
+    "status": "@outputs('Approve_or_reject')['selectedOption']"
+  }
+}

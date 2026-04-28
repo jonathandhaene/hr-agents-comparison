@@ -1,0 +1,18 @@
+{
+  "year": 2026,
+  "balances": [
+    { "employeeId": "E001", "vacationDays": 17, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E002", "vacationDays": 25, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E003", "vacationDays": 12, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E004", "vacationDays": 21, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E005", "vacationDays": 8,  "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E010", "vacationDays": 15, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E011", "vacationDays": 19, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E012", "vacationDays": 11, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "E020", "vacationDays": 10, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "H001", "vacationDays": 18, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "H002", "vacationDays": 14, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "I001", "vacationDays": 16, "sickDays": 10, "personalDays": 3 },
+    { "employeeId": "B001", "vacationDays": 13, "sickDays": 10, "personalDays": 3 }
+  ]
+}

@@ -1,0 +1,40 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc3_onboarding
+  intent:
+    triggerQueries:
+      - Start onboarding for my new hire
+      - Kick off onboarding for Eva Schmidt
+      - Set up a new joiner
+  inputs:
+    - propertyName: Topic.newHireName
+      variable: Topic.newHireName
+      type: String
+      promptDefinition: { prompt: { kind: MessageActivityTemplate, text: What is the new hire's full name? } }
+    - propertyName: Topic.startDate
+      variable: Topic.startDate
+      type: DateTime
+      promptDefinition: { prompt: { kind: MessageActivityTemplate, text: When do they start? } }
+  actions:
+    # UC3 — Onboarding orchestration
+    # Strategy: kick off the long-running flow (HR_StartOnboarding). That flow
+    # writes an Onboarding row in Dataverse and a separate scheduled flow
+    # (HR_OnboardingTick, runs every 15 minutes) advances tasks and posts
+    # Teams reminders to IT, the manager, the buddy, and the new hire.
+    - kind: InvokeFlowAction
+      id: call_start_onboarding
+      input:
+        binding:
+          newHireName: =Topic.newHireName
+          startDate: =Topic.startDate
+          managerEmail: =System.User.Email
+      output:
+        binding:
+          planId: Topic.planId
+      flowName: HR_StartOnboarding
+    - kind: SendActivity
+      id: confirm
+      activity: |
+        Onboarding plan **{Topic.planId}** created for {Topic.newHireName}.
+        I'll nudge IT, the buddy, and {Topic.newHireName} on the right days. You'll get a recap on day 1.

@@ -1,0 +1,36 @@
+{
+  "$comment": "Agent Flow — UC3 Start onboarding. Persists to Dataverse and queues task reminders. Companion scheduled flow HR_OnboardingTick (every 15m) advances reminders.",
+  "name": "HR_StartOnboarding",
+  "type": "AgentFlow",
+  "trigger": { "kind": "Manual", "inputs": { "newHireName": "string", "startDate": "string", "managerEmail": "string" } },
+  "actions": [
+    { "name": "Lookup_new_hire", "type": "Connector", "connector": "HR_API_Connection", "operationId": "findEmployeeByName", "inputs": { "name": "@triggerOutputs()['newHireName']" } },
+    { "name": "Lookup_buddy", "type": "Connector", "connector": "HR_API_Connection", "operationId": "findEmployeeByPersona", "inputs": { "persona": "buddy" } },
+    {
+      "name": "Start_plan",
+      "type": "Connector",
+      "connector": "HR_API_Connection",
+      "operationId": "startOnboarding",
+      "inputs": {
+        "newHireId": "@outputs('Lookup_new_hire')['id']",
+        "startDate": "@triggerOutputs()['startDate']",
+        "managerId": "@triggerOutputs()['managerEmail']",
+        "buddyId": "@outputs('Lookup_buddy')['id']"
+      }
+    },
+    {
+      "name": "Persist_to_dataverse",
+      "type": "Dataverse",
+      "operation": "Create",
+      "table": "cra5e_onboardingplans",
+      "row": {
+        "cra5e_planid": "@outputs('Start_plan')['id']",
+        "cra5e_newhireid": "@outputs('Lookup_new_hire')['id']",
+        "cra5e_managerid": "@triggerOutputs()['managerEmail']",
+        "cra5e_startdate": "@triggerOutputs()['startDate']",
+        "cra5e_status": "active"
+      }
+    }
+  ],
+  "outputs": { "planId": "@outputs('Start_plan')['id']" }
+}
