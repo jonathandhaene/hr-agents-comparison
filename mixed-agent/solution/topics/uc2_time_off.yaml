@@ -1,0 +1,32 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc2_time_off_mixed
+  intent:
+    triggerQueries:
+      - I'd like to take time off
+      - Request vacation
+      - Book PTO
+  actions:
+    # UC2 — Time-off with manager approval
+    # Mixed pattern: dates are collected by the topic, then handed to an
+    # Agent Flow that uses the built-in Approvals connector. Zero custom code.
+    - kind: Question
+      id: ask_dates
+      prompt: What's the start and end date (YYYY-MM-DD)?
+      property: Topic.dates
+      entity: DateTimeRange
+    - kind: InvokeWorkflowAction
+      id: kick_flow
+      workflowId: HR_RequestLeaveAndApprove
+      input:
+        binding:
+          employeeId: =System.User.Email
+          startDate: =Topic.dates.start
+          endDate: =Topic.dates.end
+      output:
+        binding: { result: Topic.result }
+    - kind: SendActivity
+      id: confirm
+      activity: |
+        Submitted. Request id: {Topic.result.requestId}. Your manager has been notified.

@@ -1,0 +1,100 @@
+name: mixed
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'mixed-agent/**'
+      - 'shared-fixtures/**'
+      - '.github/workflows/mixed.yml'
+  pull_request:
+    paths:
+      - 'mixed-agent/**'
+      - 'shared-fixtures/**'
+      - '.github/workflows/mixed.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AZURE_LOCATION: westeurope
+  AZURE_RESOURCE_GROUP_NAME: rg-hr-mixed
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: mixed-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - run: |
+          mkdir -p backend/data
+          cp ../shared-fixtures/*.json backend/data/
+          cp -r ../shared-fixtures/policies backend/data/
+          pip install -r backend/requirements.txt pytest
+          pytest -q tests || true
+
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: test
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: mixed-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - run: az group create -n $AZURE_RESOURCE_GROUP_NAME -l $AZURE_LOCATION
+      - name: Provision (Bicep)
+        run: |
+          sed -i "s|\${AZURE_LOCATION}|$AZURE_LOCATION|" infra/main.parameters.json
+          az deployment group create -g $AZURE_RESOURCE_GROUP_NAME -f infra/main.bicep -p @infra/main.parameters.json
+      - name: Package backend
+        run: |
+          mkdir -p backend/data
+          cp ../shared-fixtures/*.json backend/data/
+          cp -r ../shared-fixtures/policies backend/data/
+          cd backend
+          zip -r ../out/backend.zip . -x '*.git*' -x 'local.settings.json'
+        shell: bash
+      - name: Deploy Function App
+        run: |
+          FN=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.functionAppHost.value -o tsv | cut -d. -f1)
+          az functionapp deployment source config-zip -g $AZURE_RESOURCE_GROUP_NAME -n $FN --src out/backend.zip
+      - name: Create / update Foundry connected agent
+        run: |
+          PROJECT=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.projectEndpoint.value -o tsv)
+          echo "Project endpoint: $PROJECT"
+          az extension add -n ai-foundry -y || true
+          az ai-foundry agent create --project-endpoint "$PROJECT" --file foundry/project/agent.yaml || \
+          az ai-foundry agent update --project-endpoint "$PROJECT" --file foundry/project/agent.yaml
+      - name: Install Power Platform CLI
+        uses: microsoft/powerplatform-actions/actions-install@v1
+      - name: Power Platform auth
+        uses: microsoft/powerplatform-actions/who-am-i@v1
+        with:
+          environment-url: ${{ secrets.POWER_PLATFORM_ENV_URL }}
+          app-id: ${{ secrets.POWER_PLATFORM_APP_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+      - name: Pack mixed solution
+        uses: microsoft/powerplatform-actions/pack-solution@v1
+        with:
+          solution-folder: mixed-agent/solution
+          solution-file: mixed-agent/out/ContosoHrConciergeMixed.zip
+          solution-type: Both
+      - name: Import mixed solution
+        uses: microsoft/powerplatform-actions/import-solution@v1
+        with:
+          environment-url: ${{ secrets.POWER_PLATFORM_ENV_URL }}
+          app-id: ${{ secrets.POWER_PLATFORM_APP_ID }}
+          client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          solution-file: mixed-agent/out/ContosoHrConciergeMixed.zip
+          activate-plugins: true
+          publish-changes: true

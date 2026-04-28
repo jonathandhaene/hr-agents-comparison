@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "triggers": {"manual": {"type": "Request", "kind": "PowerVirtualAgents", "inputs": {"schema": {"type": "object", "properties": {"description": {"type": "string"}, "reporter": {"type": "string"}}}}}},
+  "actions": {
+    "Create": {
+      "type": "OpenApiConnection",
+      "inputs": {"host": {"connectionName": "shared_hrapi", "operationId": "createTicket"}, "parameters": {"body": {"description": "@triggerBody()['description']", "reporter": "@triggerBody()['reporter']"}}}
+    },
+    "Persist": {
+      "runAfter": {"Create": ["Succeeded"]},
+      "type": "OpenApiConnection",
+      "inputs": {"host": {"connectionName": "shared_commondataservice", "operationId": "CreateRecord"}, "parameters": {"entityName": "cra5e_tickets", "item": {"cra5e_ticketid": "@outputs('Create')?['body']?['id']", "cra5e_reporter": "@triggerBody()['reporter']", "cra5e_sensitivity": "high"}}}
+    },
+    "Response": {"runAfter": {"Persist": ["Succeeded"]}, "type": "Response", "inputs": {"statusCode": 200, "body": {"id": "@outputs('Create')?['body']?['id']"}}}
+  }
+}

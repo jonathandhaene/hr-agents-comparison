@@ -1,0 +1,47 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "triggers": {
+    "Recurrence": {
+      "type": "Recurrence",
+      "recurrence": {"frequency": "Day", "interval": 1, "schedule": {"hours": [8]}}
+    }
+  },
+  "actions": {
+    "List_active_plans": {
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {"connectionName": "shared_commondataservice", "operationId": "ListRecords"},
+        "parameters": {"entityName": "cra5e_onboardingplans", "$filter": "statecode eq 0"}
+      }
+    },
+    "ForEach_plan": {
+      "runAfter": {"List_active_plans": ["Succeeded"]},
+      "type": "Foreach",
+      "foreach": "@outputs('List_active_plans')?['body/value']",
+      "actions": {
+        "Tick": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "host": {"connectionName": "shared_hrapi", "operationId": "tickOnboarding"},
+            "parameters": {"id": "@items('ForEach_plan')?['cra5e_planid']"}
+          }
+        },
+        "ForEach_due_reminder": {
+          "runAfter": {"Tick": ["Succeeded"]},
+          "type": "Foreach",
+          "foreach": "@outputs('Tick')?['body/dueReminders']",
+          "actions": {
+            "Post_to_Teams": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "host": {"connectionName": "shared_teams", "operationId": "PostMessageToChat"},
+                "parameters": {"recipient": "@items('ForEach_due_reminder')?['userEmail']", "messageBody": "@items('ForEach_due_reminder')?['message']"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

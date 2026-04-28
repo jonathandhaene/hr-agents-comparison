@@ -1,0 +1,44 @@
+# Power Platform solution — mixed (Copilot Studio primary, Foundry connected)
+solutionUniqueName: ContosoHrConciergeMixed
+publisherUniqueName: ContosoHr
+displayName: Contoso HR Concierge (Mixed)
+version: 1.0.0.0
+components:
+  - type: bot
+    schemaName: cra5e_HRConciergeMixed
+    files:
+      - topics/uc1_policy_qa.yaml
+      - topics/uc2_time_off.yaml
+      - topics/uc3_onboarding.yaml
+      - topics/uc4_mobility.yaml
+      - topics/uc5_feedback.yaml
+      - topics/uc6_triage.yaml
+    knowledgeSources:
+      - kind: SharePoint
+        site: https://contoso.sharepoint.com/sites/HR
+        libraries: [Policies, Handbook]
+        generativeAnswers: true
+  - type: workflow
+    files:
+      - flows/HR_RequestLeaveAndApprove.json
+      - flows/HR_StartOnboarding.json
+      - flows/HR_OnboardingTick.json
+      - flows/HR_FeedbackOpen.json
+      - flows/HR_TicketTriage.json
+  - type: connector
+    schemaName: cra5e_HrApiConnector
+    file: connectors/hr-api.swagger.json
+  - type: connector
+    schemaName: cra5e_FoundryAgentConnector
+    file: connectors/foundry-agent.openapi.json
+  - type: entity
+    schemaName: cra5e_onboardingplans
+  - type: entity
+    schemaName: cra5e_feedbackrequests
+  - type: entity
+    schemaName: cra5e_tickets
+channels:
+  - name: M365CopilotChat
+    enabled: true
+  - name: MicrosoftTeams
+    enabled: true

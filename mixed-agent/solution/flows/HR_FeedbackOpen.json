@@ -1,0 +1,36 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "triggers": {
+    "manual": {"type": "Request", "kind": "PowerVirtualAgents", "inputs": {"schema": {"type": "object", "properties": {"subjectEmail": {"type": "string"}, "cycleId": {"type": "string"}}}}}
+  },
+  "actions": {
+    "Pick_reviewers": {
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {"connectionName": "shared_hrapi", "operationId": "suggestReviewers"},
+        "parameters": {"body": {"subjectEmail": "@triggerBody()['subjectEmail']"}}
+      }
+    },
+    "Open_request": {
+      "runAfter": {"Pick_reviewers": ["Succeeded"]},
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {"connectionName": "shared_hrapi", "operationId": "openFeedbackRequest"},
+        "parameters": {"body": {"cycleId": "@triggerBody()['cycleId']", "subjectEmployeeEmail": "@triggerBody()['subjectEmail']", "reviewerEmails": "@outputs('Pick_reviewers')?['body']?['reviewers']"}}
+      }
+    },
+    "ForEach_reviewer": {
+      "runAfter": {"Open_request": ["Succeeded"]},
+      "type": "Foreach",
+      "foreach": "@outputs('Pick_reviewers')?['body']?['reviewers']",
+      "actions": {
+        "Send_invite": {
+          "type": "OpenApiConnection",
+          "inputs": {"host": {"connectionName": "shared_office365", "operationId": "SendEmailV2"}, "parameters": {"emailMessage": {"To": "@items('ForEach_reviewer')", "Subject": "Feedback request for @{triggerBody()['subjectEmail']}", "Body": "Please share feedback by clicking the link in the chat."}}}
+        }
+      }
+    },
+    "Response": {"runAfter": {"ForEach_reviewer": ["Succeeded"]}, "type": "Response", "inputs": {"statusCode": 200, "body": {"requestId": "@outputs('Open_request')?['body']?['requestId']"}}}
+  }
+}

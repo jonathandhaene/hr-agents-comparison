@@ -1,0 +1,37 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc3_onboarding_mixed
+  intent:
+    triggerQueries:
+      - Start onboarding for a new hire
+      - Onboard someone
+  actions:
+    # UC3 — Onboarding orchestration
+    # Mixed pattern: Topic collects fields; HR_StartOnboarding flow creates the
+    # plan in Dataverse; HR_OnboardingTick scheduled flow advances tasks daily
+    # and posts Teams reminders to manager / buddy / new hire.
+    - kind: Question
+      id: ask_name
+      prompt: Who is starting? (name + role)
+      property: Topic.who
+      entity: Text
+    - kind: Question
+      id: ask_start
+      prompt: What's their start date?
+      property: Topic.startDate
+      entity: DateTime
+    - kind: InvokeWorkflowAction
+      id: start
+      workflowId: HR_StartOnboarding
+      input:
+        binding:
+          who: =Topic.who
+          startDate: =Topic.startDate
+          managerEmail: =System.User.Email
+      output:
+        binding: { plan: Topic.plan }
+    - kind: SendActivity
+      id: ack
+      activity: |
+        Plan {Topic.plan.id} created with {Topic.plan.taskCount} tasks. I'll nudge IT, the buddy, and the new hire automatically.

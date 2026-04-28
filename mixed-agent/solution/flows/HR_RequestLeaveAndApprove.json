@@ -1,0 +1,71 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {},
+  "triggers": {
+    "manual": {
+      "type": "Request",
+      "kind": "PowerVirtualAgents",
+      "inputs": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "employeeId": {"type": "string"},
+            "startDate": {"type": "string"},
+            "endDate": {"type": "string"}
+          },
+          "required": ["employeeId", "startDate", "endDate"]
+        }
+      }
+    }
+  },
+  "actions": {
+    "Get_employee": {
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {"connectionName": "shared_hrapi", "operationId": "getEmployee"},
+        "parameters": {"id": "@triggerBody()['employeeId']"}
+      }
+    },
+    "Submit_request": {
+      "runAfter": {"Get_employee": ["Succeeded"]},
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {"connectionName": "shared_hrapi", "operationId": "requestLeave"},
+        "parameters": {"body": {
+          "employeeId": "@triggerBody()['employeeId']",
+          "startDate": "@triggerBody()['startDate']",
+          "endDate": "@triggerBody()['endDate']",
+          "type": "vacation"
+        }}
+      }
+    },
+    "Approval": {
+      "runAfter": {"Submit_request": ["Succeeded"]},
+      "type": "OpenApiConnectionWebhook",
+      "inputs": {
+        "host": {"connectionName": "shared_approvals", "operationId": "StartAndWaitForAnApproval"},
+        "parameters": {
+          "approvalType": "Approve/Reject - First to respond",
+          "title": "Time-off request @{outputs('Submit_request')?['body']?['requestId']}",
+          "assignedTo": "@outputs('Get_employee')?['body']?['managerEmail']",
+          "details": "@{triggerBody()['startDate']} → @{triggerBody()['endDate']}"
+        }
+      }
+    },
+    "Decision": {
+      "runAfter": {"Approval": ["Succeeded"]},
+      "type": "Switch",
+      "expression": "@body('Approval')?['outcome']",
+      "cases": {
+        "Approve": {"actions": {"Approve": {"type": "OpenApiConnection", "inputs": {"host": {"connectionName": "shared_hrapi", "operationId": "approveLeave"}, "parameters": {"id": "@outputs('Submit_request')?['body']?['requestId']"}}}}},
+        "Reject":  {"actions": {"Reject":  {"type": "OpenApiConnection", "inputs": {"host": {"connectionName": "shared_hrapi", "operationId": "rejectLeave"},  "parameters": {"id": "@outputs('Submit_request')?['body']?['requestId']"}}}}}
+      }
+    },
+    "Response": {
+      "runAfter": {"Decision": ["Succeeded"]},
+      "type": "Response",
+      "inputs": {"statusCode": 200, "body": {"requestId": "@outputs('Submit_request')?['body']?['requestId']", "outcome": "@body('Approval')?['outcome']"}}
+    }
+  }
+}

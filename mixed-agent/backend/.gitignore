@@ -1,0 +1,4 @@
+# Local seed (copied by `make seed`)
+data/
+.python_packages/
+.azurefunctions/

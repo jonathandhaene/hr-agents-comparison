@@ -37,6 +37,7 @@ jobs:
           render_block docs/architecture/m365-agent.md   docs/architecture/img/m365-agent.svg
           render_block docs/architecture/copilot-studio.md docs/architecture/img/copilot-studio.svg
           render_block docs/architecture/foundry.md      docs/architecture/img/foundry.svg
+          render_block docs/architecture/mixed.md        docs/architecture/img/mixed.svg
           render_block docs/decision-tree.md             docs/img/decision-tree.svg
       - name: Fail if SVGs out of date
         run: |

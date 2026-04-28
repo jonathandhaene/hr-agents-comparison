@@ -1,0 +1,48 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc6_triage_mixed
+  intent:
+    triggerQueries:
+      - I'd like to file a complaint
+      - I need help with an HR issue
+      - Report harassment
+  actions:
+    # UC6 — Triage & escalation
+    # Mixed pattern: classify via the HR API, branch on sensitivity, and use
+    # Copilot Studio's first-class TransferConversation to hand sensitive cases
+    # to the HR_Partner_Queue Teams channel. No custom Graph code.
+    - kind: InvokeConnectorAction
+      id: classify
+      connectionReference: HR_API_Connection
+      operationId: classifyTicket
+      input:
+        binding: { description: =System.Activity.Text }
+      output:
+        binding: { value: Topic.classification }
+    - kind: ConditionGroup
+      id: route
+      conditions:
+        - condition: =Topic.classification.sensitivity == "high"
+          actions:
+            - kind: InvokeWorkflowAction
+              id: open_ticket
+              workflowId: HR_TicketTriage
+              input:
+                binding:
+                  description: =System.Activity.Text
+                  reporter: =System.User.Email
+              output: { binding: { ticket: Topic.ticket } }
+            - kind: TransferConversation
+              id: handoff
+              target: HR_Partner_Queue
+              context:
+                ticketId: =Topic.ticket.id
+                summary: =Topic.classification.summary
+        - condition: =Topic.classification.sensitivity != "high"
+          actions:
+            - kind: SearchAndSummarizeContent
+              id: try_self_serve
+              moderateResponse: true
+              enableGenerativeAnswers: true
+              userInput: =System.Activity.Text

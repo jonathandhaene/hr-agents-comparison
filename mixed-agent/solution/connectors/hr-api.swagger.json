@@ -1,0 +1,23 @@
+{
+  "swagger": "2.0",
+  "info": {"title": "Contoso HR API (mixed)", "version": "1.0.0", "description": "Slim Custom Connector to the Azure Functions HR API. Auth: function key in `x-functions-key` header."},
+  "host": "${HR_API_HOST}",
+  "basePath": "/api",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {"functionKey": {"type": "apiKey", "in": "header", "name": "x-functions-key"}},
+  "security": [{"functionKey": []}],
+  "paths": {
+    "/employees/{id}":            {"get":  {"operationId": "getEmployee", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/leave/request":             {"post": {"operationId": "requestLeave", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
+    "/leave/{id}/approve":        {"post": {"operationId": "approveLeave", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/leave/{id}/reject":         {"post": {"operationId": "rejectLeave",  "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/onboarding/start":          {"post": {"operationId": "startOnboarding", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
+    "/onboarding/{id}/tick":      {"post": {"operationId": "tickOnboarding",  "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/feedback/suggest-reviewers":{"post": {"operationId": "suggestReviewers", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
+    "/feedback/request":          {"post": {"operationId": "openFeedbackRequest", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
+    "/tickets/classify":          {"post": {"operationId": "classifyTicket", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
+    "/tickets/create":            {"post": {"operationId": "createTicket",   "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}}
+  }
+}

@@ -1,0 +1,50 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc5_feedback_mixed
+  intent:
+    triggerQueries:
+      - Open a 360 feedback request
+      - Summarize feedback for someone
+      - Start performance feedback
+  actions:
+    # UC5 — 360° feedback
+    # Mixed pattern: opening a cycle is declarative (Agent Flow does Outlook
+    # fan-out + Dataverse rows). Summarising is a model job, so we delegate to
+    # the Foundry connected agent which has a `summarize_feedback` tool.
+    - kind: Question
+      id: ask_intent
+      prompt: Open a new request, or summarize an existing one?
+      property: Topic.mode
+      entity: Choice
+      options: [open, summary]
+    - kind: ConditionGroup
+      id: branch
+      conditions:
+        - condition: =Topic.mode == "open"
+          actions:
+            - kind: InvokeWorkflowAction
+              id: open_flow
+              workflowId: HR_FeedbackOpen
+              output: { binding: { result: Topic.opened } }
+            - kind: SendActivity
+              activity: |
+                Opened {Topic.opened.requestId} and emailed reviewers.
+        - condition: =Topic.mode == "summary"
+          actions:
+            - kind: Question
+              id: ask_id
+              prompt: What's the feedback request id?
+              property: Topic.requestId
+              entity: Text
+            - kind: InvokeConnectorAction
+              id: ask_foundry_summary
+              connectionReference: Foundry_Agent_Connection
+              operationId: invokeAgent
+              input:
+                binding:
+                  agentName: ContosoHRMobilityAdvisor
+                  input: ='Summarize feedback request ' + Topic.requestId
+              output: { binding: { reply: Topic.reply } }
+            - kind: SendActivity
+              activity: =Topic.reply.message

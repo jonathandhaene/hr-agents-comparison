@@ -1,0 +1,29 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc4_mobility_mixed
+  intent:
+    triggerQueries:
+      - What internal jobs match my profile?
+      - Help me find my next role
+      - Career options for me
+  actions:
+    # UC4 — Internal mobility (Foundry connected agent)
+    # Mixed pattern: the heavy lifting (rank jobs + draft a tailored pitch)
+    # lives in a Foundry hosted agent. We call it via the Foundry connector
+    # and surface the streamed answer in the topic.
+    - kind: InvokeConnectorAction
+      id: ask_foundry
+      connectionReference: Foundry_Agent_Connection
+      operationId: invokeAgent
+      input:
+        binding:
+          agentName: ContosoHRMobilityAdvisor
+          input: =System.Activity.Text
+          context:
+            employeeEmail: =System.User.Email
+      output:
+        binding: { reply: Topic.reply }
+    - kind: SendActivity
+      id: relay
+      activity: =Topic.reply.message

@@ -1,0 +1,20 @@
+name: ContosoHRMobilityAdvisor
+displayName: Contoso HR Mobility & Feedback Advisor
+model:
+  deployment: gpt-4o
+  temperature: 0.2
+instructions: |
+  You are Contoso HR's Mobility & Feedback Advisor. You are invoked from a
+  Copilot Studio topic as a connected agent. Be concise. Mobility answers:
+  90-word first-person pitch + one-line runner-up fit. Feedback summary:
+  5 bullets covering strengths, blind spots, action items, theme, and an
+  anonymity-safe quote.
+tools:
+  - kind: openapi
+    name: hr_api
+    spec_path: ../../backend/openapi.json
+    auth:
+      kind: managed_identity
+publish:
+  rest_endpoint:
+    enabled: true

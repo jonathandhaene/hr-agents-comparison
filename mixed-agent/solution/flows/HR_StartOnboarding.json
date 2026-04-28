@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+  "contentVersion": "1.0.0.0",
+  "triggers": {
+    "manual": {
+      "type": "Request",
+      "kind": "PowerVirtualAgents",
+      "inputs": {"schema": {"type": "object", "properties": {"who": {"type": "string"}, "startDate": {"type": "string"}, "managerEmail": {"type": "string"}}}}
+    }
+  },
+  "actions": {
+    "Start_via_API": {
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {"connectionName": "shared_hrapi", "operationId": "startOnboarding"},
+        "parameters": {"body": {"newHireName": "@triggerBody()['who']", "startDate": "@triggerBody()['startDate']", "managerEmail": "@triggerBody()['managerEmail']"}}
+      }
+    },
+    "Persist_to_Dataverse": {
+      "runAfter": {"Start_via_API": ["Succeeded"]},
+      "type": "OpenApiConnection",
+      "inputs": {
+        "host": {"connectionName": "shared_commondataservice", "operationId": "CreateRecord"},
+        "parameters": {
+          "entityName": "cra5e_onboardingplans",
+          "item": {
+            "cra5e_planid": "@outputs('Start_via_API')?['body']?['planId']",
+            "cra5e_newhirename": "@triggerBody()['who']",
+            "cra5e_startdate": "@triggerBody()['startDate']"
+          }
+        }
+      }
+    },
+    "Response": {
+      "runAfter": {"Persist_to_Dataverse": ["Succeeded"]},
+      "type": "Response",
+      "inputs": {"statusCode": 200, "body": {"id": "@outputs('Start_via_API')?['body']?['planId']", "taskCount": "@length(outputs('Start_via_API')?['body']?['tasks'])"}}
+    }
+  }
+}
