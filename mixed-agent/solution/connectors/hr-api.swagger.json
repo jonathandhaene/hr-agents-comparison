@@ -2,8 +2,8 @@
   "swagger": "2.0",
   "info": {
     "title": "Contoso HR API (mixed)",
-    "version": "1.0.0",
-    "description": "Slim Custom Connector to the Azure Functions HR API. Auth: function key sent in the `x-functions-key` header (rotate via the Functions host configuration). Schema is primitive-only so it imports cleanly into Copilot Studio."
+    "version": "1.1.0",
+    "description": "Custom Connector to the Azure Functions HR API. Auth: function key in the x-functions-key header (rotate via Functions host configuration). Field names and response shapes match the Functions backend exactly."
   },
   "host": "${HR_API_HOST}",
   "basePath": "/api",
@@ -25,44 +25,19 @@
           {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Employee id or email"}
         ],
         "responses": {
-          "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "id": {"type": "string"},
-                "displayName": {"type": "string"},
-                "email": {"type": "string"},
-                "managerId": {"type": "string"},
-                "department": {"type": "string"}
-              }
-            }
-          }
+          "200": {"description": "OK", "schema": {"$ref": "#/definitions/Employee"}},
+          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}}
         }
       }
     },
-    "/leave/request": {
-      "post": {
-        "operationId": "requestLeave",
-        "summary": "Request leave",
-        "x-ms-summary": "Request leave",
-        "x-ms-visibility": "important",
+    "/employees/byName": {
+      "get": {
+        "operationId": "findEmployeesByName",
+        "summary": "Find employees by name",
+        "x-ms-summary": "Find employees by name",
+        "x-ms-visibility": "advanced",
         "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "required": ["employeeId", "startDate", "endDate"],
-              "properties": {
-                "employeeId": {"type": "string", "x-ms-summary": "Employee id"},
-                "startDate":  {"type": "string", "x-ms-summary": "Start date (yyyy-mm-dd)"},
-                "endDate":    {"type": "string", "x-ms-summary": "End date (yyyy-mm-dd)"},
-                "type":       {"type": "string", "x-ms-summary": "Leave type", "default": "vacation"}
-              }
-            }
-          }
+          {"name": "name", "in": "query", "required": true, "type": "string", "x-ms-summary": "Full or partial name"}
         ],
         "responses": {
           "200": {
@@ -70,11 +45,57 @@
             "schema": {
               "type": "object",
               "properties": {
-                "requestId": {"type": "string"},
-                "status":    {"type": "string"}
+                "matches": {"type": "array", "items": {"$ref": "#/definitions/EmployeeRef"}}
               }
             }
           }
+        }
+      }
+    },
+    "/employees/byPersona": {
+      "get": {
+        "operationId": "findEmployeeByPersona",
+        "summary": "Find employee by persona",
+        "x-ms-summary": "Find employee by persona",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "persona", "in": "query", "required": true, "type": "string", "x-ms-summary": "Persona"}
+        ],
+        "responses": {
+          "200": {"description": "OK", "schema": {"$ref": "#/definitions/EmployeeRef"}},
+          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}}
+        }
+      }
+    },
+    "/leave/request": {
+      "post": {
+        "operationId": "requestLeave",
+        "summary": "Request leave",
+        "description": "Idempotent on Idempotency-Key. Returns the full request including the resolved managerId and computed day count.",
+        "x-ms-summary": "Request leave",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {"name": "Idempotency-Key", "in": "header", "required": false, "type": "string", "x-ms-summary": "Idempotency key", "x-ms-visibility": "advanced"},
+          {
+            "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["employeeId", "startDate", "endDate"],
+              "properties": {
+                "employeeId": {"type": "string", "x-ms-summary": "Employee id"},
+                "startDate":  {"type": "string", "x-ms-summary": "Start date (yyyy-mm-dd)"},
+                "endDate":    {"type": "string", "x-ms-summary": "End date (yyyy-mm-dd)"},
+                "type":       {"type": "string", "x-ms-summary": "Leave type", "default": "vacation", "enum": ["vacation", "sick", "personal"]},
+                "note":       {"type": "string", "x-ms-summary": "Note", "x-ms-visibility": "advanced"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {"description": "Created", "schema": {"$ref": "#/definitions/LeaveRequest"}},
+          "200": {"description": "OK (replay)", "schema": {"$ref": "#/definitions/LeaveRequest"}},
+          "400": {"description": "Validation error", "schema": {"$ref": "#/definitions/Problem"}},
+          "404": {"description": "Employee not found", "schema": {"$ref": "#/definitions/Problem"}}
         }
       }
     },
@@ -85,10 +106,13 @@
         "x-ms-summary": "Approve leave",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"}
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"},
+          {"name": "body", "in": "body", "required": false, "schema": {"$ref": "#/definitions/Decision"}}
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"type": "object", "properties": {"status": {"type": "string"}}}}
+          "200": {"description": "OK", "schema": {"$ref": "#/definitions/LeaveRequest"}},
+          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}},
+          "409": {"description": "Conflicting state", "schema": {"$ref": "#/definitions/Problem"}}
         }
       }
     },
@@ -99,10 +123,13 @@
         "x-ms-summary": "Reject leave",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"}
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"},
+          {"name": "body", "in": "body", "required": false, "schema": {"$ref": "#/definitions/Decision"}}
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"type": "object", "properties": {"status": {"type": "string"}}}}
+          "200": {"description": "OK", "schema": {"$ref": "#/definitions/LeaveRequest"}},
+          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}},
+          "409": {"description": "Conflicting state", "schema": {"$ref": "#/definitions/Problem"}}
         }
       }
     },
@@ -114,12 +141,10 @@
         "x-ms-visibility": "important",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
+            "name": "body", "in": "body", "required": true,
             "schema": {
               "type": "object",
-              "required": ["newHireId", "startDate"],
+              "required": ["newHireId", "startDate", "managerId"],
               "properties": {
                 "newHireId": {"type": "string", "x-ms-summary": "New hire id"},
                 "startDate": {"type": "string", "x-ms-summary": "Start date"},
@@ -130,7 +155,8 @@
           }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"type": "object", "properties": {"planId": {"type": "string"}}}}
+          "201": {"description": "Created", "schema": {"$ref": "#/definitions/OnboardingPlan"}},
+          "404": {"description": "Employee not found", "schema": {"$ref": "#/definitions/Problem"}}
         }
       }
     },
@@ -150,10 +176,17 @@
             "schema": {
               "type": "object",
               "properties": {
-                "dueTasksJson": {"type": "string", "x-ms-summary": "Due tasks (JSON-encoded array of {taskId, title, ownerEmployeeId})"}
+                "planId":    {"type": "string"},
+                "advanced":  {"type": "array", "items": {"type": "string"}},
+                "dueTasks": {
+                  "type": "array",
+                  "x-ms-summary": "Due tasks",
+                  "items": {"$ref": "#/definitions/DueTask"}
+                }
               }
             }
-          }
+          },
+          "404": {"description": "Plan not found", "schema": {"$ref": "#/definitions/Problem"}}
         }
       }
     },
@@ -165,9 +198,7 @@
         "x-ms-visibility": "advanced",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
+            "name": "body", "in": "body", "required": true,
             "schema": {
               "type": "object",
               "required": ["subjectEmployeeId"],
@@ -183,7 +214,18 @@
             "schema": {
               "type": "object",
               "properties": {
-                "reviewersJson": {"type": "string", "x-ms-summary": "Reviewers (JSON-encoded array of {email, reason})"}
+                "reviewers": {
+                  "type": "array",
+                  "x-ms-summary": "Reviewers",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id":     {"type": "string"},
+                      "email":  {"type": "string"},
+                      "reason": {"type": "string"}
+                    }
+                  }
+                }
               }
             }
           }
@@ -198,40 +240,37 @@
         "x-ms-visibility": "advanced",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
+            "name": "body", "in": "body", "required": true,
             "schema": {
               "type": "object",
               "required": ["subjectEmployeeId"],
               "properties": {
-                "subjectEmployeeId": {"type": "string", "x-ms-summary": "Subject employee id"},
-                "reviewersJson":     {"type": "string", "x-ms-summary": "Reviewers (JSON-encoded array of email)"}
+                "subjectEmployeeId":    {"type": "string", "x-ms-summary": "Subject employee id"},
+                "requestedReviewerIds": {"type": "array", "items": {"type": "string"}, "x-ms-summary": "Reviewer ids"}
               }
             }
           }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"type": "object", "properties": {"requestId": {"type": "string"}}}}
+          "200": {"description": "OK", "schema": {"$ref": "#/definitions/FeedbackRequest"}}
         }
       }
     },
-    "/tickets/classify": {
+    "/feedback/raw": {
       "post": {
-        "operationId": "classifyTicket",
-        "summary": "Classify HR ticket",
-        "x-ms-summary": "Classify HR ticket",
-        "x-ms-visibility": "important",
+        "operationId": "getFeedbackRaw",
+        "summary": "Get raw feedback",
+        "description": "Returns reviewer answers for the connected Foundry agent to summarise. Sensitive; do not log responses verbatim.",
+        "x-ms-summary": "Get raw feedback",
+        "x-ms-visibility": "advanced",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
+            "name": "body", "in": "body", "required": true,
             "schema": {
               "type": "object",
-              "required": ["description"],
+              "required": ["requestId"],
               "properties": {
-                "description": {"type": "string", "x-ms-summary": "Ticket description"}
+                "requestId": {"type": "string", "x-ms-summary": "Feedback request id"}
               }
             }
           }
@@ -242,12 +281,44 @@
             "schema": {
               "type": "object",
               "properties": {
-                "category":   {"type": "string"},
-                "sensitive":  {"type": "boolean"},
-                "confidence": {"type": "number"}
+                "requestId": {"type": "string"},
+                "responses": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "reviewerId": {"type": "string"},
+                      "answers":    {"type": "object", "additionalProperties": true}
+                    }
+                  }
+                }
               }
             }
           }
+        }
+      }
+    },
+    "/tickets/classify": {
+      "post": {
+        "operationId": "classifyTicket",
+        "summary": "Classify HR ticket",
+        "description": "Demo classifier — replace with Azure OpenAI + Azure AI Content Safety for production.",
+        "x-ms-summary": "Classify HR ticket",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body", "in": "body", "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["description"],
+              "properties": {
+                "description": {"type": "string", "x-ms-summary": "Ticket description"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "OK", "schema": {"$ref": "#/definitions/TicketClassification"}}
         }
       }
     },
@@ -259,9 +330,7 @@
         "x-ms-visibility": "advanced",
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
+            "name": "body", "in": "body", "required": true,
             "schema": {
               "type": "object",
               "required": ["employeeId", "description"],
@@ -273,8 +342,124 @@
           }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"type": "object", "properties": {"ticketId": {"type": "string"}}}}
+          "201": {"description": "Created", "schema": {"$ref": "#/definitions/Ticket"}}
         }
+      }
+    }
+  },
+  "definitions": {
+    "Problem": {
+      "type": "object",
+      "properties": {
+        "type":     {"type": "string"},
+        "title":    {"type": "string"},
+        "status":   {"type": "integer"},
+        "detail":   {"type": "string"},
+        "instance": {"type": "string"}
+      }
+    },
+    "Decision": {
+      "type": "object",
+      "properties": {
+        "decisionNote": {"type": "string"}
+      }
+    },
+    "Employee": {
+      "type": "object",
+      "properties": {
+        "id":          {"type": "string"},
+        "displayName": {"type": "string"},
+        "email":       {"type": "string"},
+        "title":       {"type": "string"},
+        "department":  {"type": "string"},
+        "location":    {"type": "string"},
+        "managerId":   {"type": "string"},
+        "persona":     {"type": "string"}
+      }
+    },
+    "EmployeeRef": {
+      "type": "object",
+      "properties": {
+        "id":          {"type": "string"},
+        "displayName": {"type": "string"},
+        "email":       {"type": "string"}
+      }
+    },
+    "LeaveRequest": {
+      "type": "object",
+      "properties": {
+        "id":           {"type": "string"},
+        "employeeId":   {"type": "string"},
+        "managerId":    {"type": "string"},
+        "startDate":    {"type": "string"},
+        "endDate":      {"type": "string"},
+        "type":         {"type": "string"},
+        "days":         {"type": "integer"},
+        "status":       {"type": "string"},
+        "note":         {"type": "string"},
+        "decisionNote": {"type": "string"},
+        "createdAt":    {"type": "string"}
+      }
+    },
+    "OnboardingTask": {
+      "type": "object",
+      "properties": {
+        "id":              {"type": "string"},
+        "title":           {"type": "string"},
+        "owner":           {"type": "string"},
+        "ownerEmployeeId": {"type": "string"},
+        "dueDate":         {"type": "string"},
+        "critical":        {"type": "boolean"},
+        "status":          {"type": "string"}
+      }
+    },
+    "OnboardingPlan": {
+      "type": "object",
+      "properties": {
+        "id":        {"type": "string"},
+        "newHireId": {"type": "string"},
+        "managerId": {"type": "string"},
+        "buddyId":   {"type": "string"},
+        "startDate": {"type": "string"},
+        "tasks":     {"type": "array", "items": {"$ref": "#/definitions/OnboardingTask"}},
+        "status":    {"type": "string"}
+      }
+    },
+    "DueTask": {
+      "type": "object",
+      "properties": {
+        "taskId":          {"type": "string"},
+        "title":           {"type": "string"},
+        "ownerEmployeeId": {"type": "string"}
+      }
+    },
+    "FeedbackRequest": {
+      "type": "object",
+      "properties": {
+        "id":                 {"type": "string"},
+        "subjectEmployeeId":  {"type": "string"},
+        "reviewerIds":        {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "TicketClassification": {
+      "type": "object",
+      "properties": {
+        "categoryId":          {"type": "string"},
+        "categoryLabel":       {"type": "string"},
+        "sensitivity":         {"type": "string"},
+        "autoAnswer":          {"type": "boolean"},
+        "escalateImmediately": {"type": "boolean"}
+      }
+    },
+    "Ticket": {
+      "type": "object",
+      "properties": {
+        "id":          {"type": "string"},
+        "employeeId":  {"type": "string"},
+        "description": {"type": "string"},
+        "category":    {"$ref": "#/definitions/TicketClassification"},
+        "status":      {"type": "string"},
+        "createdAt":   {"type": "string"}
       }
     }
   }

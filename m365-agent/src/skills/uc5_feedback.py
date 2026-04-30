@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 
+from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider  # type: ignore[import-not-found]
 from openai import AsyncAzureOpenAI
 
 AOAI_ENDPOINT = os.environ.get("AOAI_ENDPOINT", "")
@@ -43,7 +44,13 @@ async def _summarize(turn, hr) -> None:
         await turn.send_activity("No responses yet — try again once reviewers have submitted.")
         return
 
-    client = AsyncAzureOpenAI(api_version="2024-10-21", azure_endpoint=AOAI_ENDPOINT)
+    client = AsyncAzureOpenAI(
+        api_version="2024-10-21",
+        azure_endpoint=AOAI_ENDPOINT,
+        azure_ad_token_provider=get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        ),
+    )
     completion = await client.chat.completions.create(
         model=AOAI_DEPLOYMENT,
         messages=[

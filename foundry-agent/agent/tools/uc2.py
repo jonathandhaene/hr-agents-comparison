@@ -35,5 +35,4 @@ async def approve_or_reject_time_off(
 ) -> dict:
     """Manager-side decision tool. Updates the request and decrements balances on approval."""
     path = f"/leave/{request_id}/{'approve' if decision == 'approve' else 'reject'}"
-    params = {"decisionNote": decision_note} if decision_note else None
-    return await hr_post(path, json=None, params=params)
+    return await hr_post(path, json={"decisionNote": decision_note})

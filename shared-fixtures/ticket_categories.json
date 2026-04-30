@@ -34,7 +34,7 @@
       "sensitivity": "critical",
       "autoAnswer": false,
       "escalateImmediately": true,
-      "examples": ["harassed", "discriminated", "retaliation"]
+      "examples": ["harass", "discriminat", "retaliat", "hostile work environment"]
     },
     {
       "id": "IMMIGRATION",

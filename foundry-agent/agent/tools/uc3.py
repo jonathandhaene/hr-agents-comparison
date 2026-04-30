@@ -31,7 +31,7 @@ async def advance_onboarding(
     task_id: Annotated[str, Field(description="Task id within the plan, e.g. T03")],
     status: Annotated[Literal["not-started", "in-progress", "done", "overdue"], Field(description="New task status")],
 ) -> dict:
-    return await hr_post(f"/onboarding/{plan_id}/task/{task_id}/status", json=None, params={"status": status})
+    return await hr_post(f"/onboarding/{plan_id}/task/{task_id}/status", json={"status": status})
 
 
 async def get_onboarding(

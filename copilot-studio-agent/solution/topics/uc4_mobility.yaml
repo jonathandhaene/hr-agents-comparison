@@ -18,7 +18,7 @@ beginDialog:
       input:
         binding:
           employeeId: =System.User.Email
-          interests: =System.Activity.Text
+          interests: =Split(System.Activity.Text, " ")
       output:
         binding: { value: Topic.jobs }
     - kind: SearchAndSummarizeContent

@@ -34,4 +34,5 @@ def test_classifier_flags_sensitive() -> None:
 
     res = classify_ticket(Req())  # type: ignore[arg-type]
     body = json.loads(res.get_body())
-    assert body["sensitivity"] == "high"
+    assert body["sensitivity"] == "critical"
+    assert body["escalateImmediately"] is True

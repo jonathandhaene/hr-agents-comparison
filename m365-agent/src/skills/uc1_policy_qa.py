@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import os
 
-from azure.identity.aio import DefaultAzureCredential  # type: ignore[import-not-found]
+from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider  # type: ignore[import-not-found]
 from azure.search.documents.aio import SearchClient  # type: ignore[import-not-found]
 from openai import AsyncAzureOpenAI
 
@@ -41,7 +41,9 @@ async def handle(turn, hr, state) -> None:
 
     client = AsyncAzureOpenAI(
         azure_endpoint=AOAI_ENDPOINT,
-        azure_ad_token_provider=lambda: cred.get_token("https://cognitiveservices.azure.com/.default").token,
+        azure_ad_token_provider=get_bearer_token_provider(
+            cred, "https://cognitiveservices.azure.com/.default"
+        ),
         api_version="2024-10-21",
     )
     completion = await client.chat.completions.create(
