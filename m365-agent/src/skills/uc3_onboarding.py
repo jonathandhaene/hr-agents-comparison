@@ -9,7 +9,7 @@ minutes and calls /workflows/tick on this app, which advances any active plans.
 """
 from __future__ import annotations
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import re
 
 
@@ -45,7 +45,7 @@ async def handle(turn, hr, state) -> None:
     )
     await state.put_workflow(
         f"ob:{plan['id']}",
-        {"planId": plan["id"], "startedAt": datetime.utcnow().isoformat(), "lastTick": None},
+        {"planId": plan["id"], "startedAt": datetime.now(timezone.utc).isoformat(), "lastTick": None},
     )
 
     summary = "\n".join(f"- **{t['title']}** → {t['owner']} (due {t['dueDate']})" for t in plan["tasks"])

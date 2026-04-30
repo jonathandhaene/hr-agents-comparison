@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import os
 
+from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider  # type: ignore[import-not-found]
 from openai import AsyncAzureOpenAI
 
 AOAI_ENDPOINT = os.environ.get("AOAI_ENDPOINT", "")
@@ -36,7 +37,13 @@ def _extract_interests(text: str) -> list[str]:
 
 
 async def _draft_pitch(employee: dict, job: dict, interests: list[str]) -> str:
-    client = AsyncAzureOpenAI(api_version="2024-10-21", azure_endpoint=AOAI_ENDPOINT)
+    client = AsyncAzureOpenAI(
+        api_version="2024-10-21",
+        azure_endpoint=AOAI_ENDPOINT,
+        azure_ad_token_provider=get_bearer_token_provider(
+            DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
+        ),
+    )
     completion = await client.chat.completions.create(
         model=AOAI_DEPLOYMENT,
         messages=[

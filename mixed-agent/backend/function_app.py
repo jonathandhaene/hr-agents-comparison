@@ -450,6 +450,80 @@ def classify_ticket(req: func.HttpRequest) -> func.HttpResponse:
     return _ok(_classify_text(description))
 
 
+# ---------------------------------------------------------------------------
+# Foundry connected-agent proxy
+# ---------------------------------------------------------------------------
+#
+# The Copilot Studio topic calls `invokeAgent` (one round-trip). Behind the
+# scenes the Foundry Agents data plane needs at least three calls (create
+# thread, run agent, poll, fetch messages), so we collapse them here.
+#
+# Production path: when `FOUNDRY_PROJECT_ENDPOINT` is set, we use the
+# `azure-ai-projects` SDK with a managed identity token. Demo / offline path:
+# when it is empty we return a deterministic local answer so the whole stack
+# can run without an Azure subscription.
+#
+# Auth: the Function key is enforced by the platform on this route. The
+# Function App itself uses a UAMI (`AZURE_CLIENT_ID`) with `Cognitive Services
+# OpenAI User` on the Foundry account.
+
+
+def _foundry_invoke(agent_name: str, user_input: str, context: dict) -> dict:
+    endpoint = os.environ.get("FOUNDRY_PROJECT_ENDPOINT")
+    if not endpoint:
+        # Offline / demo answer — keeps the connector contract honest.
+        return {
+            "message": (
+                f"(demo) {agent_name} would answer: {user_input}. "
+                "Configure FOUNDRY_PROJECT_ENDPOINT to call the real agent."
+            ),
+            "citations": [],
+        }
+
+    # Lazy imports so the offline path doesn't pay the cold-start cost.
+    from azure.ai.projects import AIProjectClient  # type: ignore[import-not-found]
+    from azure.identity import DefaultAzureCredential  # type: ignore[import-not-found]
+
+    project = AIProjectClient(endpoint=endpoint, credential=DefaultAzureCredential())
+    agents = project.agents
+    agent = agents.get_agent(agent_name)  # by name, not id, requires that the agent exists.
+    run = agents.create_thread_and_process_run(
+        agent_id=agent.id,
+        thread={"messages": [{"role": "user", "content": user_input}]},
+    )
+    if run.status != "completed":
+        raise RuntimeError(f"Agent run failed: {run.status} {run.last_error}")
+    msgs = list(agents.messages.list(thread_id=run.thread_id, order="desc"))
+    last_assistant = next((m for m in msgs if m.role == "assistant"), None)
+    if last_assistant is None:
+        return {"message": "(no reply)", "citations": []}
+    text = "".join(c.text.value for c in last_assistant.content if c.type == "text")
+    citations = [
+        {"title": ann.text, "url": getattr(ann, "url", "")}
+        for c in last_assistant.content
+        if c.type == "text"
+        for ann in (getattr(c.text, "annotations", []) or [])
+    ]
+    return {"message": text, "citations": citations}
+
+
+@app.route(route="agent/invoke", methods=["POST"])
+def invoke_agent(req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        body = req.get_json() or {}
+    except ValueError:
+        return _problem(400, "Invalid JSON body")
+    agent_name = body.get("agentName")
+    user_input = body.get("input")
+    if not (agent_name and user_input):
+        return _problem(400, "agentName and input are required")
+    context = body.get("context") or {}
+    try:
+        return _ok(_foundry_invoke(agent_name, user_input, context))
+    except Exception as exc:  # noqa: BLE001 — proxy-style boundary
+        return _problem(502, "Upstream agent failed", str(exc))
+
+
 @app.route(route="tickets/create", methods=["POST"])
 def create_ticket(req: func.HttpRequest) -> func.HttpResponse:
     try:

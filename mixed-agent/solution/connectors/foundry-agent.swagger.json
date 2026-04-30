@@ -1,71 +1,95 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Foundry connected agent",
+    "title": "Foundry connected agent (proxied)",
     "version": "1.0.0",
-    "description": "Custom Connector that calls the Microsoft Foundry hosted agent (`ContosoHRMobilityAdvisor`) used by Copilot Studio for UC4 (mobility) and UC5 (feedback summary). Auth: OAuth 2.0 client-credentials against Entra; the connection's service principal must be granted the `Cognitive Services OpenAI User` role on the Foundry project."
+    "description": "Custom connector that wraps the Microsoft Foundry hosted agent (`ContosoHRMobilityAdvisor`) used by Copilot Studio for UC4 (mobility) and UC5 (feedback summary).\n\nThis connector targets the **mixed-agent Functions backend**, not the Foundry data plane directly: a single `invokeAgent` round-trip from Copilot Studio expands into the Foundry threads/runs API behind a single HTTPS call. The Function uses a managed identity with `Cognitive Services OpenAI User` on the Foundry account, so no shared secrets cross the connector boundary.\n\nAuth: function key (`x-functions-key`)."
   },
-  "host": "${FOUNDRY_PROJECT_HOST}",
-  "basePath": "/",
+  "host": "${FUNCTION_APP_HOST}",
+  "basePath": "/api",
   "schemes": ["https"],
   "consumes": ["application/json"],
   "produces": ["application/json"],
   "securityDefinitions": {
-    "oauth2_clientcredentials": {
-      "type": "oauth2",
-      "flow": "application",
-      "tokenUrl": "https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token",
-      "scopes": {
-        "https://cognitiveservices.azure.com/.default": "Call Foundry / Azure OpenAI on behalf of the connection's service principal"
-      }
+    "function_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "x-functions-key",
+      "x-ms-summary": "Azure Functions key"
     }
   },
-  "security": [
-    {"oauth2_clientcredentials": ["https://cognitiveservices.azure.com/.default"]}
-  ],
+  "security": [ { "function_key": [] } ],
   "paths": {
-    "/agents/{agentName}/invoke": {
+    "/agent/invoke": {
       "post": {
         "operationId": "invokeAgent",
         "summary": "Invoke Foundry agent",
-        "description": "Sends a message to the named Foundry hosted agent and returns the agent's reply with citations.",
+        "description": "Sends a message to the named Foundry hosted agent and returns the agent's reply with optional citations. The Function performs the create-thread, run, poll, and fetch-messages dance internally.",
         "x-ms-summary": "Invoke Foundry agent",
         "x-ms-visibility": "important",
         "parameters": [
-          {"name": "agentName", "in": "path", "required": true, "type": "string", "x-ms-summary": "Agent name (e.g. ContosoHRMobilityAdvisor)"},
           {
             "name": "body",
             "in": "body",
             "required": true,
-            "schema": {
-              "type": "object",
-              "required": ["input"],
-              "properties": {
-                "input":   {"type": "string", "x-ms-summary": "User input / prompt"},
-                "context": {
-                  "type": "object",
-                  "x-ms-summary": "Caller context",
-                  "properties": {
-                    "employeeEmail": {"type": "string", "x-ms-summary": "Employee email"},
-                    "topic":         {"type": "string", "x-ms-summary": "Calling topic id"}
-                  }
-                }
-              }
-            }
+            "schema": { "$ref": "#/definitions/InvokeAgentInput" }
           }
         ],
         "responses": {
           "200": {
-            "description": "OK",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message":       {"type": "string", "x-ms-summary": "Agent reply"},
-                "citationsJson": {"type": "string", "x-ms-summary": "Citations (JSON-encoded array of {title, url})"}
-              }
-            }
+            "description": "Agent reply",
+            "schema": { "$ref": "#/definitions/InvokeAgentOutput" }
+          },
+          "400": { "description": "Bad request",       "schema": { "$ref": "#/definitions/Problem" } },
+          "401": { "description": "Unauthorized",      "schema": { "$ref": "#/definitions/Problem" } },
+          "502": { "description": "Upstream agent failed", "schema": { "$ref": "#/definitions/Problem" } }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "InvokeAgentInput": {
+      "type": "object",
+      "required": ["agentName", "input"],
+      "properties": {
+        "agentName": { "type": "string", "x-ms-summary": "Agent name (e.g. ContosoHRMobilityAdvisor)" },
+        "input":     { "type": "string", "x-ms-summary": "User input / prompt" },
+        "context": {
+          "type": "object",
+          "x-ms-summary": "Caller context",
+          "properties": {
+            "employeeEmail": { "type": "string", "x-ms-summary": "Employee email" },
+            "topic":         { "type": "string", "x-ms-summary": "Calling topic id" }
           }
         }
+      }
+    },
+    "Citation": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "x-ms-summary": "Citation title" },
+        "url":   { "type": "string", "x-ms-summary": "Citation URL" }
+      }
+    },
+    "InvokeAgentOutput": {
+      "type": "object",
+      "properties": {
+        "message":   { "type": "string", "x-ms-summary": "Agent reply" },
+        "citations": {
+          "type": "array",
+          "x-ms-summary": "Citations",
+          "items": { "$ref": "#/definitions/Citation" }
+        }
+      }
+    },
+    "Problem": {
+      "type": "object",
+      "description": "RFC 7807 problem details.",
+      "properties": {
+        "type":   { "type": "string" },
+        "title":  { "type": "string" },
+        "status": { "type": "integer", "format": "int32" },
+        "detail": { "type": "string" }
       }
     }
   }
