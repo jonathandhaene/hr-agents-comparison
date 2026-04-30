@@ -22,6 +22,7 @@ env:
   AZURE_LOCATION: westeurope
   AZURE_RESOURCE_GROUP_NAME: rg-hr-foundry
   IMAGE_BACKEND: hr-backend-foundry
+  DEPLOYMENT_NAME: hr-foundry-${{ github.run_id }}
 
 jobs:
   test:
@@ -30,7 +31,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: |
+            foundry-agent/backend/requirements.txt
+            foundry-agent/agent/requirements.txt
       - run: |
           mkdir -p backend/data
           cp ../shared-fixtures/*.json backend/data/
@@ -38,9 +44,16 @@ jobs:
           pip install -r backend/requirements.txt -r agent/requirements.txt pytest pytest-asyncio
           pytest -q tests
 
+  validate-bicep:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: foundry-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - run: az bicep build --file infra/main.bicep --stdout > /dev/null
+
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test
+    needs: [test, validate-bicep]
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: foundry-agent } }
     steps:
@@ -51,15 +64,25 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: az group create -n $AZURE_RESOURCE_GROUP_NAME -l $AZURE_LOCATION
+      - name: What-if (preview)
+        run: |
+          az deployment group what-if \
+            -g $AZURE_RESOURCE_GROUP_NAME \
+            -n $DEPLOYMENT_NAME \
+            -f infra/main.bicep \
+            -p location=$AZURE_LOCATION
       - name: Provision (Bicep)
         run: |
-          sed -i "s|\${AZURE_LOCATION}|$AZURE_LOCATION|" infra/main.parameters.json
-          az deployment group create -g $AZURE_RESOURCE_GROUP_NAME -f infra/main.bicep -p @infra/main.parameters.json
+          az deployment group create \
+            -g $AZURE_RESOURCE_GROUP_NAME \
+            -n $DEPLOYMENT_NAME \
+            -f infra/main.bicep \
+            -p location=$AZURE_LOCATION
       - name: Build & push backend
         id: out
         run: |
-          ACR=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.acrLoginServer.value -o tsv)
-          PROJECT_ENDPOINT=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.projectEndpoint.value -o tsv)
+          ACR=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n $DEPLOYMENT_NAME --query properties.outputs.acrLoginServer.value -o tsv)
+          PROJECT_ENDPOINT=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n $DEPLOYMENT_NAME --query properties.outputs.projectEndpoint.value -o tsv)
           echo "acr=$ACR" >> $GITHUB_OUTPUT
           echo "project_endpoint=$PROJECT_ENDPOINT" >> $GITHUB_OUTPUT
           mkdir -p backend/data

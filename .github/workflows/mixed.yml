@@ -21,6 +21,7 @@ permissions:
 env:
   AZURE_LOCATION: westeurope
   AZURE_RESOURCE_GROUP_NAME: rg-hr-mixed
+  DEPLOYMENT_NAME: hr-mixed-${{ github.run_id }}
 
 jobs:
   test:
@@ -29,17 +30,27 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: { python-version: '3.12' }
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: mixed-agent/backend/requirements.txt
       - run: |
           mkdir -p backend/data
           cp ../shared-fixtures/*.json backend/data/
           cp -r ../shared-fixtures/policies backend/data/
-          pip install -r backend/requirements.txt pytest
-          pytest -q tests || true
+          pip install -r backend/requirements.txt pytest pytest-asyncio
+          pytest -q tests
+
+  validate-bicep:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: mixed-agent } }
+    steps:
+      - uses: actions/checkout@v4
+      - run: az bicep build --file infra/main.bicep --stdout > /dev/null
 
   deploy:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    needs: test
+    needs: [test, validate-bicep]
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: mixed-agent } }
     steps:
@@ -50,13 +61,23 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
       - run: az group create -n $AZURE_RESOURCE_GROUP_NAME -l $AZURE_LOCATION
+      - name: What-if (preview)
+        run: |
+          az deployment group what-if \
+            -g $AZURE_RESOURCE_GROUP_NAME \
+            -n $DEPLOYMENT_NAME \
+            -f infra/main.bicep \
+            -p location=$AZURE_LOCATION
       - name: Provision (Bicep)
         run: |
-          sed -i "s|\${AZURE_LOCATION}|$AZURE_LOCATION|" infra/main.parameters.json
-          az deployment group create -g $AZURE_RESOURCE_GROUP_NAME -f infra/main.bicep -p @infra/main.parameters.json
+          az deployment group create \
+            -g $AZURE_RESOURCE_GROUP_NAME \
+            -n $DEPLOYMENT_NAME \
+            -f infra/main.bicep \
+            -p location=$AZURE_LOCATION
       - name: Package backend
         run: |
-          mkdir -p backend/data
+          mkdir -p backend/data out
           cp ../shared-fixtures/*.json backend/data/
           cp -r ../shared-fixtures/policies backend/data/
           cd backend
@@ -64,11 +85,11 @@ jobs:
         shell: bash
       - name: Deploy Function App
         run: |
-          FN=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.functionAppHost.value -o tsv | cut -d. -f1)
+          FN=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n $DEPLOYMENT_NAME --query properties.outputs.functionAppHost.value -o tsv | cut -d. -f1)
           az functionapp deployment source config-zip -g $AZURE_RESOURCE_GROUP_NAME -n $FN --src out/backend.zip
       - name: Create / update Foundry connected agent
         run: |
-          PROJECT=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n main --query properties.outputs.projectEndpoint.value -o tsv)
+          PROJECT=$(az deployment group show -g $AZURE_RESOURCE_GROUP_NAME -n $DEPLOYMENT_NAME --query properties.outputs.projectEndpoint.value -o tsv)
           echo "Project endpoint: $PROJECT"
           az extension add -n ai-foundry -y || true
           az ai-foundry agent create --project-endpoint "$PROJECT" --file foundry/project/agent.yaml || \
