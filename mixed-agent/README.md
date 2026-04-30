@@ -34,7 +34,7 @@ mixed-agent/
 │  ├─ flows/                     # Agent Flows: time-off, onboarding, feedback open, triage
 │  ├─ connectors/
 │  │  ├─ hr-api.swagger.json     # Slim Custom Connector to the Functions backend
-│  │  └─ foundry-agent.swagger.json  # Connected-agent connector to Foundry (Swagger 2.0)
+│  │  └─ foundry-agent.swagger.json  # Thin connector → Functions /agent/invoke (proxies Foundry)
 │  └─ solution.yaml
 ├─ foundry/                      # Tiny connected agent (only UC4 + UC5 summary)
 │  ├─ agent/main.py              # Microsoft Agent Framework, 3 tools total
@@ -50,6 +50,8 @@ mixed-agent/
 ```
 
 ## Cost shape (rough order-of-magnitude)
+
+> **Illustrative only.** Actual cost depends on region, traffic, retention, SKU choices, and Microsoft list-price changes. Run the Azure Pricing Calculator and the Power Platform / Copilot Studio message-pack pricing against your real numbers before relying on these figures.
 
 | Resource | Resting cost | Notes |
 |---|---|---|
@@ -96,3 +98,29 @@ GitHub Actions workflow: [.github/workflows/mixed.yml](../.github/workflows/mixe
 - You need a **bespoke conversation surface** (e.g., custom Adaptive Cards driven from code on every turn) → use Solution A.
 - You need **deep Microsoft Graph proactive plumbing** (e.g., manager DMs scheduled at midnight) → use Solution A.
 - You want a **single technology** to point procurement at → see [decision-tree.md](../docs/decision-tree.md).
+
+## Prerequisites
+
+- Azure subscription with Owner on the target resource group.
+- Power Platform environment with Copilot Studio enabled and Dataverse provisioned.
+- Microsoft Foundry access in the chosen region.
+- `az` CLI ≥ 2.60 with Bicep, `pac` CLI ≥ 1.34, Azure Functions Core Tools v4, Python 3.11.
+- Entra app registration with federated credentials for GitHub OIDC.
+- A Power Platform service principal with **System Administrator** on the target environment.
+
+## Responsible AI
+
+- UC1 grounds answers in SharePoint via Copilot Studio's generative answers — keep grounding mandatory and citations on.
+- UC4 / UC5 summary calls go to a Foundry connected agent through the Functions proxy. The proxy uses managed identity (no API keys), so calls are auditable per-employee in App Insights and Foundry traces.
+- UC6 always uses `TransferConversation` for sensitive cases.
+- Approvals connector keeps humans in the loop on UC2.
+- Run Foundry safety evaluators (Groundedness, Hate & Unfairness, Self-harm, Violence, Sexual, Protected Material, Indirect Attack) before each release.
+- Disclose AI usage in the agent's welcome message; let users request a human alternative.
+
+## Cleanup
+
+```bash
+az group delete -n <rg-name> --yes --no-wait
+pac solution delete --solution-name ContosoHrConciergeMixed
+az ai-foundry agent delete --name ContosoHRMobilityAdvisor
+```

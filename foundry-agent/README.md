@@ -53,3 +53,27 @@ GitHub Actions workflow: `.github/workflows/foundry.yml`. It uses OIDC + Foundry
 | UC4 Mobility | `tools/uc4.py` — `match_internal_jobs` + model-drafted pitch |
 | UC5 360° feedback | `tools/uc5.py` — `open_feedback`, `summarize_feedback` |
 | UC6 Triage & escalation | `tools/uc6.py` — classifier + create + escalate; sensitive cases never auto-answered |
+
+## Prerequisites
+
+- Azure subscription with Owner on the target resource group.
+- Microsoft Foundry access (the `Microsoft.CognitiveServices/accounts` *AIServices* kind) enabled in the chosen region.
+- `az` CLI ≥ 2.60 with Bicep, `az ai-foundry` extension, Python 3.11.
+- Entra app registration with federated credentials for GitHub OIDC.
+- M365 tenant with permission to publish Foundry agents to Copilot Chat / Teams.
+
+## Responsible AI
+
+- UC1 uses Foundry **File Search** — keep the policy corpus pinned and re-evaluate groundedness when the corpus changes.
+- UC6 sensitive-case handling is enforced in the agent instructions and is hard-coded to never produce a final answer for those categories — keep that.
+- The hosted agent runs **inside the Foundry project**, which gives you traces and built-in evaluations — use them: run Groundedness, Hate & Unfairness, Self-harm, Violence, Sexual, Protected Material, and Indirect Attack evaluators before publishing.
+- Disclose AI usage in the published agent's description; let users request a human alternative.
+- The hosted-container surface (`agent/main.py`) is provided so the same code runs identically in dev and Foundry; production traffic flows through the Foundry agent endpoint, not the container.
+- Costs in this repo are **illustrative**. Token usage scales with traffic — monitor with Foundry's usage dashboards.
+
+## Cleanup
+
+```bash
+az group delete -n <rg-name> --yes --no-wait
+az ai-foundry agent delete --name ContosoHRConcierge
+```

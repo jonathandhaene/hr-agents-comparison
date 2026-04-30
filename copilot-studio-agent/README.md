@@ -52,3 +52,29 @@ GitHub Actions workflow: `.github/workflows/copilot-studio.yml`. It uses OIDC + 
 | UC4 Mobility | `topics/uc4_mobility.yaml` | One Custom Connector call + generative summary |
 | UC5 360° feedback | `topics/uc5_feedback.yaml` + `flows/HR_FeedbackOpenOrSummarize.json` | Outlook fan-out + Dataverse storage + generative summary |
 | UC6 Triage & escalation | `topics/uc6_triage.yaml` | Classifier call + **TransferConversation** built-in handoff to HR queue |
+
+## Prerequisites
+
+- Azure subscription (for APIM + Container Apps + AOAI) with Owner on the target resource group.
+- Microsoft Power Platform environment with Copilot Studio enabled and Dataverse provisioned.
+- `pac` CLI ≥ 1.34, `az` CLI ≥ 2.60 with Bicep extension.
+- A Power Platform service principal with **System Administrator** on the target environment, plus an Entra app registration with federated credentials for GitHub OIDC.
+- Azure OpenAI access in the chosen region.
+- SharePoint site with the policy library (or accept the seeded library that the workflow creates).
+
+## Responsible AI
+
+- UC1 generative answers are bound to the SharePoint policy library — **citations are non-negotiable**; keep `groundingSources: [SharePoint, Files]` in the topic and reject ungrounded answers.
+- UC6 always uses `TransferConversation` for sensitive cases. Never replace it with an auto-reply.
+- Approvals connector (UC2) keeps a human in the loop on every leave decision.
+- Dataverse audit log must be enabled on the HR tables; review it monthly.
+- Run the Foundry safety evaluators against the topic before publishing to M365 Copilot.
+- Costs in this repo are **illustrative** — confirm against the Azure Pricing Calculator and the Copilot Studio message-pack pricing for your tenant.
+
+## Cleanup
+
+```bash
+az group delete -n <rg-name> --yes --no-wait
+pac solution delete --solution-name ContosoHrConcierge
+# unpublish the agent from Copilot Studio and remove the Custom Connector
+```

@@ -52,3 +52,32 @@ GitHub Actions workflow: `.github/workflows/m365-agent.yml`. It uses OIDC to Azu
 | UC4 Mobility | `skills/uc4_mobility.py` | Profile-aware tool call + LLM-drafted pitch |
 | UC5 360° feedback | `skills/uc5_feedback.py` | Fan-out to peers + LLM summary |
 | UC6 Triage & escalation | `skills/uc6_triage.py` | Sensitivity classifier + Graph-driven 1:1 chat handoff |
+
+## Prerequisites
+
+- Azure subscription with Owner on the target resource group (one-time, for role assignments).
+- Azure CLI ≥ 2.60 with the Bicep extension (`az bicep version`).
+- Python 3.11.
+- A Microsoft Entra app registered for federated credentials (used by GitHub OIDC).
+- M365 tenant with permission to side-load Teams apps and a configured Microsoft 365 Agents Toolkit project.
+- Azure OpenAI access in the chosen region (request via the AOAI access form if your tenant doesn't have it).
+
+## Responsible AI
+
+This solution surfaces HR data to employees in conversational form. Before opening it to real users:
+
+- Ground every UC1 answer in indexed policies and **always show citations** — do not let the model answer policy questions without retrieved context.
+- UC6 routes sensitive categories (harassment, discrimination, mental-health, PII leak) straight to a human HR partner; never bypass that classifier.
+- Mask employee identifiers and free-text grievances in App Insights traces (the included logger does this; keep it).
+- Run Foundry's safety evaluators (Groundedness, Hate & Unfairness, Self-harm, Violence, Sexual, Protected Material, Indirect Attack) on a representative eval set before release.
+- Disclose AI usage in the Teams welcome message (the manifest does so) and let users request a human alternative.
+
+Costs shown elsewhere in this repo are **illustrative**. Run the Azure Pricing Calculator for your region and traffic before committing.
+
+## Cleanup
+
+```bash
+az group delete -n <rg-name> --yes --no-wait
+# remove the Teams app from the M365 admin centre
+# revoke the federated credential on the Entra app registration
+```
