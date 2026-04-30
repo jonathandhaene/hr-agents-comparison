@@ -30,7 +30,7 @@ components:
     file: connectors/hr-api.swagger.json
   - type: connector
     schemaName: cra5e_FoundryAgentConnector
-    file: connectors/foundry-agent.openapi.json
+    file: connectors/foundry-agent.swagger.json
   - type: entity
     schemaName: cra5e_onboardingplans
   - type: entity

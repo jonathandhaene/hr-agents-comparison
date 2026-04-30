@@ -34,7 +34,7 @@ mixed-agent/
 │  ├─ flows/                     # Agent Flows: time-off, onboarding, feedback open, triage
 │  ├─ connectors/
 │  │  ├─ hr-api.swagger.json     # Slim Custom Connector to the Functions backend
-│  │  └─ foundry-agent.openapi.json  # Connected-agent connector to Foundry
+│  │  └─ foundry-agent.swagger.json  # Connected-agent connector to Foundry (Swagger 2.0)
 │  └─ solution.yaml
 ├─ foundry/                      # Tiny connected agent (only UC4 + UC5 summary)
 │  ├─ agent/main.py              # Microsoft Agent Framework, 3 tools total

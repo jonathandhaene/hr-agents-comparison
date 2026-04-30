@@ -1,23 +1,281 @@
 {
   "swagger": "2.0",
-  "info": {"title": "Contoso HR API (mixed)", "version": "1.0.0", "description": "Slim Custom Connector to the Azure Functions HR API. Auth: function key in `x-functions-key` header."},
+  "info": {
+    "title": "Contoso HR API (mixed)",
+    "version": "1.0.0",
+    "description": "Slim Custom Connector to the Azure Functions HR API. Auth: function key sent in the `x-functions-key` header (rotate via the Functions host configuration). Schema is primitive-only so it imports cleanly into Copilot Studio."
+  },
   "host": "${HR_API_HOST}",
   "basePath": "/api",
   "schemes": ["https"],
   "consumes": ["application/json"],
   "produces": ["application/json"],
-  "securityDefinitions": {"functionKey": {"type": "apiKey", "in": "header", "name": "x-functions-key"}},
+  "securityDefinitions": {
+    "functionKey": {"type": "apiKey", "in": "header", "name": "x-functions-key"}
+  },
   "security": [{"functionKey": []}],
   "paths": {
-    "/employees/{id}":            {"get":  {"operationId": "getEmployee", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
-    "/leave/request":             {"post": {"operationId": "requestLeave", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
-    "/leave/{id}/approve":        {"post": {"operationId": "approveLeave", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
-    "/leave/{id}/reject":         {"post": {"operationId": "rejectLeave",  "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
-    "/onboarding/start":          {"post": {"operationId": "startOnboarding", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
-    "/onboarding/{id}/tick":      {"post": {"operationId": "tickOnboarding",  "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
-    "/feedback/suggest-reviewers":{"post": {"operationId": "suggestReviewers", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
-    "/feedback/request":          {"post": {"operationId": "openFeedbackRequest", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
-    "/tickets/classify":          {"post": {"operationId": "classifyTicket", "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
-    "/tickets/create":            {"post": {"operationId": "createTicket",   "parameters": [{"name": "body", "in": "body", "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}}
+    "/employees/{id}": {
+      "get": {
+        "operationId": "getEmployee",
+        "summary": "Get employee",
+        "x-ms-summary": "Get employee",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Employee id or email"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "displayName": {"type": "string"},
+                "email": {"type": "string"},
+                "managerId": {"type": "string"},
+                "department": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/leave/request": {
+      "post": {
+        "operationId": "requestLeave",
+        "summary": "Request leave",
+        "x-ms-summary": "Request leave",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["employeeId", "startDate", "endDate"],
+              "properties": {
+                "employeeId": {"type": "string", "x-ms-summary": "Employee id"},
+                "startDate":  {"type": "string", "x-ms-summary": "Start date (yyyy-mm-dd)"},
+                "endDate":    {"type": "string", "x-ms-summary": "End date (yyyy-mm-dd)"},
+                "type":       {"type": "string", "x-ms-summary": "Leave type", "default": "vacation"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "requestId": {"type": "string"},
+                "status":    {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/leave/{id}/approve": {
+      "post": {
+        "operationId": "approveLeave",
+        "summary": "Approve leave",
+        "x-ms-summary": "Approve leave",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"}
+        ],
+        "responses": {
+          "200": {"description": "OK", "schema": {"type": "object", "properties": {"status": {"type": "string"}}}}
+        }
+      }
+    },
+    "/leave/{id}/reject": {
+      "post": {
+        "operationId": "rejectLeave",
+        "summary": "Reject leave",
+        "x-ms-summary": "Reject leave",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"}
+        ],
+        "responses": {
+          "200": {"description": "OK", "schema": {"type": "object", "properties": {"status": {"type": "string"}}}}
+        }
+      }
+    },
+    "/onboarding/start": {
+      "post": {
+        "operationId": "startOnboarding",
+        "summary": "Start onboarding",
+        "x-ms-summary": "Start onboarding",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["newHireId", "startDate"],
+              "properties": {
+                "newHireId": {"type": "string", "x-ms-summary": "New hire id"},
+                "startDate": {"type": "string", "x-ms-summary": "Start date"},
+                "managerId": {"type": "string", "x-ms-summary": "Manager id"},
+                "buddyId":   {"type": "string", "x-ms-summary": "Buddy id"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "OK", "schema": {"type": "object", "properties": {"planId": {"type": "string"}}}}
+        }
+      }
+    },
+    "/onboarding/{id}/tick": {
+      "post": {
+        "operationId": "tickOnboarding",
+        "summary": "Tick onboarding plan",
+        "description": "Idempotent daily tick that advances the plan and emits reminders for due tasks.",
+        "x-ms-summary": "Tick onboarding plan",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Plan id"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "dueTasksJson": {"type": "string", "x-ms-summary": "Due tasks (JSON-encoded array of {taskId, title, ownerEmployeeId})"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/suggest-reviewers": {
+      "post": {
+        "operationId": "suggestReviewers",
+        "summary": "Suggest reviewers",
+        "x-ms-summary": "Suggest reviewers",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["subjectEmployeeId"],
+              "properties": {
+                "subjectEmployeeId": {"type": "string", "x-ms-summary": "Subject employee id"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reviewersJson": {"type": "string", "x-ms-summary": "Reviewers (JSON-encoded array of {email, reason})"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feedback/request": {
+      "post": {
+        "operationId": "openFeedbackRequest",
+        "summary": "Open feedback request",
+        "x-ms-summary": "Open feedback request",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["subjectEmployeeId"],
+              "properties": {
+                "subjectEmployeeId": {"type": "string", "x-ms-summary": "Subject employee id"},
+                "reviewersJson":     {"type": "string", "x-ms-summary": "Reviewers (JSON-encoded array of email)"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "OK", "schema": {"type": "object", "properties": {"requestId": {"type": "string"}}}}
+        }
+      }
+    },
+    "/tickets/classify": {
+      "post": {
+        "operationId": "classifyTicket",
+        "summary": "Classify HR ticket",
+        "x-ms-summary": "Classify HR ticket",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["description"],
+              "properties": {
+                "description": {"type": "string", "x-ms-summary": "Ticket description"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "category":   {"type": "string"},
+                "sensitive":  {"type": "boolean"},
+                "confidence": {"type": "number"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tickets/create": {
+      "post": {
+        "operationId": "createTicket",
+        "summary": "Create HR ticket",
+        "x-ms-summary": "Create HR ticket",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["employeeId", "description"],
+              "properties": {
+                "employeeId":  {"type": "string", "x-ms-summary": "Employee id"},
+                "description": {"type": "string", "x-ms-summary": "Description"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {"description": "OK", "schema": {"type": "object", "properties": {"ticketId": {"type": "string"}}}}
+        }
+      }
+    }
   }
 }

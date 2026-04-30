@@ -1,0 +1,72 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Foundry connected agent",
+    "version": "1.0.0",
+    "description": "Custom Connector that calls the Microsoft Foundry hosted agent (`ContosoHRMobilityAdvisor`) used by Copilot Studio for UC4 (mobility) and UC5 (feedback summary). Auth: OAuth 2.0 client-credentials against Entra; the connection's service principal must be granted the `Cognitive Services OpenAI User` role on the Foundry project."
+  },
+  "host": "${FOUNDRY_PROJECT_HOST}",
+  "basePath": "/",
+  "schemes": ["https"],
+  "consumes": ["application/json"],
+  "produces": ["application/json"],
+  "securityDefinitions": {
+    "oauth2_clientcredentials": {
+      "type": "oauth2",
+      "flow": "application",
+      "tokenUrl": "https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token",
+      "scopes": {
+        "https://cognitiveservices.azure.com/.default": "Call Foundry / Azure OpenAI on behalf of the connection's service principal"
+      }
+    }
+  },
+  "security": [
+    {"oauth2_clientcredentials": ["https://cognitiveservices.azure.com/.default"]}
+  ],
+  "paths": {
+    "/agents/{agentName}/invoke": {
+      "post": {
+        "operationId": "invokeAgent",
+        "summary": "Invoke Foundry agent",
+        "description": "Sends a message to the named Foundry hosted agent and returns the agent's reply with citations.",
+        "x-ms-summary": "Invoke Foundry agent",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {"name": "agentName", "in": "path", "required": true, "type": "string", "x-ms-summary": "Agent name (e.g. ContosoHRMobilityAdvisor)"},
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["input"],
+              "properties": {
+                "input":   {"type": "string", "x-ms-summary": "User input / prompt"},
+                "context": {
+                  "type": "object",
+                  "x-ms-summary": "Caller context",
+                  "properties": {
+                    "employeeEmail": {"type": "string", "x-ms-summary": "Employee email"},
+                    "topic":         {"type": "string", "x-ms-summary": "Calling topic id"}
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message":       {"type": "string", "x-ms-summary": "Agent reply"},
+                "citationsJson": {"type": "string", "x-ms-summary": "Citations (JSON-encoded array of {title, url})"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

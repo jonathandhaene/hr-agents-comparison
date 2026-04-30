@@ -3,78 +3,403 @@
   "info": {
     "title": "Contoso HR API (Copilot Studio Custom Connector)",
     "version": "1.0.0",
-    "description": "Slimmed schema friendly to Power Platform Custom Connector limits."
+    "description": "Slim schema for the Contoso HR API exposed through APIM. All operations return primitive-typed objects so the schema imports cleanly into Copilot Studio (no $ref types, no union types)."
   },
   "host": "${HR_API_HOST}",
   "basePath": "/",
   "schemes": ["https"],
   "consumes": ["application/json"],
   "produces": ["application/json"],
+  "securityDefinitions": {
+    "apim_subscription_key": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Ocp-Apim-Subscription-Key"
+    }
+  },
+  "security": [{"apim_subscription_key": []}],
   "paths": {
     "/employees/{id}": {
       "get": {
         "operationId": "getEmployee",
-        "summary": "Get an employee by id or email",
-        "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}],
-        "responses": {"200": {"description": "OK"}}
+        "summary": "Get employee",
+        "description": "Get an employee by id or email.",
+        "x-ms-summary": "Get employee",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Employee id or email", "x-ms-visibility": "important"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "x-ms-summary": "Employee id"},
+                "displayName": {"type": "string", "x-ms-summary": "Display name"},
+                "email": {"type": "string", "x-ms-summary": "Email"},
+                "managerId": {"type": "string", "x-ms-summary": "Manager id"},
+                "department": {"type": "string", "x-ms-summary": "Department"}
+              }
+            }
+          }
+        }
       }
     },
     "/employees/byName": {
       "get": {
         "operationId": "findEmployeeByName",
-        "parameters": [{"name": "name", "in": "query", "required": true, "type": "string"}],
-        "responses": {"200": {"description": "OK"}}
+        "summary": "Find employee by name",
+        "x-ms-summary": "Find employee by name",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "name", "in": "query", "required": true, "type": "string", "x-ms-summary": "Full or partial name"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "displayName": {"type": "string"},
+                "email": {"type": "string"}
+              }
+            }
+          }
+        }
       }
     },
     "/employees/byPersona": {
       "get": {
         "operationId": "findEmployeeByPersona",
-        "parameters": [{"name": "persona", "in": "query", "required": true, "type": "string"}],
-        "responses": {"200": {"description": "OK"}}
+        "summary": "Find employee by persona",
+        "x-ms-summary": "Find employee by persona",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "persona", "in": "query", "required": true, "type": "string", "x-ms-summary": "Persona (e.g. buddy, manager)"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string"},
+                "displayName": {"type": "string"},
+                "email": {"type": "string"}
+              }
+            }
+          }
+        }
       }
     },
     "/leave/request": {
       "post": {
         "operationId": "requestLeave",
-        "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"employeeId": {"type": "string"}, "startDate": {"type": "string"}, "endDate": {"type": "string"}, "type": {"type": "string"}}}}],
-        "responses": {"200": {"description": "OK"}}
+        "summary": "Request leave",
+        "x-ms-summary": "Request leave",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["employeeId", "startDate", "endDate"],
+              "properties": {
+                "employeeId": {"type": "string", "x-ms-summary": "Employee id"},
+                "startDate":  {"type": "string", "x-ms-summary": "Start date (yyyy-mm-dd)"},
+                "endDate":    {"type": "string", "x-ms-summary": "End date (yyyy-mm-dd)"},
+                "type":       {"type": "string", "x-ms-summary": "Leave type", "default": "vacation"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "requestId": {"type": "string", "x-ms-summary": "Leave request id"},
+                "status":    {"type": "string", "x-ms-summary": "Status"}
+              }
+            }
+          }
+        }
       }
     },
-    "/leave/{id}/approve": {"post": {"operationId": "approveLeave", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
-    "/leave/{id}/reject": {"post": {"operationId": "rejectLeave", "parameters": [{"name": "id", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/leave/{id}/approve": {
+      "post": {
+        "operationId": "approveLeave",
+        "summary": "Approve leave",
+        "x-ms-summary": "Approve leave",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {"type": "object", "properties": {"status": {"type": "string"}}}
+          }
+        }
+      }
+    },
+    "/leave/{id}/reject": {
+      "post": {
+        "operationId": "rejectLeave",
+        "summary": "Reject leave",
+        "x-ms-summary": "Reject leave",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {"type": "object", "properties": {"status": {"type": "string"}}}
+          }
+        }
+      }
+    },
     "/onboarding/start": {
       "post": {
         "operationId": "startOnboarding",
-        "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"newHireId": {"type": "string"}, "startDate": {"type": "string"}, "managerId": {"type": "string"}, "buddyId": {"type": "string"}}}}],
-        "responses": {"200": {"description": "OK"}}
+        "summary": "Start onboarding",
+        "x-ms-summary": "Start onboarding",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["newHireId", "startDate"],
+              "properties": {
+                "newHireId": {"type": "string", "x-ms-summary": "New hire id"},
+                "startDate": {"type": "string", "x-ms-summary": "Start date"},
+                "managerId": {"type": "string", "x-ms-summary": "Manager id"},
+                "buddyId":   {"type": "string", "x-ms-summary": "Buddy id"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "planId": {"type": "string", "x-ms-summary": "Onboarding plan id"}
+              }
+            }
+          }
+        }
       }
     },
-    "/onboarding/{planId}": {"get": {"operationId": "getOnboarding", "parameters": [{"name": "planId", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
+    "/onboarding/{planId}": {
+      "get": {
+        "operationId": "getOnboarding",
+        "summary": "Get onboarding plan",
+        "x-ms-summary": "Get onboarding plan",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "planId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Plan id"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "planId": {"type": "string"},
+                "status": {"type": "string"},
+                "tasksJson": {"type": "string", "x-ms-summary": "Tasks (JSON-encoded array)"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/onboarding/{planId}/task/{taskId}/status": {
       "post": {
         "operationId": "setOnboardingTaskStatus",
+        "summary": "Set onboarding task status",
+        "x-ms-summary": "Set onboarding task status",
+        "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "planId", "in": "path", "required": true, "type": "string"},
-          {"name": "taskId", "in": "path", "required": true, "type": "string"},
-          {"name": "status", "in": "query", "required": true, "type": "string"}
+          {"name": "planId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Plan id"},
+          {"name": "taskId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Task id"},
+          {"name": "status", "in": "query", "required": true, "type": "string", "x-ms-summary": "Status (pending|in-progress|done)"}
         ],
-        "responses": {"200": {"description": "OK"}}
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {"type": "object", "properties": {"status": {"type": "string"}}}
+          }
+        }
       }
     },
     "/jobs/search": {
       "post": {
         "operationId": "searchJobs",
-        "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"employeeId": {"type": "string"}, "interests": {"type": "array", "items": {"type": "string"}}, "location": {"type": "string"}}}}],
-        "responses": {"200": {"description": "OK"}}
+        "summary": "Search internal jobs",
+        "x-ms-summary": "Search internal jobs",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["employeeId"],
+              "properties": {
+                "employeeId": {"type": "string", "x-ms-summary": "Employee id"},
+                "interests":  {"type": "array", "items": {"type": "string"}, "x-ms-summary": "Interests"},
+                "location":   {"type": "string", "x-ms-summary": "Preferred location"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "matchesJson": {"type": "string", "x-ms-summary": "Matches (JSON-encoded array of {jobId, title, location, score})"}
+              }
+            }
+          }
+        }
       }
     },
-    "/feedback/request": {"post": {"operationId": "openFeedbackRequest", "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object"}}], "responses": {"200": {"description": "OK"}}}},
-    "/feedback/{requestId}/summary": {"get": {"operationId": "getFeedbackSummary", "parameters": [{"name": "requestId", "in": "path", "required": true, "type": "string"}], "responses": {"200": {"description": "OK"}}}},
-    "/tickets/classify": {"post": {"operationId": "classifyTicket", "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"description": {"type": "string"}}}}], "responses": {"200": {"description": "OK"}}}},
-    "/tickets/create": {"post": {"operationId": "createTicket", "parameters": [{"name": "body", "in": "body", "required": true, "schema": {"type": "object", "properties": {"employeeId": {"type": "string"}, "description": {"type": "string"}}}}], "responses": {"200": {"description": "OK"}}}}
-  },
-  "securityDefinitions": {
-    "apim_subscription_key": {"type": "apiKey", "in": "header", "name": "Ocp-Apim-Subscription-Key"}
-  },
-  "security": [{"apim_subscription_key": []}]
+    "/feedback/request": {
+      "post": {
+        "operationId": "openFeedbackRequest",
+        "summary": "Open feedback request",
+        "x-ms-summary": "Open feedback request",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["subjectEmployeeId"],
+              "properties": {
+                "subjectEmployeeId": {"type": "string", "x-ms-summary": "Subject employee id"},
+                "reviewersJson":     {"type": "string", "x-ms-summary": "Reviewers (JSON-encoded array of email)"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {"requestId": {"type": "string"}}
+            }
+          }
+        }
+      }
+    },
+    "/feedback/{requestId}/summary": {
+      "get": {
+        "operationId": "getFeedbackSummary",
+        "summary": "Get feedback summary",
+        "x-ms-summary": "Get feedback summary",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {"name": "requestId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Feedback request id"}
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "summary":     {"type": "string", "x-ms-summary": "Summary text"},
+                "themesJson":  {"type": "string", "x-ms-summary": "Themes (JSON-encoded array)"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tickets/classify": {
+      "post": {
+        "operationId": "classifyTicket",
+        "summary": "Classify HR ticket",
+        "x-ms-summary": "Classify HR ticket",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["description"],
+              "properties": {
+                "description": {"type": "string", "x-ms-summary": "Ticket description"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "category":   {"type": "string", "x-ms-summary": "Category"},
+                "sensitive":  {"type": "boolean", "x-ms-summary": "Sensitive flag"},
+                "confidence": {"type": "number",  "x-ms-summary": "Confidence (0-1)"}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/tickets/create": {
+      "post": {
+        "operationId": "createTicket",
+        "summary": "Create HR ticket",
+        "x-ms-summary": "Create HR ticket",
+        "x-ms-visibility": "advanced",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "required": ["employeeId", "description"],
+              "properties": {
+                "employeeId":  {"type": "string", "x-ms-summary": "Employee id"},
+                "description": {"type": "string", "x-ms-summary": "Description"}
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {"ticketId": {"type": "string"}}
+            }
+          }
+        }
+      }
+    }
+  }
 }
