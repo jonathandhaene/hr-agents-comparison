@@ -33,6 +33,7 @@ See each solution's `README.md` for prerequisites.
 - [docs/scenario.md](./docs/scenario.md) — personas, use cases, sample dialogues
 - [docs/comparison.md](./docs/comparison.md) — capability matrix per UC × technology
 - [docs/decision-tree.md](./docs/decision-tree.md) — when to choose what (incl. mixing guidance)
+- [docs/timeline.md](./docs/timeline.md) — how an HR-agent estate evolves over 1/2/3/5 years and how that should shape your day-one choices
 - [docs/architecture/](./docs/architecture/) — Mermaid diagrams per solution
 - [docs/findings/](./docs/findings/) — build-time observations, gotchas, limits hit
 - [docs/demo-script.md](./docs/demo-script.md) — exact prompts to run in M365 Copilot
