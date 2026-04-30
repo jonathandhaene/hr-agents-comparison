@@ -7,6 +7,11 @@
 //   - Diagnostic settings forwarding all logs to Log Analytics
 //   - Tags on every resource
 //
+// Voice / IVR: nothing to provision in Azure. Copilot Studio's built-in
+// voice channel (Channels → Telephony) ships STT/TTS and a phone number;
+// it is also voice-enabled inside Microsoft Teams and Microsoft 365
+// Copilot. See README § "Voice / IVR".
+//
 // What lives outside this template:
 //   - Topics, Power Fx flows, custom connector, Dataverse tables — deployed
 //     by `pac solution import` from `solution/`.
@@ -187,7 +192,7 @@ resource apimDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   }
 }
 
-// ─────────────────────────────── Outputs ────────────────────────────────
+// ───────────────────────────── Outputs ────────────────────────────────
 
 output backendUrl string = 'https://${backend.properties.configuration.ingress.fqdn}'
 output apimGatewayUrl string = apim.properties.gatewayUrl

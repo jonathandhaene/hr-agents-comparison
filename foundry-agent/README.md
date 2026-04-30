@@ -71,6 +71,21 @@ GitHub Actions workflow: `.github/workflows/foundry.yml`. It uses OIDC + Foundry
 - The hosted-container surface (`agent/main.py`) is provided so the same code runs identically in dev and Foundry; production traffic flows through the Foundry agent endpoint, not the container.
 - Costs in this repo are **illustrative**. Token usage scales with traffic — monitor with Foundry's usage dashboards.
 
+## Voice / IVR
+
+This solution targets two distinct voice surfaces:
+
+**1. PSTN IVR (telephony).** Provisioned by default via `enableVoice=true` in [infra/main.bicep](infra/main.bicep):
+
+- **Azure AI Speech** (`Microsoft.CognitiveServices/accounts` kind=`SpeechServices`) for STT/TTS, wired into the Foundry project as a connection (`speech-voice`, AAD-auth). The project MI is granted **Cognitive Services Speech User**.
+- **Azure Communication Services** for PSTN inbound.
+
+A thin call-control front-end (Functions or Container App) takes the inbound call over ACS Call Automation, calls Speech for STT, posts the transcript to the Foundry agent endpoint, and streams the agent reply back through Speech TTS. Swap to a realtime-capable model deployment if you want end-to-end audio streaming without the Speech round-trip on the hot path.
+
+**2. Voice in Microsoft Teams and Microsoft 365 Copilot UI.** **No extra Azure resources required.** When the Foundry agent is published into Teams / Microsoft 365 Copilot (via Microsoft 365 Agents Toolkit or a Bot Service registration), voice input/output is provided by those host applications. Speech and ACS stay reserved for the telephony path.
+
+Set `enableVoice=false` to skip Speech, the project Speech connection, and ACS when telephony IVR is not needed.
+
 ## Cleanup
 
 ```bash

@@ -10,6 +10,11 @@
 //   - Application Insights + Log Analytics
 //   - User-assigned managed identity used by the Function App
 //
+// Voice / IVR: nothing to provision in Azure. Copilot Studio is the
+// orchestrator and ships voice via Teams, Microsoft 365 Copilot, and the
+// built-in voice/telephony channel. The connected Foundry agent inherits
+// voice from that surface. See README § "Voice / IVR".
+//
 // Deliberately NOT included: APIM, Container Apps, Cosmos DB, Azure AI Search.
 // All durable state lives in-memory in the demo Function App (see README).
 //
@@ -229,7 +234,7 @@ resource aoaiRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-// ─────────────────────────────── Outputs ────────────────────────────────
+// ───────────────────────────── Outputs ────────────────────────────────
 
 output functionAppHost string = func.properties.defaultHostName
 output foundryEndpoint string = foundry.properties.endpoint

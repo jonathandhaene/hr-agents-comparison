@@ -74,6 +74,15 @@ This solution surfaces HR data to employees in conversational form. Before openi
 
 Costs shown elsewhere in this repo are **illustrative**. Run the Azure Pricing Calculator for your region and traffic before committing.
 
+## Voice / IVR
+
+**No extra Azure resources are required.** Voice is delivered through the surfaces the agent is published on:
+
+- **Microsoft Teams** — the Bot Service registration enables Teams; voice in 1:1 calls and meetings is a Teams capability.
+- **Microsoft 365 Copilot** — the M365Extensions channel makes the agent reachable from Microsoft 365 Copilot, where voice input/output is a host capability.
+
+PSTN/IVR is **deliberately out of scope** for this solution. If a contact-centre style IVR is needed, prefer Solution C (Foundry) or Solution B/D (Copilot Studio telephony channel).
+
 ## Cleanup
 
 ```bash

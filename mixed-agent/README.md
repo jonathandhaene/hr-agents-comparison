@@ -117,6 +117,15 @@ GitHub Actions workflow: [.github/workflows/mixed.yml](../.github/workflows/mixe
 - Run Foundry safety evaluators (Groundedness, Hate & Unfairness, Self-harm, Violence, Sexual, Protected Material, Indirect Attack) before each release.
 - Disclose AI usage in the agent's welcome message; let users request a human alternative.
 
+## Voice / IVR
+
+**No extra Azure resources are required.** Copilot Studio is the orchestrator and is voice-enabled by default:
+
+- **Microsoft Teams** and **Microsoft 365 Copilot** — voice is a host capability on both surfaces.
+- **Copilot Studio telephony channel** — Channels → Telephony provides a Microsoft-managed PSTN voice runtime (STT/TTS included).
+
+The connected Foundry agent is reached via the same Copilot Studio surface, so it inherits voice automatically. Azure AI Speech and Azure Communication Services are intentionally **not** provisioned here — add them only if a future requirement (custom IVR menus, ACS-side recording, warm transfer to a human queue) calls for it.
+
 ## Cleanup
 
 ```bash

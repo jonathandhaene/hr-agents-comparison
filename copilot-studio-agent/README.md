@@ -71,6 +71,16 @@ GitHub Actions workflow: `.github/workflows/copilot-studio.yml`. It uses OIDC + 
 - Run the Foundry safety evaluators against the topic before publishing to M365 Copilot.
 - Costs in this repo are **illustrative** — confirm against the Azure Pricing Calculator and the Copilot Studio message-pack pricing for your tenant.
 
+## Voice / IVR
+
+**No extra Azure resources are required.** Copilot Studio is voice-enabled out of the box:
+
+- **Microsoft Teams** — the agent published from Copilot Studio inherits Teams' voice in 1:1 calls and meetings.
+- **Microsoft 365 Copilot Chat** — voice input/output in the Copilot UI is a host capability.
+- **Telephony channel** — enable Channels → Telephony in Copilot Studio for a Microsoft-managed PSTN voice runtime (STT/TTS included).
+
+If you later need fine-grained call control (custom IVR menus, recording, warm transfer), bring Azure Communication Services and/or Azure AI Speech in alongside the existing infra — they're intentionally not provisioned here to keep the resting cost of this solution at zero for voice.
+
 ## Cleanup
 
 ```bash

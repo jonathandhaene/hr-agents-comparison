@@ -12,6 +12,11 @@
 //   - Diagnostic settings forwarding all logs to Log Analytics
 //   - Tags on every resource
 //
+// Voice / IVR: nothing to provision in Azure. The agent is published to
+// Microsoft Teams and Microsoft 365 Copilot, both of which are voice-
+// enabled hosts — they handle STT/TTS and (in Teams) call routing. See
+// README § "Voice / IVR".
+//
 // All resources for this solution live in a SINGLE resource group so it can
 // be torn down independently of the other solutions.
 //
@@ -390,7 +395,7 @@ resource m365CopilotChannel 'Microsoft.BotService/botServices/channels@2022-09-1
   properties: { channelName: 'M365Extensions', properties: { isEnabled: true } }
 }
 
-// ─────────────────────────────── Outputs ────────────────────────────────
+// ───────────────────────────── Outputs ────────────────────────────────
 
 output backendUrl string = 'https://${backend.properties.configuration.ingress.fqdn}'
 output agentUrl string = 'https://${agent.properties.configuration.ingress.fqdn}'
