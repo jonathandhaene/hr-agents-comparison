@@ -37,7 +37,7 @@ Three solutions on the table — A (M365 Agents SDK), B (Copilot Studio), C (Fou
 
 **Day-one choice that paid off:** picking a path with **built-in long-running orchestration** (flows + Dataverse, or SDK + Cosmos). Teams that picked C-only here are already writing their own Logic-App tick.
 
-**Day-one choice that hurt:** picking AI Search for UC1 when SharePoint generative answers would have been fine. The Search service has been at €70/mo since week one with nobody to update the index.
+**Day-one choice that hurt:** standing up AI Search for UC1 *before* knowing whether SharePoint generative answers would have been good enough. AI Search earns its keep when you have hybrid/semantic ranking needs, non-SharePoint corpora, or quality thresholds that grounding-on-files can't meet — but for a single SharePoint policy library used by 600 people, the resting cost (a Basic tier sits in the tens of euros per month) and the indexer maintenance only pay back if someone owns it. Several teams ran both for a quarter, measured, and removed the one that wasn't pulling its weight.
 
 ---
 
@@ -51,11 +51,11 @@ Three solutions on the table — A (M365 Agents SDK), B (Copilot Studio), C (Fou
 - **Manager dashboards.** People Analytics ships a Power BI report on top of Dataverse.
 - **Live human handoff** to HR Partners in Teams becomes a hard requirement (regulator asked).
 
-**The branch point.** This is where the "pure" solutions diverge:
+**The branch point.** This is where the pure solutions start to show their grain. None of them is *blocked* here — each can deliver year-2 asks — but the cost shape diverges:
 
-- **Pure B teams** add **connected agents** — a small Foundry agent for the model-led parts. Congratulations, you have arrived at **Solution D (Mixed)**. The teams that started on D in year 1 have a six-month head start.
-- **Pure A teams** are fine — they add tools to the SDK app. But HR makers can't change anything without a PR.
-- **Pure C teams** struggle on live human handoff and proactive multi-actor flows; they end up bolting on Logic Apps and a Bot Service channel for handoff. Some quietly migrate the conversation surface to Copilot Studio and keep Foundry as a connected agent — same destination as D, slower path.
+- **Pure B teams** most often reach for **connected agents** — a small Foundry agent for the model-led parts. That is effectively **Solution D (Mixed)**. Teams that started on D in year 1 typically have a head start of a quarter or two; teams that stay strictly inside Copilot Studio's generative answers can usually get acceptable results for UC4/UC5 with prompt and grounding work, just with a lower ceiling on quality.
+- **Pure A teams** keep moving by adding tools and orchestrators to the SDK app. The friction here is organisational rather than technical: HR makers can't change phrasing, topics, or approval branches without a PR, so the engineering team becomes the bottleneck for changes that on the other surfaces are a maker afternoon.
+- **Pure C teams** can do live handoff and proactive multi-actor flows — Foundry agents expose channels, and you can wire handoff via Bot Service, Teams, or Azure Communication Services. The friction is that the *building blocks* are lower-level than Agent Flows + Dataverse, so teams that didn't budget engineering capacity for the orchestration layer feel it. Several end up adopting Copilot Studio for the conversational surface while keeping Foundry as a connected agent — converging on D from the other direction.
 
 **What hurts (typical):**
 - Connector sprawl. Three agents, two backends, four custom connectors, DLP policy now blocks one of them in a sub-environment. Someone documents the wiring.
@@ -78,13 +78,13 @@ Three solutions on the table — A (M365 Agents SDK), B (Copilot Studio), C (Fou
 - A **shared identity & secrets posture**: managed identity everywhere, Key Vault references, no more function keys in connector definitions.
 - **Per-environment governance**: dev/test/prod Power Platform environments, dev/test/prod Foundry projects, DLP policies per environment.
 - **A platform team** (1–2 people) that owns the agent runtime, evaluations, FinOps reporting, and the HR API.
-- **Voice / IVR** asks ("can the agent answer the after-hours HR line?"). Copilot Studio voice channel covers it cleanly. Pure-A and pure-C teams eat this one.
+- **Voice / IVR** asks ("can the agent answer the after-hours HR line?"). All three substrates have a path: Copilot Studio ships a voice channel that's a few clicks for the makers; Foundry pairs with Azure AI Speech and the realtime models for low-latency voice agents; the M365 Agents SDK can be fronted by Azure Communication Services or Bot Framework telephony. The differences are in *who builds it* and *how much code*, not in whether it's possible. Teams without a clear voice owner tend to default to whichever surface their existing agents already live on.
 
 **What hurts (typical):**
 - The HR API is no longer "the HR API" — it's "the people-data plane." Versioning becomes real. v1 endpoints are still wired into three custom connectors that nobody wants to touch.
 - Long-running flows (UC3 onboarding) reveal **Dataverse table-design debt**. The shape that worked for 1k plans/year creaks at 50k.
-- Evaluations diverge between platforms. Foundry has first-class evals; Copilot Studio's analytics are conversation-shaped, not model-shaped. Teams build a unified eval harness in their CI.
-- Compliance asks for **PII redaction at the agent boundary**. Pure-B teams discover that Copilot Studio's redaction is per-channel, not per-tool-call. Mixed-D teams add it at the Functions backend and move on.
+- Evaluations diverge between platforms. Foundry has first-class model and agent evals; Copilot Studio's analytics lean conversation-shaped rather than model-shaped, though its evaluation tooling has been catching up. Most teams end up running a unified eval harness in CI on top of fixtures, regardless of surface, because that's the only way to compare like with like across agents.
+- Compliance asks for **PII redaction at the agent boundary**. Where you put the redaction matters more than which surface you chose: teams that put it in the backend (Functions, APIM policy, or a shared library) only have to do it once; teams that pushed it into per-channel settings or per-topic logic end up auditing every agent. Mixed-D teams tend to land on backend redaction earlier because they already have a backend; pure-B teams sometimes start with channel-level redaction and migrate later.
 
 **Day-one choice that paid off:** picking a **substrate that lets HR makers ship 80% of changes**. Year-3 backlogs are dominated by phrasing tweaks, new approval branches, and new SharePoint sources — exactly what HR can do without engineering.
 
@@ -133,10 +133,10 @@ Distilled from the timeline above. None of these are about which tool you pick *
 | # | Day-one choice | Cost of getting it right on day one | Cost of fixing in year 3 |
 |---|---|---|---|
 | 1 | **Schema-first backend** (OpenAPI in Git, semantic versioning, no slim swagger by hand) | one engineer-week | several engineer-months |
-| 2 | **Compute that scales to zero** (Functions Consumption ≫ min-replica Container Apps, until you outgrow it) | a deploy-time decision | rewrites + 22 months of resting cost |
-| 3 | **State in Dataverse, not Cosmos** (unless you have a *specific* reason for Cosmos) | a config decision | a migration |
-| 4 | **Knowledge in SharePoint with generative answers, not AI Search** (until corpus or quality forces otherwise) | nothing | painless, but you carried €70/mo for two years for nothing |
-| 5 | **Copilot Studio as the conversational surface** + targeted **connected agents** (Solution D) for code-first parts | adopt the mixed pattern from day one | rewrite the front door, retrain HR makers |
+| 2 | **Compute that scales to zero by default** (Functions Consumption, Container Apps with min-replica 0) until you have a measured reason to pin capacity | a deploy-time decision | rewrites + months of resting cost you didn't need |
+| 3 | **State in Dataverse** when HR makers will touch it; **Cosmos / SQL** when access patterns or scale demand it. Pick deliberately, not by default. | a config decision | a migration |
+| 4 | **Start knowledge with SharePoint generative answers**; graduate to AI Search when corpus shape, retrieval quality, or non-SharePoint sources demand it | nothing | a quarter of carrying cost you didn't need to pay |
+| 5 | **Copilot Studio as the conversational surface** + targeted **connected agents** (Solution D) for code-first parts — *when* the use case mix includes both maker-friendly and model-led work | adopt the mixed pattern from day one | rewrite the front door, retrain HR makers |
 | 6 | **Managed solutions in prod**, source-controlled | a sprint of CI plumbing | a production outage |
 | 7 | **Managed identity from day one**, no function keys in connectors | one extra deployment step | rotation incident at 2 a.m. |
 | 8 | **Per-UC cost attribution** (App Insights custom dimensions, Foundry project tags) | a half-day | a re-instrumentation project |
@@ -145,15 +145,15 @@ Distilled from the timeline above. None of these are about which tool you pick *
 
 ## The one-page recommendation
 
-If you're at day 0 and your shape looks roughly like Contoso's:
+If you're at day 0 and your shape looks roughly like Contoso's — mixed maker / engineering ownership, M365 E5 already in place, a use-case mix that spans simple Q&A and model-led reasoning — the defaults below are a reasonable starting point. Each one is reversible; none is universal.
 
-1. Adopt **Solution D (Mixed)** as the substrate. It costs no more than B on day one and saves you the year-2 migration.
-2. Put your HR backend behind **OpenAPI in Git** with semver from commit one.
-3. Use **SharePoint generative answers** for knowledge unless you can articulate why not.
-4. Use **Dataverse** for state unless you can articulate why not.
-5. Stand up the **evaluation harness** with two prompts before you stand up the second use case.
+1. Lean toward **Solution D (Mixed)** as the substrate. The day-one cost is modestly higher than B (a Functions backend and a Foundry project) but typically less than the year-2 cost of retrofitting model-led capability. If your use cases are genuinely all maker-shaped, B alone is fine; if they're all code-shaped with no maker audience, A or C alone is fine.
+2. Put your HR backend behind **OpenAPI in Git** with semver from commit one. This is the recommendation with the fewest downsides.
+3. Start knowledge with **SharePoint generative answers**; graduate to AI Search when you can name the reason.
+4. Start state in **Dataverse** when HR makers will touch it; pick Cosmos/SQL deliberately when they won't.
+5. Stand up an **evaluation harness** with a handful of prompts before you stand up the second use case.
 6. Write the **agent registry** README before you ship the second agent.
 7. Wire **managed identity + Key Vault references** before the first production deploy.
-8. Plan for **HR makers to own ≥ 60% of future changes** — because they will whether you plan for it or not.
+8. Plan for **HR makers to own a meaningful share of future changes** — typical year-2 estates see 50–70% of changes land in topics, phrasing, and approval branches, which engineering shouldn't be the bottleneck for.
 
-Everything else can wait. These eight don't.
+Everything else can wait. These eight rarely regret being done early.
