@@ -4,7 +4,7 @@
 
 ## 1. Welcome to Zava
 
-Zava is a specialty coffee retailer and supplier headquartered in Seattle, Washington. We employ approximately 5,000 people across 12 countries. This handbook summarizes the key policies that apply to all employees regardless of location, with country-specific addenda where applicable.
+Zava is an athletic apparel brand headquartered in Seattle, Washington. We employ approximately 5,000 people across 12 countries. This handbook summarizes the key policies that apply to all employees regardless of location, with country-specific addenda where applicable.
 
 ## 2. Working at Zava
 

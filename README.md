@@ -15,7 +15,7 @@ The fourth folder ([`mixed-agent/`](./mixed-agent/)) is the recommended **produc
 
 ## Scenario in one paragraph
 
-Zava (a fictional specialty coffee retailer with 5,000 employees) wants an HR Concierge for **Employees, Managers, HR Partners, IT/Buddies**. All seven use cases (policy Q&A, time-off approval, onboarding orchestration, internal mobility, 360° feedback, ticket triage, and calibrated performance narrative generation) are implemented across the four solutions. UC7 uses a fine-tuned model deployment and is fully implemented in B, C, and D; Solution A uses a tool call to the same fine-tuned Foundry deployment. See [docs/scenario.md](./docs/scenario.md) and [docs/fine-tuning.md](./docs/fine-tuning.md).
+Zava (a fictional athletic apparel brand with 5,000 employees) wants an HR Concierge for **Employees, Managers, HR Partners, IT/Buddies**. All seven use cases (policy Q&A, time-off approval, onboarding orchestration, internal mobility, 360° feedback, ticket triage, and calibrated performance narrative generation) are implemented across the four solutions. UC7 uses a fine-tuned model deployment and is fully implemented in B, C, and D; Solution A uses a tool call to the same fine-tuned Foundry deployment. See [docs/scenario.md](./docs/scenario.md) and [docs/fine-tuning.md](./docs/fine-tuning.md).
 
 ## Quickstart
 

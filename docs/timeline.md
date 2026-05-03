@@ -6,7 +6,7 @@ A composite story drawn from real engagements. The numbers, names, and use cases
 
 ## The cast
 
-- **Zava** — 5,000 employees, specialty coffee retailer (retail stores + roasting facilities), single tenant, M365 E5, Power Platform per-user licensing for HR, no existing agents.
+- **Zava** — 5,000 employees, athletic apparel brand (retail stores + distribution centers), single tenant, M365 E5, Power Platform per-user licensing for HR, no existing agents.
 - **HR Operations** (12 people) — owns policies, onboarding, feedback cycles, ticketing.
 - **HR Tech / People Analytics** (3 people, one of whom can write Python) — owns the integrations.
 - **Central Platform team** — owns Azure tenancy, networking, security, FinOps.
