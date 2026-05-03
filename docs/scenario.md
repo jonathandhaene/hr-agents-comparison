@@ -2,10 +2,10 @@
 
 ## Company
 
-**Zava** is a fictional specialty coffee retailer and supplier (a play on "Java"):
+**Zava** is a fictional athletic apparel brand:
 - ~5,000 employees across 12 countries
 - HQ in Seattle, US
-- Hybrid work model (retail stores + corporate offices + roasting facilities)
+- Hybrid work model (retail stores + corporate offices + distribution centers)
 - Standard HRIS, learning platform, ticketing system, SharePoint-based handbook
 - HR org: shared-services HR Operations + business-aligned HR Partners
 
