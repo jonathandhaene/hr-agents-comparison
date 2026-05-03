@@ -7,9 +7,15 @@
   },
   "host": "${HR_API_HOST}",
   "basePath": "/hr",
-  "schemes": ["https"],
-  "consumes": ["application/json"],
-  "produces": ["application/json"],
+  "schemes": [
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
   "securityDefinitions": {
     "apim_subscription_key": {
       "type": "apiKey",
@@ -17,7 +23,11 @@
       "name": "Ocp-Apim-Subscription-Key"
     }
   },
-  "security": [{"apim_subscription_key": []}],
+  "security": [
+    {
+      "apim_subscription_key": []
+    }
+  ],
   "paths": {
     "/employees/{id}": {
       "get": {
@@ -27,11 +37,28 @@
         "x-ms-summary": "Get employee",
         "x-ms-visibility": "important",
         "parameters": [
-          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Employee id or email", "x-ms-visibility": "important"}
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Employee id or email",
+            "x-ms-visibility": "important"
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/Employee"}},
-          "404": {"description": "Employee not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Employee"
+            }
+          },
+          "404": {
+            "description": "Employee not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -43,7 +70,13 @@
         "x-ms-summary": "Find employees by name",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "name", "in": "query", "required": true, "type": "string", "x-ms-summary": "Full or partial name"}
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Full or partial name"
+          }
         ],
         "responses": {
           "200": {
@@ -54,7 +87,9 @@
                 "matches": {
                   "type": "array",
                   "x-ms-summary": "Matches",
-                  "items": {"$ref": "#/definitions/EmployeeRef"}
+                  "items": {
+                    "$ref": "#/definitions/EmployeeRef"
+                  }
                 }
               }
             }
@@ -70,11 +105,27 @@
         "x-ms-summary": "Find employee by persona",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "persona", "in": "query", "required": true, "type": "string", "x-ms-summary": "Persona"}
+          {
+            "name": "persona",
+            "in": "query",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Persona"
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/EmployeeRef"}},
-          "404": {"description": "No employee with that persona", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/EmployeeRef"
+            }
+          },
+          "404": {
+            "description": "No employee with that persona",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -86,27 +137,82 @@
         "x-ms-summary": "Request leave",
         "x-ms-visibility": "important",
         "parameters": [
-          {"name": "Idempotency-Key", "in": "header", "required": false, "type": "string", "x-ms-summary": "Idempotency key", "x-ms-visibility": "advanced"},
           {
-            "name": "body", "in": "body", "required": true,
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "type": "string",
+            "x-ms-summary": "Idempotency key",
+            "x-ms-visibility": "advanced"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": ["employeeId", "startDate", "endDate"],
+              "required": [
+                "employeeId",
+                "startDate",
+                "endDate"
+              ],
               "properties": {
-                "employeeId": {"type": "string", "x-ms-summary": "Employee id"},
-                "startDate":  {"type": "string", "x-ms-summary": "Start date (yyyy-mm-dd)"},
-                "endDate":    {"type": "string", "x-ms-summary": "End date (yyyy-mm-dd)"},
-                "type":       {"type": "string", "x-ms-summary": "Leave type", "default": "vacation", "enum": ["vacation", "sick", "personal"]},
-                "note":       {"type": "string", "x-ms-summary": "Note", "x-ms-visibility": "advanced"}
+                "employeeId": {
+                  "type": "string",
+                  "x-ms-summary": "Employee id"
+                },
+                "startDate": {
+                  "type": "string",
+                  "x-ms-summary": "Start date (yyyy-mm-dd)"
+                },
+                "endDate": {
+                  "type": "string",
+                  "x-ms-summary": "End date (yyyy-mm-dd)"
+                },
+                "type": {
+                  "type": "string",
+                  "x-ms-summary": "Leave type",
+                  "default": "vacation",
+                  "enum": [
+                    "vacation",
+                    "sick",
+                    "personal"
+                  ]
+                },
+                "note": {
+                  "type": "string",
+                  "x-ms-summary": "Note",
+                  "x-ms-visibility": "advanced"
+                }
               }
             }
           }
         ],
         "responses": {
-          "201": {"description": "Created", "schema": {"$ref": "#/definitions/LeaveRequest"}},
-          "200": {"description": "OK (idempotent replay)", "schema": {"$ref": "#/definitions/LeaveRequest"}},
-          "400": {"description": "Validation error", "schema": {"$ref": "#/definitions/Problem"}},
-          "404": {"description": "Employee not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/LeaveRequest"
+            }
+          },
+          "200": {
+            "description": "OK (idempotent replay)",
+            "schema": {
+              "$ref": "#/definitions/LeaveRequest"
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "404": {
+            "description": "Employee not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -117,11 +223,27 @@
         "x-ms-summary": "Get leave request",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"}
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Leave request id"
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/LeaveRequest"}},
-          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LeaveRequest"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -129,17 +251,45 @@
       "post": {
         "operationId": "approveLeave",
         "summary": "Approve leave",
-        "description": "Idempotent — approving an already-approved request is a no-op.",
+        "description": "Idempotent \u2014 approving an already-approved request is a no-op.",
         "x-ms-summary": "Approve leave",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"},
-          {"name": "body", "in": "body", "required": false, "schema": {"$ref": "#/definitions/Decision"}}
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Leave request id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Decision"
+            }
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/LeaveRequest"}},
-          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}},
-          "409": {"description": "Conflicting state", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LeaveRequest"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "409": {
+            "description": "Conflicting state",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -147,17 +297,45 @@
       "post": {
         "operationId": "rejectLeave",
         "summary": "Reject leave",
-        "description": "Idempotent — rejecting an already-rejected request is a no-op.",
+        "description": "Idempotent \u2014 rejecting an already-rejected request is a no-op.",
         "x-ms-summary": "Reject leave",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "id", "in": "path", "required": true, "type": "string", "x-ms-summary": "Leave request id"},
-          {"name": "body", "in": "body", "required": false, "schema": {"$ref": "#/definitions/Decision"}}
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Leave request id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Decision"
+            }
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/LeaveRequest"}},
-          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}},
-          "409": {"description": "Conflicting state", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/LeaveRequest"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "409": {
+            "description": "Conflicting state",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -169,22 +347,50 @@
         "x-ms-visibility": "important",
         "parameters": [
           {
-            "name": "body", "in": "body", "required": true,
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": ["newHireId", "startDate", "managerId"],
+              "required": [
+                "newHireId",
+                "startDate",
+                "managerId"
+              ],
               "properties": {
-                "newHireId": {"type": "string", "x-ms-summary": "New hire id"},
-                "startDate": {"type": "string", "x-ms-summary": "Start date"},
-                "managerId": {"type": "string", "x-ms-summary": "Manager id"},
-                "buddyId":   {"type": "string", "x-ms-summary": "Buddy id"}
+                "newHireId": {
+                  "type": "string",
+                  "x-ms-summary": "New hire id"
+                },
+                "startDate": {
+                  "type": "string",
+                  "x-ms-summary": "Start date"
+                },
+                "managerId": {
+                  "type": "string",
+                  "x-ms-summary": "Manager id"
+                },
+                "buddyId": {
+                  "type": "string",
+                  "x-ms-summary": "Buddy id"
+                }
               }
             }
           }
         ],
         "responses": {
-          "201": {"description": "Created", "schema": {"$ref": "#/definitions/OnboardingPlan"}},
-          "404": {"description": "Employee not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/OnboardingPlan"
+            }
+          },
+          "404": {
+            "description": "Employee not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -195,11 +401,27 @@
         "x-ms-summary": "Get onboarding plan",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "planId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Plan id"}
+          {
+            "name": "planId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Plan id"
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/OnboardingPlan"}},
-          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/OnboardingPlan"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -210,15 +432,40 @@
         "x-ms-summary": "Set onboarding task status",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "planId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Plan id"},
-          {"name": "taskId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Task id"},
           {
-            "name": "body", "in": "body", "required": true,
+            "name": "planId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Plan id"
+          },
+          {
+            "name": "taskId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Task id"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": ["status"],
+              "required": [
+                "status"
+              ],
               "properties": {
-                "status": {"type": "string", "x-ms-summary": "Status", "enum": ["not-started", "in-progress", "done", "overdue"]}
+                "status": {
+                  "type": "string",
+                  "x-ms-summary": "Status",
+                  "enum": [
+                    "not-started",
+                    "in-progress",
+                    "done",
+                    "overdue"
+                  ]
+                }
               }
             }
           }
@@ -229,12 +476,21 @@
             "schema": {
               "type": "object",
               "properties": {
-                "ok":   {"type": "boolean"},
-                "plan": {"$ref": "#/definitions/OnboardingPlan"}
+                "ok": {
+                  "type": "boolean"
+                },
+                "plan": {
+                  "$ref": "#/definitions/OnboardingPlan"
+                }
               }
             }
           },
-          "404": {"description": "Plan or task not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "404": {
+            "description": "Plan or task not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -246,14 +502,30 @@
         "x-ms-visibility": "important",
         "parameters": [
           {
-            "name": "body", "in": "body", "required": true,
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": ["employeeId"],
+              "required": [
+                "employeeId"
+              ],
               "properties": {
-                "employeeId": {"type": "string", "x-ms-summary": "Employee id"},
-                "interests":  {"type": "array", "items": {"type": "string"}, "x-ms-summary": "Interests"},
-                "location":   {"type": "string", "x-ms-summary": "Preferred location"}
+                "employeeId": {
+                  "type": "string",
+                  "x-ms-summary": "Employee id"
+                },
+                "interests": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Interests"
+                },
+                "location": {
+                  "type": "string",
+                  "x-ms-summary": "Preferred location"
+                }
               }
             }
           }
@@ -267,7 +539,9 @@
                 "matches": {
                   "type": "array",
                   "x-ms-summary": "Matches",
-                  "items": {"$ref": "#/definitions/Job"}
+                  "items": {
+                    "$ref": "#/definitions/Job"
+                  }
                 }
               }
             }
@@ -283,21 +557,48 @@
         "x-ms-visibility": "advanced",
         "parameters": [
           {
-            "name": "body", "in": "body", "required": true,
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": ["cycleId", "subjectEmployeeId"],
+              "required": [
+                "cycleId",
+                "subjectEmployeeId"
+              ],
               "properties": {
-                "cycleId":              {"type": "string", "x-ms-summary": "Cycle id"},
-                "subjectEmployeeId":    {"type": "string", "x-ms-summary": "Subject employee id"},
-                "requestedReviewerIds": {"type": "array", "items": {"type": "string"}, "x-ms-summary": "Reviewer ids"}
+                "cycleId": {
+                  "type": "string",
+                  "x-ms-summary": "Cycle id"
+                },
+                "subjectEmployeeId": {
+                  "type": "string",
+                  "x-ms-summary": "Subject employee id"
+                },
+                "requestedReviewerIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "x-ms-summary": "Reviewer ids"
+                }
               }
             }
           }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/FeedbackRequest"}},
-          "404": {"description": "Cycle not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FeedbackRequest"
+            }
+          },
+          "404": {
+            "description": "Cycle not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -309,11 +610,27 @@
         "x-ms-summary": "Get feedback summary",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "requestId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Feedback request id"}
+          {
+            "name": "requestId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Feedback request id"
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/FeedbackSummary"}},
-          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/FeedbackSummary"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -321,23 +638,35 @@
       "post": {
         "operationId": "classifyTicket",
         "summary": "Classify HR ticket",
-        "description": "Demo classifier — returns category, sensitivity, autoAnswer flag, and escalateImmediately flag. Replace with a Microsoft Foundry call backed by Azure AI Content Safety for production.",
+        "description": "Demo classifier \u2014 returns category, sensitivity, autoAnswer flag, and escalateImmediately flag. Replace with a Microsoft Foundry call backed by Azure AI Content Safety for production.",
         "x-ms-summary": "Classify HR ticket",
         "x-ms-visibility": "important",
         "parameters": [
           {
-            "name": "body", "in": "body", "required": true,
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": ["description"],
+              "required": [
+                "description"
+              ],
               "properties": {
-                "description": {"type": "string", "x-ms-summary": "Ticket description"}
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Ticket description"
+                }
               }
             }
           }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/TicketClassification"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/TicketClassification"
+            }
+          }
         }
       }
     },
@@ -349,20 +678,41 @@
         "x-ms-visibility": "advanced",
         "parameters": [
           {
-            "name": "body", "in": "body", "required": true,
+            "name": "body",
+            "in": "body",
+            "required": true,
             "schema": {
               "type": "object",
-              "required": ["employeeId", "description"],
+              "required": [
+                "employeeId",
+                "description"
+              ],
               "properties": {
-                "employeeId":  {"type": "string", "x-ms-summary": "Employee id"},
-                "description": {"type": "string", "x-ms-summary": "Description"}
+                "employeeId": {
+                  "type": "string",
+                  "x-ms-summary": "Employee id"
+                },
+                "description": {
+                  "type": "string",
+                  "x-ms-summary": "Description"
+                }
               }
             }
           }
         ],
         "responses": {
-          "201": {"description": "Created", "schema": {"$ref": "#/definitions/Ticket"}},
-          "404": {"description": "Employee not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "201": {
+            "description": "Created",
+            "schema": {
+              "$ref": "#/definitions/Ticket"
+            }
+          },
+          "404": {
+            "description": "Employee not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     },
@@ -373,11 +723,109 @@
         "x-ms-summary": "Escalate HR ticket",
         "x-ms-visibility": "advanced",
         "parameters": [
-          {"name": "ticketId", "in": "path", "required": true, "type": "string", "x-ms-summary": "Ticket id"}
+          {
+            "name": "ticketId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "x-ms-summary": "Ticket id"
+          }
         ],
         "responses": {
-          "200": {"description": "OK", "schema": {"$ref": "#/definitions/Ticket"}},
-          "404": {"description": "Not found", "schema": {"$ref": "#/definitions/Problem"}}
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Ticket"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
+        }
+      }
+    },
+    "/narratives/draft": {
+      "post": {
+        "operationId": "draftNarrative",
+        "summary": "Draft a calibrated performance narrative",
+        "x-ms-summary": "Draft performance narrative (UC7)",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NarrativeDraftRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Draft created",
+            "schema": {
+              "$ref": "#/definitions/NarrativeDraft"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
+        }
+      }
+    },
+    "/narratives/submit": {
+      "post": {
+        "operationId": "submitNarrative",
+        "summary": "Submit an approved performance narrative",
+        "x-ms-summary": "Submit performance narrative (UC7)",
+        "x-ms-visibility": "important",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NarrativeSubmitRequest"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Submitted",
+            "schema": {
+              "$ref": "#/definitions/NarrativeSubmission"
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "404": {
+            "description": "Draft not found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          },
+          "409": {
+            "description": "Already submitted",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            }
+          }
         }
       }
     }
@@ -387,114 +835,255 @@
       "type": "object",
       "description": "RFC 7807 problem details.",
       "properties": {
-        "type":     {"type": "string"},
-        "title":    {"type": "string"},
-        "status":   {"type": "integer"},
-        "detail":   {"type": "string"},
-        "instance": {"type": "string"}
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "instance": {
+          "type": "string"
+        }
       }
     },
     "Decision": {
       "type": "object",
       "properties": {
-        "decisionNote": {"type": "string", "x-ms-summary": "Decision note"}
+        "decisionNote": {
+          "type": "string",
+          "x-ms-summary": "Decision note"
+        }
       }
     },
     "Employee": {
       "type": "object",
       "properties": {
-        "id":          {"type": "string", "x-ms-summary": "Employee id"},
-        "displayName": {"type": "string", "x-ms-summary": "Display name"},
-        "email":       {"type": "string"},
-        "title":       {"type": "string"},
-        "department":  {"type": "string"},
-        "location":    {"type": "string"},
-        "managerId":   {"type": "string"},
-        "persona":     {"type": "string"}
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Employee id"
+        },
+        "displayName": {
+          "type": "string",
+          "x-ms-summary": "Display name"
+        },
+        "email": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "department": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string"
+        },
+        "persona": {
+          "type": "string"
+        }
       }
     },
     "EmployeeRef": {
       "type": "object",
       "properties": {
-        "id":          {"type": "string"},
-        "displayName": {"type": "string"},
-        "email":       {"type": "string"}
+        "id": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        }
       }
     },
     "LeaveRequest": {
       "type": "object",
       "properties": {
-        "id":           {"type": "string", "x-ms-summary": "Leave request id"},
-        "employeeId":   {"type": "string"},
-        "managerId":    {"type": "string", "x-ms-summary": "Manager id"},
-        "startDate":    {"type": "string"},
-        "endDate":      {"type": "string"},
-        "type":         {"type": "string"},
-        "days":         {"type": "integer", "x-ms-summary": "Day count"},
-        "status":       {"type": "string", "x-ms-summary": "Status"},
-        "note":         {"type": "string"},
-        "decisionNote": {"type": "string"},
-        "createdAt":    {"type": "string"}
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Leave request id"
+        },
+        "employeeId": {
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string",
+          "x-ms-summary": "Manager id"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "endDate": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "days": {
+          "type": "integer",
+          "x-ms-summary": "Day count"
+        },
+        "status": {
+          "type": "string",
+          "x-ms-summary": "Status"
+        },
+        "note": {
+          "type": "string"
+        },
+        "decisionNote": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        }
       }
     },
     "OnboardingTask": {
       "type": "object",
       "properties": {
-        "id":              {"type": "string"},
-        "title":           {"type": "string"},
-        "owner":           {"type": "string"},
-        "ownerEmployeeId": {"type": "string"},
-        "dueDate":         {"type": "string"},
-        "critical":        {"type": "boolean"},
-        "status":          {"type": "string"},
-        "description":     {"type": "string"}
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "ownerEmployeeId": {
+          "type": "string"
+        },
+        "dueDate": {
+          "type": "string"
+        },
+        "critical": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
       }
     },
     "OnboardingPlan": {
       "type": "object",
       "properties": {
-        "id":        {"type": "string", "x-ms-summary": "Plan id"},
-        "newHireId": {"type": "string"},
-        "managerId": {"type": "string"},
-        "buddyId":   {"type": "string"},
-        "startDate": {"type": "string"},
-        "tasks":     {"type": "array", "items": {"$ref": "#/definitions/OnboardingTask"}},
-        "status":    {"type": "string"}
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Plan id"
+        },
+        "newHireId": {
+          "type": "string"
+        },
+        "managerId": {
+          "type": "string"
+        },
+        "buddyId": {
+          "type": "string"
+        },
+        "startDate": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/OnboardingTask"
+          }
+        },
+        "status": {
+          "type": "string"
+        }
       }
     },
     "Job": {
       "type": "object",
       "properties": {
-        "id":       {"type": "string"},
-        "title":    {"type": "string"},
-        "location": {"type": "string"},
-        "skills":   {"type": "array", "items": {"type": "string"}}
+        "id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "location": {
+          "type": "string"
+        },
+        "skills": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "FeedbackRequest": {
       "type": "object",
       "properties": {
-        "id":                {"type": "string", "x-ms-summary": "Feedback request id"},
-        "cycleId":           {"type": "string"},
-        "subjectEmployeeId": {"type": "string"},
-        "reviewerIds":       {"type": "array", "items": {"type": "string"}},
-        "questions":         {"type": "array", "items": {"type": "string"}}
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Feedback request id"
+        },
+        "cycleId": {
+          "type": "string"
+        },
+        "subjectEmployeeId": {
+          "type": "string"
+        },
+        "reviewerIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       }
     },
     "FeedbackSummary": {
       "type": "object",
       "properties": {
-        "subjectEmployeeId": {"type": "string"},
-        "received":          {"type": "integer"},
-        "expected":          {"type": "integer"},
-        "questions":         {"type": "array", "items": {"type": "string"}},
+        "subjectEmployeeId": {
+          "type": "string"
+        },
+        "received": {
+          "type": "integer"
+        },
+        "expected": {
+          "type": "integer"
+        },
+        "questions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
         "responses": {
           "type": "array",
           "items": {
             "type": "object",
             "properties": {
-              "reviewerId": {"type": "string"},
-              "answers":    {"type": "object", "additionalProperties": true}
+              "reviewerId": {
+                "type": "string"
+              },
+              "answers": {
+                "type": "object",
+                "additionalProperties": true
+              }
             }
           }
         }
@@ -503,23 +1092,153 @@
     "TicketClassification": {
       "type": "object",
       "properties": {
-        "categoryId":          {"type": "string"},
-        "categoryLabel":       {"type": "string"},
-        "sensitivity":         {"type": "string", "x-ms-summary": "low | medium | high | critical"},
-        "autoAnswer":          {"type": "boolean"},
-        "escalateImmediately": {"type": "boolean"}
+        "categoryId": {
+          "type": "string"
+        },
+        "categoryLabel": {
+          "type": "string"
+        },
+        "sensitivity": {
+          "type": "string",
+          "x-ms-summary": "low | medium | high | critical"
+        },
+        "autoAnswer": {
+          "type": "boolean"
+        },
+        "escalateImmediately": {
+          "type": "boolean"
+        }
       }
     },
     "Ticket": {
       "type": "object",
       "properties": {
-        "id":           {"type": "string", "x-ms-summary": "Ticket id"},
-        "employeeId":   {"type": "string"},
-        "assignedToId": {"type": "string"},
-        "description":  {"type": "string"},
-        "category":     {"$ref": "#/definitions/TicketClassification"},
-        "status":       {"type": "string"},
-        "createdAt":    {"type": "string"}
+        "id": {
+          "type": "string",
+          "x-ms-summary": "Ticket id"
+        },
+        "employeeId": {
+          "type": "string"
+        },
+        "assignedToId": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "category": {
+          "$ref": "#/definitions/TicketClassification"
+        },
+        "status": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string"
+        }
+      }
+    },
+    "NarrativeDraftRequest": {
+      "type": "object",
+      "required": [
+        "employeeId",
+        "cycleId",
+        "managerNotes"
+      ],
+      "properties": {
+        "employeeId": {
+          "type": "string",
+          "x-ms-summary": "Employee id"
+        },
+        "cycleId": {
+          "type": "string",
+          "x-ms-summary": "Review cycle id (e.g. H1-2026)"
+        },
+        "managerNotes": {
+          "type": "string",
+          "x-ms-summary": "Manager bullet notes"
+        },
+        "feedbackRequestId": {
+          "type": "string",
+          "x-ms-summary": "Optional UC5 feedback request id"
+        }
+      }
+    },
+    "NarrativeDraft": {
+      "type": "object",
+      "properties": {
+        "draftId": {
+          "type": "string",
+          "x-ms-summary": "Draft id"
+        },
+        "employeeId": {
+          "type": "string"
+        },
+        "cycleId": {
+          "type": "string"
+        },
+        "grade": {
+          "type": "string",
+          "x-ms-summary": "Employee grade (e.g. L5)"
+        },
+        "draft": {
+          "type": "string",
+          "x-ms-summary": "Draft narrative text"
+        },
+        "status": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "NarrativeSubmitRequest": {
+      "type": "object",
+      "required": [
+        "draftId",
+        "approvedText"
+      ],
+      "properties": {
+        "draftId": {
+          "type": "string",
+          "x-ms-summary": "Draft id from draftNarrative"
+        },
+        "approvedText": {
+          "type": "string",
+          "x-ms-summary": "Manager-approved narrative text"
+        }
+      }
+    },
+    "NarrativeSubmission": {
+      "type": "object",
+      "properties": {
+        "submissionId": {
+          "type": "string",
+          "x-ms-summary": "Submission id"
+        },
+        "draftId": {
+          "type": "string"
+        },
+        "employeeId": {
+          "type": "string"
+        },
+        "cycleId": {
+          "type": "string"
+        },
+        "grade": {
+          "type": "string"
+        },
+        "approvedText": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "submittedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
       }
     }
   }

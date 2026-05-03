@@ -18,11 +18,11 @@
 | **HR Partner** | Carlos Mendes | "I want the easy questions deflected so I can focus on real cases." |
 | **IT / Buddy** | Dana Okafor | "Onboarding tasks reach me late and out of order." |
 
-## Six use cases
+## Seven use cases
 
-Each is implemented in **all three** technologies (UC × Technology = 18 implementations). Where a technology cannot do something cleanly, the limit is documented in [comparison.md](./comparison.md).
+UC1–UC6 are implemented in **all four** solutions (A/B/C/D). UC7 (performance narrative) is implemented in B, C, and D using a fine-tuned model deployment, and in A via a tool call to the same deployment. Where a technology cannot do something cleanly, the limit is documented in [comparison.md](./comparison.md).
 
-UC7 (below) is a **fine-tuning-dependent** use case that is not implemented in the A/B/C/D solutions but is a natural next step once UC5 is running. See [docs/fine-tuning.md](./fine-tuning.md) for the full fine-tuning analysis across all UCs.
+UC7 (below) uses a fine-tuned model to generate grade-calibrated performance narratives. It is fully implemented in Solutions B, C, and D, and in A via a tool call to the same fine-tuned Foundry deployment. See [docs/fine-tuning.md](./fine-tuning.md) for the full fine-tuning analysis across all UCs.
 
 ### UC1 — Policy & benefits Q&A
 - **Trigger:** Employee asks "How many vacation days do I get after 5 years?" / "What does our parental leave policy cover?"
@@ -128,6 +128,3 @@ A successful demo run shows, for each technology:
 5. UC5 produces a **summary across multiple inputs**.
 6. UC6 **does not auto-answer** sensitive cases and produces a real handoff artifact.
 7. UC7 (fine-tuning path) produces a **grade-level-calibrated narrative** that the manager approves with minor edits; the calibration committee can compare narratives across employees without systematic wording differences.
-4. UC4 produces **personalized** matches (not generic).
-5. UC5 produces a **summary across multiple inputs**.
-6. UC6 **does not auto-answer** sensitive cases and produces a real handoff artifact.

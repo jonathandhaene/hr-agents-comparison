@@ -24,6 +24,7 @@ See [docs/architecture/mixed.md](../docs/architecture/mixed.md) and [docs/findin
 | UC4 Internal mobility | Topic → **connected Foundry agent** (`match_internal_jobs` tool + LLM pitch) | Dev (rarely) |
 | UC5 360° feedback | Topic kicks off Agent Flow (open) **or** connected Foundry agent (summarize) | Maker + Dev |
 | UC6 Triage & escalation | Topic + classifier flow + **`TransferConversation`** to HR queue | HR maker |
+| UC7 Performance narrative | Topic → **connected Foundry agent** (`draft_performance_narrative` + fine-tuned model) → `submitNarrative` on HR API | Dev (fine-tuned model); Maker (topic) |
 
 ## Layout
 

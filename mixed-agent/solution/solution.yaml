@@ -13,6 +13,7 @@ components:
       - topics/uc4_mobility.yaml
       - topics/uc5_feedback.yaml
       - topics/uc6_triage.yaml
+      - topics/uc7_performance_narrative.yaml
     knowledgeSources:
       - kind: SharePoint
         site: https://contoso.sharepoint.com/sites/HR
@@ -37,6 +38,8 @@ components:
     schemaName: cra5e_feedbackrequests
   - type: entity
     schemaName: cra5e_tickets
+  - type: entity
+    schemaName: cra5e_performancenarrative_drafts
 channels:
   - name: M365CopilotChat
     enabled: true

@@ -9,13 +9,13 @@ Demonstrates the **same HR scenario** ("Contoso HR Concierge") implemented three
 | [foundry-agent/](./foundry-agent/) | Microsoft Foundry — Hosted Agent (Python) inside a Foundry project | M365 Copilot, Teams |
 | [mixed-agent/](./mixed-agent/) | **Mixed** — Copilot Studio primary + Foundry connected agent + Azure Functions backend | M365 Copilot, Teams |
 
-The first three folders (A/B/C) are **completely independent** from each other so they can be compared on their own merits — same six use cases, three pure implementations. The only shared thing is committed reference seed data in [`shared-fixtures/`](./shared-fixtures/), which each solution copies/loads at build time.
+The first three folders (A/B/C) are **completely independent** from each other so they can be compared on their own merits — same seven use cases, three pure implementations. The only shared thing is committed reference seed data in [`shared-fixtures/`](./shared-fixtures/), which each solution copies/loads at build time.
 
 The fourth folder ([`mixed-agent/`](./mixed-agent/)) is the recommended **production starting point** for most teams: it deliberately combines Copilot Studio + Foundry to optimise for **lowest cost, lowest maintenance, highest flexibility for HR makers** while keeping advanced reasoning where it earns its keep. See [docs/architecture/mixed.md](./docs/architecture/mixed.md) and [docs/findings/mixed.md](./docs/findings/mixed.md).
 
 ## Scenario in one paragraph
 
-Contoso Ltd (5,000 employees) wants an HR Concierge for **Employees, Managers, HR Partners, IT/Buddies**. The same six use cases (policy Q&A, time-off approval, onboarding orchestration, internal mobility, 360° feedback, ticket triage) are implemented in all three technologies. A seventh use case — **calibrated performance narrative generation** — is documented as a fine-tuning-dependent extension. See [docs/scenario.md](./docs/scenario.md) and [docs/fine-tuning.md](./docs/fine-tuning.md).
+Contoso Ltd (5,000 employees) wants an HR Concierge for **Employees, Managers, HR Partners, IT/Buddies**. All seven use cases (policy Q&A, time-off approval, onboarding orchestration, internal mobility, 360° feedback, ticket triage, and calibrated performance narrative generation) are implemented across the four solutions. UC7 uses a fine-tuned model deployment and is fully implemented in B, C, and D; Solution A uses a tool call to the same fine-tuned Foundry deployment. See [docs/scenario.md](./docs/scenario.md) and [docs/fine-tuning.md](./docs/fine-tuning.md).
 
 ## Quickstart
 

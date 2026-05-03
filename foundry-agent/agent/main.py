@@ -15,7 +15,7 @@ from agent_framework.azure import AzureOpenAIChatClient  # type: ignore[import-n
 from azure.ai.agents.aio import AgentsClient  # type: ignore[import-not-found]
 from azure.identity.aio import DefaultAzureCredential  # type: ignore[import-not-found]
 
-from .tools import uc1, uc2, uc3, uc4, uc5, uc6
+from .tools import uc1, uc2, uc3, uc4, uc5, uc6, uc7
 
 log = logging.getLogger(__name__)
 
@@ -35,9 +35,12 @@ Tools you have:
 - classify_ticket / create_ticket / escalate_ticket → UC6 triage; ALWAYS escalate
   sensitive cases (harassment, employee relations, immigration, leave) to HR Partners
   without auto-answering.
+- draft_performance_narrative / submit_performance_narrative → UC7 grade-calibrated
+  performance narratives; ALWAYS show the draft to the manager and get explicit
+  approval before calling submit_performance_narrative.
 
 Be concise. Cite sources for policy answers. Confirm before submitting state-changing
-actions like time-off requests or escalations.
+actions like time-off requests, escalations, or performance narrative submissions.
 """
 
 
@@ -64,6 +67,8 @@ def build_agent() -> ChatAgent:
             uc6.classify_ticket,
             uc6.create_ticket,
             uc6.escalate_ticket,
+            uc7.draft_performance_narrative,
+            uc7.submit_performance_narrative,
         ],
     )
 
