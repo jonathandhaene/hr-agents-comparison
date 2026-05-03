@@ -371,7 +371,7 @@ For a European public-sector body starting in 2025, the answer is:
 > **Deploy Solution D (Mixed: Copilot Studio + Foundry) in `northeurope` or
 > `westeurope`, start with UC1/UC2/UC6-monitoring, put your HR backend behind
 > OpenAPI from commit one, and own your fine-tuning datasets — that combination
-> keeps every future door open without buying you into any vendor you are not
+> keeps every future door open without locking you into any vendor you are not
 > already committed to.**
 
 ---
