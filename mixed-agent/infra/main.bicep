@@ -222,7 +222,7 @@ resource mistral 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' =
   name: 'mistral-large'
   sku: { name: 'Standard', capacity: 10 }   // Mistral requires Standard, not GlobalStandard
   properties: { model: { format: 'MistralAI', name: 'Mistral-Large' } }
-  dependsOn: [ gpt ]   // serialise deployments to avoid Foundry conflicts
+  dependsOn: [ gpt ]   // serialize deployments to avoid Foundry conflicts
 }
 
 resource foundryDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
