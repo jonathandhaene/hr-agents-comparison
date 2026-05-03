@@ -503,10 +503,12 @@ def list_policies() -> list:
 
 @app.get("/policies/{name}")
 def get_policy(name: str) -> dict:
+    # Sanitise: strip directory components to prevent path traversal.
+    safe_name = Path(name).name
     for ext in (".md", ".txt"):
-        path = _POLICIES_DIR / f"{name}{ext}"
+        path = _POLICIES_DIR / f"{safe_name}{ext}"
         if path.exists():
-            return {"name": name, "content": path.read_text(encoding="utf-8")}
+            return {"name": safe_name, "content": path.read_text(encoding="utf-8")}
     raise HTTPException(status_code=404, detail="Policy not found")
 
 
