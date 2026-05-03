@@ -1,0 +1,111 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc7_performance_narrative
+  intent:
+    triggerQueries:
+      - Draft a performance narrative
+      - Write a performance review for
+      - Generate a narrative for the H1 review
+      - Help me write a calibrated narrative
+  actions:
+    # UC7 — Calibrated performance narrative generation
+    # Strategy:
+    # 1. Collect the employee name / id and optional 360 request id.
+    # 2. Collect manager's bullet notes in-conversation.
+    # 3. Call /narratives/draft via the Custom Connector → returns a draft
+    #    calibrated by the fine-tuned model to the employee's grade.
+    # 4. Show the draft and loop until the manager approves it.
+    # 5. Call /narratives/submit to record the approved text.
+    #
+    # Note: The Copilot Studio generative answers node uses the fine-tuned
+    # deployment when FOUNDRY_NARRATIVE_DEPLOYMENT is configured on the backend.
+    # HR makers can update the prompts in this topic without dev involvement;
+    # changing the fine-tuned model itself still requires dev sign-off.
+
+    - kind: TextInput
+      id: ask_employee
+      property: Topic.employeeId
+      prompt: "Who is this narrative for? Please enter their employee id or email."
+
+    - kind: TextInput
+      id: ask_cycle
+      property: Topic.cycleId
+      prompt: "Which review cycle? (e.g. H1-2026)"
+
+    - kind: TextInput
+      id: ask_notes
+      property: Topic.managerNotes
+      prompt: |
+        Share your bullet notes on this employee's performance this cycle.
+        Include key deliverables, behaviours, and any areas for growth.
+        (You can paste multiple lines — just send when ready.)
+
+    - kind: TextInput
+      id: ask_feedback_id
+      property: Topic.feedbackRequestId
+      prompt: "Do you have a 360 feedback request id to include? (e.g. FBR-XXXXXXXX — or type 'none')"
+
+    - kind: SetProperty
+      id: clear_if_none
+      property: Topic.feedbackRequestId
+      value: =if(lower(Topic.feedbackRequestId) == 'none', '', Topic.feedbackRequestId)
+
+    - kind: InvokeConnectorAction
+      id: draft_narrative
+      connectionReference: HR_API_Connection
+      operationId: draftNarrative
+      input:
+        binding:
+          employeeId: =Topic.employeeId
+          cycleId: =Topic.cycleId
+          managerNotes: =Topic.managerNotes
+          feedbackRequestId: =Topic.feedbackRequestId
+      output:
+        binding: { value: Topic.narrativeDraft }
+
+    - kind: SendActivity
+      id: show_draft
+      activity: |
+        Here is a draft narrative calibrated for **{Topic.narrativeDraft.grade}**:
+
+        ---
+        {Topic.narrativeDraft.draft}
+        ---
+
+        Does this reflect your assessment? You can ask me to adjust the tone,
+        specificity, or any section — or say **"approve"** to submit.
+
+    - kind: TextInput
+      id: manager_decision
+      property: Topic.managerFeedback
+      prompt: "Your feedback or 'approve':"
+
+    - kind: ConditionGroup
+      id: branch_on_approval
+      conditions:
+        - id: approved
+          condition: =lower(Topic.managerFeedback) == 'approve' or lower(Topic.managerFeedback) == 'approved' or lower(Topic.managerFeedback) == 'yes'
+          actions:
+            - kind: InvokeConnectorAction
+              id: submit_narrative
+              connectionReference: HR_API_Connection
+              operationId: submitNarrative
+              input:
+                binding:
+                  draftId: =Topic.narrativeDraft.draftId
+                  approvedText: =Topic.narrativeDraft.draft
+              output:
+                binding: { value: Topic.submission }
+            - kind: SendActivity
+              id: confirm_submission
+              activity: |
+                Submitted. Your narrative for **{Topic.employeeId}** (cycle **{Topic.cycleId}**)
+                has been recorded — submission id **{Topic.submission.submissionId}**.
+                HR Partner has received a copy for the calibration session.
+      elseActions:
+        - kind: SearchAndSummarizeContent
+          id: revise_narrative
+          userInput: =concat('Revise this performance narrative based on the following feedback: ', Topic.managerFeedback, '\n\nCurrent draft:\n', Topic.narrativeDraft.draft)
+          moderateResponse: true
+          enableGenerativeAnswers: true

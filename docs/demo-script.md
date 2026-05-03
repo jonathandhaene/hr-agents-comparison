@@ -1,6 +1,6 @@
 # Demo script — Contoso HR Concierge (three-way comparison)
 
-A 25-minute walkthrough that shows the *same six* HR use cases in **M365 Copilot Chat** (and Teams) across three independent implementations. Switch between agents in M365 Copilot Chat using the agent picker.
+A 25-minute walkthrough that shows the *same seven* HR use cases in **M365 Copilot Chat** (and Teams) across three independent implementations. Switch between agents in M365 Copilot Chat using the agent picker.
 
 > **Setup:** Sign in as Aarav Patel (E001), Beatrice Lambert (E010), Carlos Mendes (H001). Have the three agents pinned: "HR Concierge (M365 SDK)", "HR Concierge (Copilot Studio)", "HR Concierge (Foundry)".
 
@@ -66,6 +66,19 @@ All three agents:
 
 Talking point: same policy, three handoff implementations.
 
-## 7. Wrap (2 min)
+## 7. UC7 Performance narrative (3 min) — fine-tuning path
+
+As **Beatrice (E010)**:
+
+> "Draft a performance narrative for Aarav Patel for the H1 review."
+
+- **A (SDK)** calls the fine-tuned Foundry deployment directly via a tool call; returns a grade-calibrated draft.
+- **B (Copilot Studio)** topic collects manager notes, calls `/narratives/draft` via Custom Connector; generative answers node surfaces the result; manager approves in-chat.
+- **C (Foundry)** tool call → `draft_performance_narrative` → fine-tuned model; agent loops until manager types "approve" → `submit_performance_narrative`.
+- **D (Mixed)** topic delegates to the Foundry connected agent; same fine-tuned model as C; Copilot Studio topic unchanged when model is updated.
+
+Talking point: same equity control (grade-calibrated language), four implementations ranging from full code-control (A/C) to near-zero-code (B/D).
+
+## 8. Wrap (2 min)
 
 Open `docs/comparison.md` and `docs/decision-tree.md` side-by-side and align on the recommendation per scenario class.

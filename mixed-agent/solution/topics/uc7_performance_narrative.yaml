@@ -1,0 +1,123 @@
+kind: AdaptiveDialog
+beginDialog:
+  kind: OnRecognizedIntent
+  id: uc7_performance_narrative
+  intent:
+    triggerQueries:
+      - Draft a performance narrative
+      - Write a performance review for
+      - Generate a narrative for the H1 review
+      - Help me write a calibrated narrative
+  actions:
+    # UC7 — Calibrated performance narrative generation (Mixed-agent edition)
+    # Strategy:
+    # 1. Collect the employee id, cycle, optional 360 request id, and manager
+    #    bullet notes.
+    # 2. Delegate to the Foundry connected agent via the foundry-agent connector.
+    #    The connected agent calls draft_performance_narrative → fine-tuned model.
+    # 3. Present the draft; loop until the manager approves.
+    # 4. Call the Foundry connected agent again to submit, or invoke
+    #    submitNarrative directly on the HR API connector.
+    #
+    # The Copilot Studio topic remains unchanged when the fine-tuned model is
+    # updated — devs only touch the Foundry connected agent.
+
+    - kind: TextInput
+      id: ask_employee
+      property: Topic.employeeId
+      prompt: "Who is this narrative for? Please enter their employee id or email."
+
+    - kind: TextInput
+      id: ask_cycle
+      property: Topic.cycleId
+      prompt: "Which review cycle? (e.g. H1-2026)"
+
+    - kind: TextInput
+      id: ask_notes
+      property: Topic.managerNotes
+      prompt: |
+        Share your bullet notes on this employee's performance this cycle.
+        Include key deliverables, behaviours, and any areas for growth.
+        (You can paste multiple lines — just send when ready.)
+
+    - kind: TextInput
+      id: ask_feedback_id
+      property: Topic.feedbackRequestId
+      prompt: "Do you have a 360 feedback request id to include? (e.g. FBR-XXXXXXXX — or type 'none')"
+
+    - kind: SetProperty
+      id: clear_if_none
+      property: Topic.feedbackRequestId
+      value: =if(lower(Topic.feedbackRequestId) == 'none', '', Topic.feedbackRequestId)
+
+    # Delegate to Foundry connected agent for model-led narrative generation.
+    - kind: InvokeConnectorAction
+      id: invoke_foundry_draft
+      connectionReference: Foundry_Agent_Connection
+      operationId: invokeAgent
+      input:
+        binding:
+          agentName: ContosoHRMobilityAdvisor
+          input: =concat('Draft a performance narrative for ', Topic.employeeId, ' cycle ', Topic.cycleId, '. Manager notes: ', Topic.managerNotes, if(empty(Topic.feedbackRequestId), '', concat(' 360 request id: ', Topic.feedbackRequestId)))
+          context:
+            employeeId: =Topic.employeeId
+            cycleId: =Topic.cycleId
+            feedbackRequestId: =Topic.feedbackRequestId
+      output:
+        binding: { value: Topic.foundryReply }
+
+    - kind: SendActivity
+      id: show_draft
+      activity: |
+        {Topic.foundryReply.message}
+
+        ---
+        Does this reflect your assessment? Ask me to adjust anything — or say **"approve"** to submit.
+
+    - kind: TextInput
+      id: manager_decision
+      property: Topic.managerFeedback
+      prompt: "Your feedback or 'approve':"
+
+    - kind: ConditionGroup
+      id: branch_on_approval
+      conditions:
+        - id: approved
+          condition: =lower(Topic.managerFeedback) == 'approve' or lower(Topic.managerFeedback) == 'approved' or lower(Topic.managerFeedback) == 'yes'
+          actions:
+            - kind: InvokeConnectorAction
+              id: submit_narrative
+              connectionReference: HR_API_Connection
+              operationId: submitNarrative
+              input:
+                binding:
+                  draftId: =Topic.foundryReply.draftId
+                  approvedText: =Topic.foundryReply.draft
+              output:
+                binding: { value: Topic.submission }
+            - kind: SendActivity
+              id: confirm_submission
+              activity: |
+                Submitted. The narrative for **{Topic.employeeId}** (cycle **{Topic.cycleId}**)
+                has been recorded — submission id **{Topic.submission.submissionId}**.
+                HR Partner has received a copy for the calibration session.
+      elseActions:
+        - kind: InvokeConnectorAction
+          id: invoke_foundry_revise
+          connectionReference: Foundry_Agent_Connection
+          operationId: invokeAgent
+          input:
+            binding:
+              agentName: ContosoHRMobilityAdvisor
+              input: =concat('Revise the performance narrative based on: ', Topic.managerFeedback)
+              context:
+                employeeId: =Topic.employeeId
+          output:
+            binding: { value: Topic.foundryReply }
+        - kind: SendActivity
+          id: show_revised_draft
+          activity: |
+            {Topic.foundryReply.message}
+
+            ---
+            Does this work? Say **"approve"** to submit or give more feedback.

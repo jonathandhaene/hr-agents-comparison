@@ -2,7 +2,7 @@
 
 A composite story drawn from real engagements. The numbers, names, and use cases are illustrative, but the **shape of the curve** is what we see again and again. Read this before you commit to one of the four solutions in this repo.
 
-> TL;DR — most teams *think* they're picking a tech for today's six use cases. They're actually picking the **substrate** that the next twenty will be built on. The choices that matter on day one are the ones that are expensive to undo in year three.
+> TL;DR — most teams *think* they're picking a tech for today's seven use cases. They're actually picking the **substrate** that the next twenty will be built on. The choices that matter on day one are the ones that are expensive to undo in year three.
 
 ## The cast
 
@@ -22,7 +22,7 @@ Three solutions on the table — A (M365 Agents SDK), B (Copilot Studio), C (Fou
 
 ## Year 1 — "this is great, can we add…"
 
-**State of the estate:** 1 agent, 6 UCs, ~600 monthly active users, ~12k messages/mo.
+**State of the estate:** 1 agent, 7 UCs, ~600 monthly active users, ~12k messages/mo.
 
 **What gets added (typical):**
 - *"Can it read the new starter handbook?"* → second SharePoint library wired into generative answers. **Cost: a maker afternoon.**
@@ -119,7 +119,7 @@ Three solutions on the table — A (M365 Agents SDK), B (Copilot Studio), C (Fou
 | Year | Reading |
 |---|---|
 | 0 — picking a path | [docs/decision-tree.md](decision-tree.md), [docs/comparison.md](comparison.md) |
-| 1 — first six UCs | [docs/scenario.md](scenario.md), each solution's `README.md` |
+| 1 — first seven UCs | [docs/scenario.md](scenario.md), each solution's `README.md` |
 | 2 — adding model-led reasoning | [mixed-agent/README.md](../mixed-agent/README.md), [docs/architecture/mixed.md](architecture/mixed.md) |
 | 3 — operationalising | [docs/findings/](findings/) — read all four |
 | 5 — platforming | this document |

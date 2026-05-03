@@ -1,6 +1,6 @@
 # Capability comparison
 
-Three pure implementations of the same six HR use cases — plus one **recommended mix** — surfaced in **Microsoft 365 Copilot** and **Teams**. Solutions A/B/C deliberately avoid mixing technologies so each can be evaluated on its own. Solution D combines them where it pays off; see [decision-tree.md](decision-tree.md).
+Three pure implementations of the same seven HR use cases — plus one **recommended mix** — surfaced in **Microsoft 365 Copilot** and **Teams**. Solutions A/B/C deliberately avoid mixing technologies so each can be evaluated on its own. Solution D combines them where it pays off; see [decision-tree.md](decision-tree.md).
 
 Legend: ✅ first-class · ⚠️ possible but constrained · ❌ not supported / not idiomatic
 
@@ -14,7 +14,7 @@ Legend: ✅ first-class · ⚠️ possible but constrained · ❌ not supported 
 | UC4 Internal mobility | ✅ Tool call + LLM | ✅ Custom Connector + generative summary | ✅ Tool + LLM | ✅ **Foundry connected agent** (delegated from Copilot Studio) |
 | UC5 360° feedback | ✅ Fan-out via Graph + LLM summary | ✅ Outlook fan-out + Dataverse + generative summary | ✅ Tools + model summary | ✅ Open via flow (B); summary via Foundry connected agent (C) |
 | UC6 Triage & escalation | ✅ Sensitivity classifier + Graph 1:1 chat handoff | ✅ Built-in `TransferConversation` to HR queue | ⚠️ Tool-driven escalation; live human handoff requires custom integration | ✅ `TransferConversation` — same as B |
-| **UC7 Performance narrative** *(fine-tuning)* | ✅ Tool call → fine-tuned Foundry deployment; full control | ⚠️ Generative answers node can use a fine-tuned deployment but HR makers cannot trigger fine-tuning jobs — needs dev involvement | ✅ Fine-tuned model registered as secondary deployment in Foundry project | ✅ Fine-tuned generator in Foundry connected agent; Copilot Studio topics unchanged |
+| **UC7 Performance narrative** *(fine-tuning)* | ✅ Tool call → fine-tuned Foundry deployment; full control | ✅ Topic → Custom Connector `/narratives/draft` → fine-tuned deployment on backend; HR makers own the topic, devs own the model | ✅ Fine-tuned model registered as secondary deployment in Foundry project | ✅ Fine-tuned generator in Foundry connected agent; Copilot Studio topics unchanged |
 
 ## Engineering & operations
 
