@@ -32,6 +32,7 @@ See each solution's `README.md` for prerequisites.
 
 - [docs/scenario.md](./docs/scenario.md) — personas, use cases (including UC7), sample dialogues
 - [docs/comparison.md](./docs/comparison.md) — capability matrix per UC × technology
+- [docs/technique-comparison.md](./docs/technique-comparison.md) — prompting vs RAG vs fine-tuning explained without jargon, mapped to all seven use cases
 - [docs/fine-tuning.md](./docs/fine-tuning.md) — when fine-tuning adds value per UC, worked examples for UC6 triage classifier and UC7 performance narrative
 - [docs/fine-tuning-why.md](./docs/fine-tuning-why.md) — stakeholder guide: why fine-tuning must be considered (C-Level, HR, DPO & CISO, Legal)
 - [docs/public-sector-eu.md](./docs/public-sector-eu.md) — EU Public Sector sovereignty story (data residency, EU AI Act, NIS2, procurement)

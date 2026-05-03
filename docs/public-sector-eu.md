@@ -233,12 +233,157 @@ obligations include:
 
 ---
 
+---
+
+## Day-one recommendation and 10-year technology path for EU public sector
+
+After the theory and the checklists, the practical question is: *where do we start, what
+do we build first, and which technology choices will still be correct in 2035?*
+
+This section answers that question directly, for a European public-sector body deploying
+an HR agent on Microsoft 365 with EU data-residency requirements.
+
+---
+
+### Where to focus on day one
+
+Start with **three use cases** that deliver immediate value with the lowest regulatory
+risk and the shortest delivery timeline:
+
+| Day-one UC | Why it is low-risk to start | What "done" looks like |
+|---|---|---|
+| **UC1 — Policy & benefits Q&A** | No employment decision is made; the agent cites the document. EU AI Act Annex III §4 risk is low for pure information retrieval. No fine-tuning needed. | Civil servants get cited answers from the official policy library instead of calling HR. |
+| **UC2 — Time-off request with manager approval** | A human (the manager) approves every request. The agent facilitates workflow, not decisions. | Manager receives an actionable approval card; civil servant gets a confirmation. No autonomous actions. |
+| **UC6 — HR ticket triage (classifier only — human hands all cases)** | Day one: deploy the classifier in *monitoring mode* only. Every ticket still goes to HR Operations; the classifier adds a suggested priority label that HR reviews. No automation yet. | HR Operations gets a suggested label on every incoming ticket. You simultaneously build the labeled dataset needed for the fine-tuned classifier. |
+
+UC3, UC4, UC5, and UC7 follow in subsequent phases as the team and the dataset mature.
+Do not try to deliver all seven use cases at once — the fine-tuning datasets for UC5,
+UC6, and UC7 do not exist yet and take months to curate.
+
+---
+
+### The day-one tech stack
+
+The recommended starting configuration for EU public sector is **Solution D (Mixed)**:
+Copilot Studio as the conversational surface, Microsoft Foundry as the connected-agent
+back-end, Azure Functions Consumption for the HR API, and SharePoint as the knowledge
+source. All resources pinned to `northeurope` or `westeurope`.
+
+```
+Civil servant / manager
+        │
+        ▼
+Microsoft Teams (already in the M365 tenant)
+        │
+        ▼
+Copilot Studio agent                     ← HR makers own topics and flows
+  │   (topics, generative answers,
+  │    approval flows, human handoff)
+  │
+  ├── SharePoint generative answers      ← UC1 policy Q&A — no new infrastructure
+  │
+  ├── Agent Flow → Azure Functions       ← UC2 leave approval, UC6 ticket intake
+  │   (Consumption tier — scales to zero)
+  │
+  └── Microsoft Foundry connected agent  ← UC4 mobility, UC5 summary (Year 2 onwards)
+        (northeurope / westeurope,
+         Standard capacity — no GlobalStandard)
+```
+
+**Why this specific combination:**
+
+| Requirement | How the stack meets it |
+|---|---|
+| EU data residency (GDPR, national data-sovereignty laws) | Every resource — Copilot Studio, SharePoint, Dataverse, Foundry, Functions — runs inside the EU Data Boundary. No data crosses the EU boundary by default. |
+| Sovereignty of model inference | Foundry pinned to `northeurope` or `westeurope` with `Standard` (regional) capacity. No `GlobalStandard`. The authority controls the model deployment version and can freeze it. |
+| Human in the loop for consequential actions | Copilot Studio's `TransferConversation` for UC6 escalation; Power Automate Approvals for UC2. Both are first-class, no custom code. |
+| HR makers own day-to-day changes | Copilot Studio topics and generative-answer sources are managed by HR Operations, not the engineering team. Phrasing tweaks, new approval branches, new policy documents: zero engineering. |
+| IaC, auditability, version control | Bicep for Azure resources; `pac solution` export for Copilot Studio. Every state change is a Git commit. EU AI Act Art. 11 technical documentation is a `git log` away. |
+| No resting compute cost | Functions Consumption and Foundry pay-per-token mean that a public-sector body with irregular usage patterns pays for what it uses, not for what it reserves. |
+| Works-council / DPO / procurement readiness | The stack uses only services available through existing Microsoft framework agreements (Microsoft 365, Azure). No new vendor relationships, no new procurement processes beyond what is already in place. |
+
+---
+
+### The 10-year path — no rewrites, no lock-in
+
+The choices below are the ones that are expensive to undo. Make them correctly on day
+one and the architecture can evolve through five generations of AI models without a
+rewrite.
+
+| # | Choice | Why it lasts 10 years |
+|---|---|---|
+| 1 | **OpenAPI-first HR backend** — every endpoint described in OpenAPI, versioned with semver, checked into Git | The conversational surface (Copilot Studio today, whatever comes next) calls the same API. Swap the surface without rewriting the data plane. |
+| 2 | **Copilot Studio as the primary surface** | Microsoft's stated long-term investment direction for M365-integrated agents. HR makers can own changes. The surface is replaceable; the people-data plane is not. |
+| 3 | **Microsoft Foundry for model inference in EU regions** | Foundry is a managed service that absorbs model-version churn (GPT-4o → GPT-5 → whatever) without infrastructure changes. The authority keeps its own fine-tuned deployments and can pin versions. |
+| 4 | **Fine-tuned models for UC5, UC6, UC7 — datasets owned by the authority** | The fine-tuning datasets are the authority's intellectual property, stored in authority-controlled storage. A new foundation model release means a new fine-tuning job, not a new architecture. No dependency on a vendor's proprietary system prompt or a closed model. |
+| 5 | **SharePoint as the policy corpus** | Already inside the M365 tenant. Updated by policy owners with no IT involvement. Foundry's generative-answers grounding remains accurate as long as SharePoint is current. |
+| 6 | **Dataverse for HR-process state** | Already licensed through M365/Power Platform. HR makers can query Dataverse tables in Power BI, Power Apps, and flows without SQL or engineering involvement. EU-resident. |
+| 7 | **Managed identity everywhere, no API keys in connectors** | Key rotation incidents are eliminated. The identity posture is auditable and meets NIS2 requirements. Works across all five years of an evolving estate without re-architecture. |
+| 8 | **Evaluation harness in CI from day one** | Every model-version change, every fine-tuning cycle, every policy-corpus update is validated against a known gold set before deployment. EU AI Act Art. 9 (risk management) and Art. 26(5) (monitoring) are operationalised by default. |
+
+#### What this stack does *not* lock you into
+
+- **Not locked into a specific model version.** Fine-tuned models are registered
+  deployments in your Foundry project. Upgrade the base model, re-run the fine-tuning
+  job, promote the new deployment.
+- **Not locked into Copilot Studio forever.** Because the HR API is OpenAPI-first, a
+  future surface (voice agent, mobile app, a different chat platform) calls the same
+  endpoints.
+- **Not locked into a commercial agent platform beyond M365.** Copilot Studio is included
+  in M365 E3/E5 licenses most public-sector bodies already hold. There is no incremental
+  per-agent commercial dependency.
+- **Not locked into proprietary embedding indexes.** SharePoint generative answers and
+  Foundry File Search are both replaceable with AI Search (and AI Search with any
+  OpenAI-compatible vector store) without touching the conversational layer.
+
+---
+
+### Delivery sequence — from day one to year three
+
+```
+Quarter 1   UC1 (policy Q&A via SharePoint generative answers)
+            UC2 (time-off via Approvals connector)
+            UC6 — classifier in monitoring mode; every ticket still handled by HR
+            Fine-tuning dataset curation begins (UC6 ticket labels, UC5 summaries)
+
+Quarter 2   UC6 — fine-tuned classifier deployed; auto-routing for LOW/MEDIUM tickets;
+            HARASSMENT/CRITICAL and ER/HIGH always escalated to HR Partner
+            DPIA filed; works-council consultation started (if required nationally)
+
+Quarter 3   UC3 (onboarding orchestration via Dataverse + scheduled flows)
+            UC4 (internal mobility — Foundry connected agent for job-matching + pitch)
+
+Year 2      UC5 (360° feedback — fine-tuned summary model aligned to first review cycle)
+            UC7 (performance narrative — fine-tuned model on manager-approved narratives)
+            Agent registry; per-UC cost attribution; evaluation harness with full coverage
+
+Year 3      Agent estate (HR, IT, Finance-lite) sharing OpenAPI people-data plane
+            Voice channel (if required by the authority's service model)
+            Formal MLOPS cycle: dataset refresh, eval gate, promoted deployment
+```
+
+---
+
+### The one-sentence answer
+
+For a European public-sector body starting in 2025, the answer is:
+
+> **Deploy Solution D (Mixed: Copilot Studio + Foundry) in `northeurope` or
+> `westeurope`, start with UC1/UC2/UC6-monitoring, put your HR backend behind
+> OpenAPI from commit one, and own your fine-tuning datasets — that combination
+> keeps every future door open without locking you into any vendor you are not
+> already committed to.**
+
+---
+
 ## Cross-references
 
 | Topic | Document |
 |---|---|
+| Prompting vs RAG vs fine-tuning explained | [docs/technique-comparison.md](technique-comparison.md) |
 | Fine-tuning rationale by stakeholder | [docs/fine-tuning-why.md](fine-tuning-why.md) |
 | Fine-tuning technical details | [docs/fine-tuning.md](fine-tuning.md) |
 | IaC for all four solutions | `*/infra/main.bicep` in each solution folder |
 | Responsible AI baseline | [README.md](../README.md) — Responsible AI section |
 | Architecture diagrams | [docs/architecture/](architecture/) |
+| 10-year evolution timeline | [docs/timeline.md](timeline.md) |
