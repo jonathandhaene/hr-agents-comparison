@@ -15,6 +15,7 @@
 | `performance_narratives.json` | UC7 fine-tuning | HR-approved performance narrative examples (L3–L6, two functions) — used as fine-tuning training examples |
 | `competency_framework.json` | UC7 fine-tuning | Contoso competency descriptors per grade level (L3–L7) — used as system-prompt grounding for the fine-tuned narrative model |
 | `policies/*.md` | UC1 RAG corpora (all solutions) | HR handbook, PTO policy, benefits, code of conduct |
+| `fine-tuning/` | Microsoft Foundry fine-tuning jobs | JSONL training datasets for all 7 use cases; see `fine-tuning/README.md` |
 
 ## Persona IDs
 
