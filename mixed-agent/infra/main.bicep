@@ -3,7 +3,7 @@
 //
 // Resources (Azure side only — Power Platform side is the Copilot Studio solution):
 //   - Microsoft Foundry account (kind=AIServices) + project for the connected advisor agent
-//   - Azure OpenAI gpt-4o GlobalStandard (low capacity)
+//   - Microsoft Foundry gpt-4o GlobalStandard (low capacity)
 //   - Azure Functions Consumption plan + Linux Function App (Python v2)
 //     hosting the HR API as the connector backend
 //   - Storage account (required by Functions) — identity-based (no shared keys)
@@ -18,7 +18,7 @@
 // Deliberately NOT included: APIM, Container Apps, Cosmos DB, Azure AI Search.
 // All durable state lives in-memory in the demo Function App (see README).
 //
-// Cost note (illustrative): Functions Consumption + AOAI gpt-4o pay-per-token
+// Cost note (illustrative): Functions Consumption + Foundry gpt-4o pay-per-token
 // is the cheapest tier we ship. Tear down the resource group when not in use.
 
 targetScope = 'resourceGroup'
@@ -31,8 +31,8 @@ param namePrefix string = 'hrmix'
 @description('Azure region.')
 param location string = resourceGroup().location
 
-@description('AOAI deployment name used by the Foundry connected agent.')
-param openAiDeployment string = 'gpt-4o'
+@description('Microsoft Foundry model deployment name used by the connected agent.')
+param foundryDeployment string = 'gpt-4o'
 
 @description('Tags applied to every resource.')
 param tags object = {
@@ -177,7 +177,7 @@ resource funcDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   }
 }
 
-// ─────────────────────────── Foundry + AOAI ────────────────────────────
+// ─────────────────────────── Microsoft Foundry ─────────────────────────
 
 resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   name: '${namePrefix}-fdy-${uniq}'
@@ -207,7 +207,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
 
 resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: foundry
-  name: openAiDeployment
+  name: foundryDeployment
   sku: { name: 'GlobalStandard', capacity: 10 } // low capacity — only UC4/UC5 calls
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
 }
@@ -222,15 +222,15 @@ resource foundryDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' 
   }
 }
 
-// Functions UAMI → Foundry/AOAI (Cognitive Services OpenAI User)
-var aoaiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-resource aoaiRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(foundry.id, identity.id, aoaiUserRoleId)
+// Functions UAMI → Foundry (Cognitive Services OpenAI User)
+var foundryUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+resource foundryRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(foundry.id, identity.id, foundryUserRoleId)
   scope: foundry
   properties: {
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aoaiUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
   }
 }
 

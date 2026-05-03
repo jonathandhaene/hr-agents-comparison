@@ -18,7 +18,7 @@ m365-agent/
 │  └─ skills/uc{1..6}.py # One module per use case
 ├─ backend/              # Dedicated FastAPI mock HR API
 ├─ appPackage/           # Teams/M365 manifest
-├─ infra/main.bicep      # Container Apps, Bot, AOAI, AI Search, Cosmos, KV
+├─ infra/main.bicep      # Container Apps, Bot, Foundry, AI Search, Cosmos, KV
 ├─ tests/
 ├─ teamsapp.yml          # Microsoft 365 Agents Toolkit lifecycle
 └─ Makefile
@@ -46,7 +46,7 @@ GitHub Actions workflow: `.github/workflows/m365-agent.yml`. It uses OIDC to Azu
 
 | UC | Module | How |
 |---|---|---|
-| UC1 Policy Q&A | `skills/uc1_policy_qa.py` | Azure AI Search retrieval + Azure OpenAI generation |
+| UC1 Policy Q&A | `skills/uc1_policy_qa.py` | Azure AI Search retrieval + Microsoft Foundry generation |
 | UC2 Time-off approval | `skills/uc2_time_off.py` | Adaptive Card + proactive message via stored conversation reference |
 | UC3 Onboarding | `skills/uc3_onboarding.py` | Long-running plan + scheduled tick job |
 | UC4 Mobility | `skills/uc4_mobility.py` | Profile-aware tool call + LLM-drafted pitch |
@@ -60,7 +60,7 @@ GitHub Actions workflow: `.github/workflows/m365-agent.yml`. It uses OIDC to Azu
 - Python 3.11.
 - A Microsoft Entra app registered for federated credentials (used by GitHub OIDC).
 - M365 tenant with permission to side-load Teams apps and a configured Microsoft 365 Agents Toolkit project.
-- Azure OpenAI access in the chosen region (request via the AOAI access form if your tenant doesn't have it).
+- Microsoft Foundry access in the chosen region.
 
 ## Responsible AI
 

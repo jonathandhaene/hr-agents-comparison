@@ -11,7 +11,7 @@ Notes:
     `_LEAVE_REQUESTS`, `_ONBOARDING_PLANS`, `_FEEDBACK_REQUESTS`, `_TICKETS`
     to Cosmos / Dataverse.
 - The ticket classifier is a deterministic keyword stub so the demo runs
-    offline. For production, replace `_classify_text` with an Azure OpenAI
+    offline. For production, replace `_classify_text` with a Microsoft Foundry
     call backed by Azure AI Content Safety; default to escalation on
     uncertainty.
 """

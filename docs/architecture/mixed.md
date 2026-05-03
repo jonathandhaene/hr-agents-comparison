@@ -19,7 +19,7 @@ flowchart LR
   fdyconn["Custom Connector — Foundry agent"]
   fn["Azure Functions Consumption — Python HR API"]
   fdy["Foundry hosted agent — ContosoHRMobilityAdvisor"]
-  aoai["Azure OpenAI gpt-4o GlobalStandard"]
+  fdy_model["Microsoft Foundry gpt-4o GlobalStandard"]
   hrqueue["Teams HR Partner queue"]
 
   user --> copilot
@@ -37,7 +37,7 @@ flowchart LR
   flows --> hrconn
   hrconn --> fn
   fdyconn --> fdy
-  fdy --> aoai
+  fdy --> fdy_model
   fdy --> fn
 ```
 

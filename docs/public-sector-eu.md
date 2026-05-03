@@ -60,13 +60,13 @@ the EU and are covered by Microsoft's **EU Data Boundary** commitment.
 param location string = 'northeurope'  // or 'westeurope'
 ```
 
-**Do not use** `globalstandard` capacity for Azure OpenAI deployments in production.
+**Do not use** `globalstandard` capacity for Microsoft Foundry deployments in production.
 Use regional standard capacity:
 
 ```bicep
 resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: foundry
-  name: openAiDeployment
+  name: foundryDeployment
   sku: { name: 'Standard', capacity: 30 }          // Regional, not GlobalStandard
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
 }
@@ -155,12 +155,12 @@ When a fine-tuning job runs in Microsoft Foundry, the training data is temporari
 processed by Microsoft's training infrastructure. The following contractual protections apply:
 
 - **Data Processing Agreement (DPA):** Microsoft's standard online services DPA covers
-  Azure OpenAI fine-tuning. For EU public sector, request the EU public-sector addendum.
+  Microsoft Foundry fine-tuning. For EU public sector, request the EU public-sector addendum.
 - **EU Data Boundary:** Training jobs submitted to EU-region Foundry accounts stay within
   the EU boundary. Microsoft's [EU Data Boundary documentation](https://www.microsoft.com/en-us/trust-center/privacy/european-data-boundary-eudb)
   confirms this for Azure AI Services.
 - **No training on customer data:** Microsoft does not use customer fine-tuning data to
-  train foundation models. This is covered in the [Azure OpenAI data privacy documentation](https://learn.microsoft.com/azure/ai-services/openai/concepts/data-privacy).
+  train foundation models. This is covered in the [Microsoft Foundry data privacy documentation](https://learn.microsoft.com/azure/ai-services/openai/concepts/data-privacy).
 
 ---
 
@@ -192,7 +192,7 @@ obligations include:
 > buyers.
 >
 > All AI inference (conversation, ticket triage, feedback summary, performance narrative)
-> runs on **regional Azure OpenAI deployments** — not on globally distributed capacity.
+> runs on **regional Microsoft Foundry deployments** — not on globally distributed capacity.
 > For the highest-sensitivity use cases (UC6 harassment triage, UC7 performance narratives),
 > a **fine-tuned model** is used rather than a base model. The fine-tuning training data
 > is stored in the deploying authority's own storage account inside the EU boundary; it
@@ -218,7 +218,7 @@ obligations include:
 ## Checklist for EU public-sector go-live
 
 - [ ] All Azure resources deployed to `northeurope` or `westeurope`.
-- [ ] Azure OpenAI deployments use `Standard` (regional) capacity, not `GlobalStandard`.
+- [ ] Microsoft Foundry deployments use `Standard` (regional) capacity, not `GlobalStandard`.
 - [ ] Private endpoints configured for Foundry, Storage, Cosmos, and AI Search.
 - [ ] Log Analytics retention set to meet the applicable sectoral law.
 - [ ] Separate Log Analytics workspace for UC6 (grievance/harassment) traces, with restricted access.

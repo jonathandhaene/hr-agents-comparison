@@ -19,7 +19,7 @@ foundry-agent/
 ├─ backend/                   # Dedicated FastAPI mock HR API
 ├─ project/agent.yaml         # Foundry hosted-agent definition (file_search + openapi tools)
 ├─ search/                    # AI Search index + OpenAPI for the agent
-├─ infra/main.bicep           # Foundry account + project + AOAI + Search + Container App + Cosmos
+├─ infra/main.bicep           # Foundry account + project + Search + Container App + Cosmos
 ├─ tests/
 └─ Makefile
 ```
@@ -38,7 +38,7 @@ In dev, the agent runs as a local Python process; in production, the same instru
 
 GitHub Actions workflow: `.github/workflows/foundry.yml`. It uses OIDC + Foundry's CLI to:
 1. Build and push the backend image to ACR.
-2. Deploy `infra/main.bicep` (Foundry account + project + AOAI + Search + Cosmos + Container Apps).
+2. Deploy `infra/main.bicep` (Foundry account + project + Search + Cosmos + Container Apps).
 3. Seed the Search index from `shared-fixtures/policies/`.
 4. Run `az ai-foundry agent create --file project/agent.yaml`.
 5. **Publish the agent to M365 Copilot Chat and Teams** via Foundry's publish API.

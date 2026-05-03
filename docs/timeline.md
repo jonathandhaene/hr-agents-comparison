@@ -98,7 +98,7 @@ Three solutions on the table — A (M365 Agents SDK), B (Copilot Studio), C (Fou
 
 **What gets added:**
 - An **internal developer platform** for agents — golden-path templates, shared evaluation pipelines, shared tool registry, shared observability.
-- **Multi-region** for non-EU subsidiaries. Foundry + AOAI regional pinning. Power Platform geo selection (set once, expensive to undo).
+- **Multi-region** for non-EU subsidiaries. Foundry regional pinning. Power Platform geo selection (set once, expensive to undo).
 - **Audit-grade traceability** — every tool call, every grounding, every model output stored for X years per a retention policy.
 - **A formal tools team** (3–5 people) producing reusable, versioned, OpenAPI-described tools. The HR people-data plane is one of many.
 

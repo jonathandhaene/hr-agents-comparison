@@ -44,7 +44,7 @@ mixed-agent/
 │  ├─ function_app.py            # Single function app exposing /api/* HTTP triggers
 │  ├─ host.json
 │  └─ requirements.txt
-├─ infra/main.bicep              # Functions (Consumption) + Foundry account+project + AOAI
+├─ infra/main.bicep              # Functions (Consumption) + Foundry account+project
 ├─ Makefile
 └─ tests/test_backend.py
 ```
@@ -60,7 +60,7 @@ mixed-agent/
 | Dataverse | per env | UC3/UC5/UC6 state |
 | Azure Functions (Consumption) | **\$0 idle** | small HR API; scales to zero |
 | Microsoft Foundry account+project | small | pay per token |
-| Azure OpenAI (gpt-4o GlobalStandard) | per token | only UC4 + UC5 calls |
+| Microsoft Foundry (gpt-4o GlobalStandard) | per token | only UC4 + UC5 calls |
 | App Insights + Log Analytics | small | shared workspace |
 
 Compare with Solution A's Container Apps (min 1 replica = constant) + Cosmos serverless RU floor + AI Search Basic (≈ €70/mo always-on) and Solution B's APIM Consumption + Container Apps backend.
@@ -78,7 +78,7 @@ make test
 GitHub Actions workflow: [.github/workflows/mixed.yml](../.github/workflows/mixed.yml).
 
 1. Build & deploy the Azure Functions backend (zip deploy).
-2. Deploy `infra/main.bicep` (Functions + Foundry + AOAI).
+2. Deploy `infra/main.bicep` (Functions + Foundry).
 3. `az ai-foundry agent create --file foundry/project/agent.yaml` (creates the connected agent).
 4. `pac solution pack` + `pac solution import` (Copilot Studio).
 5. Wire the Foundry connector's host to the deployed agent endpoint.

@@ -49,7 +49,7 @@ All three return ranked matches and a short pitch. Show the difference in pitch 
 As **Beatrice**: *"Open a 360 feedback request for Liam (E003)."*
 Then a few minutes later: *"Summarize FBR-XXXXXXXX."*
 
-Highlight that A and C synthesise via Azure OpenAI, B via Copilot Studio's generative summary.
+Highlight that A and C synthesise via Microsoft Foundry, B via Copilot Studio's generative summary.
 
 ## 6. UC6 Triage & escalation (4 min)
 

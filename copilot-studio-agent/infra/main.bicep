@@ -200,7 +200,7 @@ resource apimDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
 // The Copilot Studio agent uses Power Platform for its conversational surface, but
 // fine-tuning jobs (UC6 triage classifier, UC7 performance narrative) and safety
 // evaluations must run in a Microsoft Foundry project. Once a fine-tuned deployment
-// is registered here, update the AOAI resource selector in Copilot Studio's
+// is registered here, update the Foundry resource selector in Copilot Studio's
 // Generative Answers node to point at this endpoint.
 
 resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
@@ -212,6 +212,7 @@ resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   identity: { type: 'SystemAssigned' }
   properties: {
     customSubDomainName: '${namePrefix}-fdy-${uniq}'
+    allowProjectManagement: true
     disableLocalAuth: true
     publicNetworkAccess: 'Enabled' // demo only.
   }
@@ -240,14 +241,14 @@ resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
 
 // Backend UAMI → Foundry (Cognitive Services OpenAI User) so the backend can
 // call the fine-tuned classifier deployment from the Functions/Container Apps tier.
-var aoaiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+var foundryUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
 resource foundryUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(foundry.id, identity.id, aoaiUserRoleId)
+  name: guid(foundry.id, identity.id, foundryUserRoleId)
   scope: foundry
   properties: {
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aoaiUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
   }
 }
 

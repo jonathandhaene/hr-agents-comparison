@@ -61,12 +61,12 @@ All three solutions handle employee data and HR policy. Anyone running this in p
 - **Ground every generative answer** in retrieved context (policies, employee record, ticket history) and surface citations to the user. UC1 enforces this; do not loosen it for other UCs.
 - **Never auto-action sensitive cases.** UC6 routes harassment / discrimination / mental-health signals straight to a human HR partner — that classifier and the human-handoff path are mandatory, not optional.
 - **Mask PII in logs and traces.** Application Insights, Foundry traces, and Dataverse audit must not contain free-text descriptions of grievances.
-- **Respect data residency.** Pin Azure OpenAI and Microsoft Foundry to a region your HR data is allowed to leave. Use `GlobalStandard` only after legal sign-off; otherwise pin to a regional deployment.
+- **Respect data residency.** Pin Microsoft Foundry to a region your HR data is allowed to leave. Use `GlobalStandard` only after legal sign-off; otherwise pin to a regional deployment.
 - **Run the Microsoft Foundry safety evaluators** (Groundedness, Hate & Unfairness, Self-harm, Violence, Sexual, Protected Material, Indirect Attack) on a representative eval set before any release.
 - **Keep humans in the loop** on irreversible actions (UC2 leave approval, UC3 access provisioning, UC6 escalation) — the workflows in this repo always do.
 - **Disclose AI use** to employees and let them request a human alternative.
 
-See Microsoft's [Responsible AI Standard](https://aka.ms/RAIStandard) and [Transparency Notes for Azure OpenAI](https://learn.microsoft.com/legal/cognitive-services/openai/transparency-note).
+See Microsoft's [Responsible AI Standard](https://aka.ms/RAIStandard) and [Transparency Notes for Microsoft Foundry](https://learn.microsoft.com/legal/cognitive-services/openai/transparency-note).
 
 ## License
 

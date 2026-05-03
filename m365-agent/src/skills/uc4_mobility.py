@@ -6,8 +6,8 @@ import os
 from azure.identity.aio import DefaultAzureCredential, get_bearer_token_provider  # type: ignore[import-not-found]
 from openai import AsyncAzureOpenAI
 
-AOAI_ENDPOINT = os.environ.get("AOAI_ENDPOINT", "")
-AOAI_DEPLOYMENT = os.environ.get("AOAI_DEPLOYMENT", "gpt-4o")
+FOUNDRY_ENDPOINT = os.environ.get("FOUNDRY_ENDPOINT", "")
+FOUNDRY_DEPLOYMENT = os.environ.get("FOUNDRY_DEPLOYMENT", "gpt-4o")
 
 
 async def handle(turn, hr, state) -> None:
@@ -39,13 +39,13 @@ def _extract_interests(text: str) -> list[str]:
 async def _draft_pitch(employee: dict, job: dict, interests: list[str]) -> str:
     client = AsyncAzureOpenAI(
         api_version="2024-10-21",
-        azure_endpoint=AOAI_ENDPOINT,
+        azure_endpoint=FOUNDRY_ENDPOINT,
         azure_ad_token_provider=get_bearer_token_provider(
             DefaultAzureCredential(), "https://cognitiveservices.azure.com/.default"
         ),
     )
     completion = await client.chat.completions.create(
-        model=AOAI_DEPLOYMENT,
+        model=FOUNDRY_DEPLOYMENT,
         messages=[
             {"role": "system", "content": "You write short, candid internal-mobility pitches (max 90 words)."},
             {"role": "user", "content": (

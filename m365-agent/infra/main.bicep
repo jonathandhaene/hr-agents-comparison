@@ -5,7 +5,7 @@
 //   - Container Apps Environment + 2 apps (agent + backend)
 //   - Azure Bot service (Teams + M365 Copilot channels)
 //   - Microsoft Foundry account (CognitiveServices kind=AIServices) + project
-//     so the agent's AOAI calls go through the Foundry endpoint and evals
+//     so the agent's model calls go through the Foundry endpoint and evals
 //     (Groundedness, Safety) can be run inside the Foundry project
 //   - Azure AI Search (RBAC only, key auth disabled)
 //   - Cosmos DB (SQL API, key auth disabled, RBAC for the agent UAMI)
@@ -23,7 +23,7 @@
 // be torn down independently of the other solutions.
 //
 // Cost note (illustrative): Always-on Container Apps + Cosmos serverless +
-// AOAI gpt-4o is the most expensive of the four solutions. Tear down the
+// Foundry gpt-4o is the most expensive of the four solutions. Tear down the
 // resource group when not in use.
 
 targetScope = 'resourceGroup'
@@ -41,8 +41,8 @@ param location string = resourceGroup().location
 @description('Microsoft Entra app id used for the bot registration.')
 param botAppId string
 
-@description('Azure OpenAI deployment to call from the agent.')
-param openAiDeployment string = 'gpt-4o'
+@description('Microsoft Foundry model deployment to call from the agent.')
+param foundryDeployment string = 'gpt-4o'
 
 @description('Tags applied to every resource.')
 param tags object = {
@@ -239,7 +239,7 @@ resource searchDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' =
 }
 
 // ─────────────── Microsoft Foundry account + project ────────────────────
-// Using kind=AIServices gives the single Foundry endpoint that unifies AOAI,
+// Using kind=AIServices gives the single Foundry endpoint that unifies
 // evaluations, fine-tuning jobs, and the agents runtime under one project.
 
 resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
@@ -251,6 +251,7 @@ resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
   identity: { type: 'SystemAssigned' }
   properties: {
     customSubDomainName: '${namePrefix}-fdy-${uniq}'
+    allowProjectManagement: true
     disableLocalAuth: true
     publicNetworkAccess: 'Enabled' // demo only.
   }
@@ -271,21 +272,21 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
 
 resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: foundry
-  name: openAiDeployment
+  name: foundryDeployment
   sku: { name: 'GlobalStandard', capacity: 30 }
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
 }
 
 // Agent UAMI → Foundry account (Cognitive Services OpenAI User).
 // The project MI inherits the same scope via its own system identity.
-var aoaiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-resource aoaiUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(foundry.id, identity.id, aoaiUserRoleId)
+var foundryUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+resource foundryUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(foundry.id, identity.id, foundryUserRoleId)
   scope: foundry
   properties: {
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aoaiUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
   }
 }
 
@@ -350,7 +351,7 @@ resource agent 'Microsoft.App/containerApps@2024-03-01' = {
   location: location
   tags: tags
   identity: { type: 'UserAssigned', userAssignedIdentities: { '${identity.id}': {} } }
-  dependsOn: [ acrPull, cosmosRoleAssignment, searchReader, aoaiUser ]
+  dependsOn: [ acrPull, cosmosRoleAssignment, searchReader, foundryUser ]
   properties: {
     managedEnvironmentId: cae.id
     configuration: {
@@ -369,8 +370,8 @@ resource agent 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'COSMOS_CONTAINER', value: 'state' }
             { name: 'SEARCH_ENDPOINT', value: 'https://${search.name}.search.windows.net' }
             { name: 'SEARCH_INDEX', value: 'hr-policies' }
-            { name: 'AOAI_ENDPOINT', value: foundry.properties.endpoint }
-            { name: 'AOAI_DEPLOYMENT', value: openAiDeployment }
+            { name: 'FOUNDRY_ENDPOINT', value: foundry.properties.endpoint }
+            { name: 'FOUNDRY_DEPLOYMENT', value: foundryDeployment }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
             { name: 'AZURE_CLIENT_ID', value: identity.properties.clientId }
           ]
