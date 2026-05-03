@@ -15,7 +15,7 @@ The fourth folder ([`mixed-agent/`](./mixed-agent/)) is the recommended **produc
 
 ## Scenario in one paragraph
 
-Contoso Ltd (5,000 employees) wants an HR Concierge for **Employees, Managers, HR Partners, IT/Buddies**. The same six use cases (policy Q&A, time-off approval, onboarding orchestration, internal mobility, 360° feedback, ticket triage) are implemented in all three technologies. See [docs/scenario.md](./docs/scenario.md).
+Contoso Ltd (5,000 employees) wants an HR Concierge for **Employees, Managers, HR Partners, IT/Buddies**. The same six use cases (policy Q&A, time-off approval, onboarding orchestration, internal mobility, 360° feedback, ticket triage) are implemented in all three technologies. A seventh use case — **calibrated performance narrative generation** — is documented as a fine-tuning-dependent extension. See [docs/scenario.md](./docs/scenario.md) and [docs/fine-tuning.md](./docs/fine-tuning.md).
 
 ## Quickstart
 
@@ -30,8 +30,9 @@ See each solution's `README.md` for prerequisites.
 
 ## Documentation
 
-- [docs/scenario.md](./docs/scenario.md) — personas, use cases, sample dialogues
+- [docs/scenario.md](./docs/scenario.md) — personas, use cases (including UC7), sample dialogues
 - [docs/comparison.md](./docs/comparison.md) — capability matrix per UC × technology
+- [docs/fine-tuning.md](./docs/fine-tuning.md) — when fine-tuning adds value per UC, worked examples for UC6 triage classifier and UC7 performance narrative
 - [docs/decision-tree.md](./docs/decision-tree.md) — when to choose what (incl. mixing guidance)
 - [docs/timeline.md](./docs/timeline.md) — how an HR-agent estate evolves over 1/2/3/5 years and how that should shape your day-one choices
 - [docs/architecture/](./docs/architecture/) — Mermaid diagrams per solution

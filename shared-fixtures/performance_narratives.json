@@ -1,0 +1,58 @@
+{
+  "narratives": [
+    {
+      "id": "N-001",
+      "employee_grade": "L3",
+      "function": "Engineering",
+      "cycle": "H2 2025",
+      "narrative": "Alex has made solid progress in their first year, consistently delivering assigned tasks on time and demonstrating a growing ability to debug and fix issues independently. Peer feedback highlights strong willingness to ask questions and incorporate code-review feedback. For H1, the focus area is developing more proactive communication with stakeholders when blockers arise, rather than waiting for stand-up to surface them.",
+      "manager_approved": true,
+      "hr_legal_reviewed": true
+    },
+    {
+      "id": "N-002",
+      "employee_grade": "L4",
+      "function": "Engineering",
+      "cycle": "H2 2025",
+      "narrative": "Priya delivered the Search relevance improvements that shipped in the Q3 release, demonstrating solid end-to-end ownership from design through rollout. Peer feedback notes strong technical depth and good cross-team communication. The area to grow into L5 is increasing scope: Priya's impact is consistently high within her own squad but there are opportunities to share patterns and mentor L3 colleagues more deliberately.",
+      "manager_approved": true,
+      "hr_legal_reviewed": true
+    },
+    {
+      "id": "N-003",
+      "employee_grade": "L5",
+      "function": "Engineering",
+      "cycle": "H1 2025",
+      "narrative": "Aarav delivered the Payments v3 API three weeks ahead of schedule, unblocking the Q2 merchant launch and directly contributing to significant new payment volume. Peer feedback consistently highlights his ability to simplify complex technical trade-offs for non-engineering partners, which is a key L5 indicator. One area of focus for H2: extending his impact beyond the immediate team by sharing architectural patterns and participating in cross-org design reviews.",
+      "manager_approved": true,
+      "hr_legal_reviewed": true
+    },
+    {
+      "id": "N-004",
+      "employee_grade": "L6",
+      "function": "Engineering",
+      "cycle": "H1 2025",
+      "narrative": "Chen drove the platform migration that reduced P99 latency by 40% and is now a dependency for four downstream product teams. Her influence is clearly operating beyond her immediate org: she initiated and ran the quarterly API-design forum, which three teams cite as the primary place they resolve cross-cutting questions. The calibration committee noted that her work on the shared observability layer is L7 in impact; the remaining step for a promotion case is demonstrating consistent L7 scope on a second, independent initiative.",
+      "manager_approved": true,
+      "hr_legal_reviewed": true
+    },
+    {
+      "id": "N-005",
+      "employee_grade": "L3",
+      "function": "People Operations",
+      "cycle": "H2 2025",
+      "narrative": "Jordan has ramped quickly into the benefits-administration process and handled the open-enrollment period with minimal escalations. Peer and partner feedback highlights reliability and clear written communication. The growth area for H1 is expanding comfort with ambiguous requests — Jordan currently escalates borderline cases to senior HR Operations partners; the goal is to develop a clearer personal decision framework to handle a broader share independently.",
+      "manager_approved": true,
+      "hr_legal_reviewed": true
+    },
+    {
+      "id": "N-006",
+      "employee_grade": "L5",
+      "function": "People Operations",
+      "cycle": "H1 2025",
+      "narrative": "Fatima redesigned the onboarding programme from a three-week paper checklist to a fully tracked digital flow, reducing time-to-productivity for new hires by an average of six days. HR partner feedback highlights her ability to manage multiple stakeholder groups — IT, Facilities, Hiring Managers — without creating coordination overhead. For H2, the opportunity is to use the data now available from the digital flow to propose evidence-based improvements to the onboarding content itself.",
+      "manager_approved": true,
+      "hr_legal_reviewed": true
+    }
+  ]
+}

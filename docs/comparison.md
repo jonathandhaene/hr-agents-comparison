@@ -14,6 +14,7 @@ Legend: ✅ first-class · ⚠️ possible but constrained · ❌ not supported 
 | UC4 Internal mobility | ✅ Tool call + LLM | ✅ Custom Connector + generative summary | ✅ Tool + LLM | ✅ **Foundry connected agent** (delegated from Copilot Studio) |
 | UC5 360° feedback | ✅ Fan-out via Graph + LLM summary | ✅ Outlook fan-out + Dataverse + generative summary | ✅ Tools + model summary | ✅ Open via flow (B); summary via Foundry connected agent (C) |
 | UC6 Triage & escalation | ✅ Sensitivity classifier + Graph 1:1 chat handoff | ✅ Built-in `TransferConversation` to HR queue | ⚠️ Tool-driven escalation; live human handoff requires custom integration | ✅ `TransferConversation` — same as B |
+| **UC7 Performance narrative** *(fine-tuning)* | ✅ Tool call → fine-tuned AOAI deployment; full control | ⚠️ Generative answers node can use a fine-tuned deployment but HR makers cannot trigger fine-tuning jobs — needs dev involvement | ✅ Fine-tuned model registered as secondary deployment in Foundry project | ✅ Fine-tuned generator in Foundry connected agent; Copilot Studio topics unchanged |
 
 ## Engineering & operations
 
@@ -42,6 +43,22 @@ Legend: ✅ first-class · ⚠️ possible but constrained · ❌ not supported 
 - **B (Copilot Studio)** — fastest delivery, citizen-developer-friendly, heavy use of approvals/SharePoint/Dataverse, tight M365 integration.
 - **C (Foundry hosted agent)** — model-led reasoning with a few tools, you want hosted threads + evaluations + rapid Copilot publishing, and you treat the agent as a deployable asset.
 - **D (Mixed)** — you're already heavy on M365/Power, you want HR makers to own day-to-day topic and flow changes, and a *small* number of UCs benefit from model-led reasoning. Lowest resting cost; best balance of flexibility-for-makers and depth-where-needed.
+
+## Fine-tuning applicability
+
+Fine-tuning a model on company-specific HR data adds value where **output consistency across employees matters more than output diversity**. The table below shows, per use case, whether fine-tuning is required, recommended, or optional.
+
+| Use case | Fine-tuning value | Primary benefit |
+|---|---|---|
+| UC1 Policy Q&A | Optional | Consistent citation format and answer phrasing; RAG is the primary control |
+| UC2 Time-off approval | Low | Slot-filling; format variation is acceptable |
+| UC3 Onboarding | Optional | Consistent plan structure once you accumulate manager-edited plan pairs |
+| UC4 Internal mobility | Recommended | Pitch language calibrated to Contoso grade/competency model |
+| UC5 360° feedback summary | **Required for equity** | Prevents format variation that creates disparate treatment risk |
+| UC6 Triage & escalation | **Required for safety** | Stable `HARASSMENT/CRITICAL` recall regardless of how the employee phrases the complaint |
+| UC7 Performance narrative | **Core value prop** | Grade-level-calibrated drafts; consistency is the entire point of the use case |
+
+See [docs/fine-tuning.md](fine-tuning.md) for the detailed per-UC analysis, the UC6 worked example (dataset shape, Azure OpenAI fine-tuning steps, eval gate), and the full UC7 description.
 
 ## What is *not* in this comparison
 
