@@ -15,7 +15,7 @@ flowchart LR
   search[("Azure AI Search — handbook index")]
   api["Container Apps — FastAPI mock HR backend"]
   msgraph["Microsoft Graph — proactive messages"]
-  ai["Azure OpenAI — gpt-4o"]
+  ai["Microsoft Foundry — gpt-4o"]
 
   user -->|chat| copilot
   user -->|chat| teams

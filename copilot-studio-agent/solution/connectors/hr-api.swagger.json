@@ -321,7 +321,7 @@
       "post": {
         "operationId": "classifyTicket",
         "summary": "Classify HR ticket",
-        "description": "Demo classifier — returns category, sensitivity, autoAnswer flag, and escalateImmediately flag. Replace with an Azure OpenAI call backed by Azure AI Content Safety for production.",
+        "description": "Demo classifier — returns category, sensitivity, autoAnswer flag, and escalateImmediately flag. Replace with a Microsoft Foundry call backed by Azure AI Content Safety for production.",
         "x-ms-summary": "Classify HR ticket",
         "x-ms-visibility": "important",
         "parameters": [

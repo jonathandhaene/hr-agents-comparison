@@ -1,7 +1,7 @@
 # Fine-tuning datasets — Contoso HR Concierge
 
 Each `.jsonl` file in this folder is a **supervised fine-tuning (SFT) dataset** in the
-[Azure OpenAI chat-completion format](https://learn.microsoft.com/azure/ai-services/openai/how-to/fine-tuning).
+[Microsoft Foundry chat-completion format](https://learn.microsoft.com/azure/ai-services/openai/how-to/fine-tuning).
 Every line is a complete `{"messages": [...]}` training example.
 
 These files contain **dummy data only** — names, ticket text, policies, and
@@ -37,7 +37,7 @@ pathlib.Path("train.jsonl").write_text("\n".join(src[:split]))
 pathlib.Path("val.jsonl").write_text("\n".join(src[split:]))
 EOF
 
-# 3. Submit fine-tuning job via Azure OpenAI
+# 3. Submit fine-tuning job via Microsoft Foundry
 openai api fine_tuning.jobs.create \
   --training-file train.jsonl \
   --validation-file val.jsonl \

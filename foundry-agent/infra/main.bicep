@@ -23,7 +23,7 @@
 //     Microsoft Teams and Microsoft 365 Copilot is handled by those hosts
 //     when the agent is published there — no extra Azure resources are
 //     required for the in-Teams / in-Copilot UI voice path.
-//   - Role assignments so each project's MI can call AOAI, Search, Cosmos,
+//   - Role assignments so each project's MI can call Foundry, Search, Cosmos,
 //     Storage, and Speech
 //   - Diagnostic settings for chargeable resources
 //
@@ -40,8 +40,8 @@ param namePrefix string = 'hrfdy'
 @description('Azure region.')
 param location string = resourceGroup().location
 
-@description('Azure OpenAI deployment used by the Foundry agent.')
-param openAiDeployment string = 'gpt-4o'
+@description('Microsoft Foundry model deployment used by the Foundry agent.')
+param foundryDeployment string = 'gpt-4o'
 
 @description('Provision voice/IVR resources (Azure AI Speech + Azure Communication Services).')
 param enableVoice bool = true
@@ -289,7 +289,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
 
 resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   parent: foundry
-  name: openAiDeployment
+  name: foundryDeployment
   sku: { name: 'GlobalStandard', capacity: 30 }
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
 }
@@ -304,15 +304,15 @@ resource foundryDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' 
   }
 }
 
-// Foundry project's MI → AOAI (Cognitive Services OpenAI User)
-var aoaiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
-resource aoaiUserForProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+// Foundry project's MI → Foundry (Cognitive Services OpenAI User)
+var foundryUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+resource foundryUserForProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(foundry.id, project.id, 'aoai-user')
   scope: foundry
   properties: {
     principalId: project.identity.principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aoaiUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
   }
 }
 
@@ -453,7 +453,7 @@ resource projectCapabilityHost 'Microsoft.CognitiveServices/accounts/projects/ca
 // ───────────────────────── Evaluations project ────────────────────────
 // Sibling project used by the offline eval harness so eval runs, datasets,
 // and red-team experiments don't pollute the runtime project's traces.
-// No capabilityHost: evals run via the SDK against the AOAI deployment
+// No capabilityHost: evals run via the SDK against the Foundry deployment
 // directly and don't need agent thread/vector/file state.
 
 resource evalsProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = {
@@ -467,13 +467,13 @@ resource evalsProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-
   }
 }
 
-resource aoaiUserForEvalsProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+resource foundryUserForEvalsProject 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(foundry.id, evalsProject.id, 'aoai-user')
   scope: foundry
   properties: {
     principalId: evalsProject.identity.principalId
     principalType: 'ServicePrincipal'
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aoaiUserRoleId)
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', foundryUserRoleId)
   }
 }
 

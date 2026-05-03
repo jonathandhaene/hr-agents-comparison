@@ -14,7 +14,7 @@ Legend: ✅ first-class · ⚠️ possible but constrained · ❌ not supported 
 | UC4 Internal mobility | ✅ Tool call + LLM | ✅ Custom Connector + generative summary | ✅ Tool + LLM | ✅ **Foundry connected agent** (delegated from Copilot Studio) |
 | UC5 360° feedback | ✅ Fan-out via Graph + LLM summary | ✅ Outlook fan-out + Dataverse + generative summary | ✅ Tools + model summary | ✅ Open via flow (B); summary via Foundry connected agent (C) |
 | UC6 Triage & escalation | ✅ Sensitivity classifier + Graph 1:1 chat handoff | ✅ Built-in `TransferConversation` to HR queue | ⚠️ Tool-driven escalation; live human handoff requires custom integration | ✅ `TransferConversation` — same as B |
-| **UC7 Performance narrative** *(fine-tuning)* | ✅ Tool call → fine-tuned AOAI deployment; full control | ⚠️ Generative answers node can use a fine-tuned deployment but HR makers cannot trigger fine-tuning jobs — needs dev involvement | ✅ Fine-tuned model registered as secondary deployment in Foundry project | ✅ Fine-tuned generator in Foundry connected agent; Copilot Studio topics unchanged |
+| **UC7 Performance narrative** *(fine-tuning)* | ✅ Tool call → fine-tuned Foundry deployment; full control | ⚠️ Generative answers node can use a fine-tuned deployment but HR makers cannot trigger fine-tuning jobs — needs dev involvement | ✅ Fine-tuned model registered as secondary deployment in Foundry project | ✅ Fine-tuned generator in Foundry connected agent; Copilot Studio topics unchanged |
 
 ## Engineering & operations
 
@@ -22,7 +22,7 @@ Legend: ✅ first-class · ⚠️ possible but constrained · ❌ not supported 
 |---|---|---|---|---|
 | Primary skill set | Python developer | HR/business power user + maker | Python developer + AI ops | **Maker-led, with thin dev surface for the connected agent** |
 | Source of truth | Git | Git (`pac solution` export) + Power Platform env | Git + Foundry project state | Git (`pac solution` + Foundry agent yaml + Functions) |
-| Auth surface | Bot Service + Entra app + Managed Identity | Power Platform connections + APIM key | Foundry project MI + AOAI/Search RBAC | Power Platform connections + Functions key + Foundry MI |
+| Auth surface | Bot Service + Entra app + Managed Identity | Power Platform connections + APIM key | Foundry project MI + Foundry/Search RBAC | Power Platform connections + Functions key + Foundry MI |
 | Long-running orchestration | Manual (scheduled job + Cosmos) | Built-in (scheduled flows + Dataverse) | Manual (Logic App tick + Cosmos) | Built-in (scheduled flows + Dataverse) |
 | Built-in human handoff | Build with Graph | ✅ `TransferConversation` to queue | Build with tools | ✅ `TransferConversation` |
 | Built-in RAG | Build with AI Search | ✅ Generative answers + SharePoint | ✅ File Search | ✅ Generative answers + SharePoint |
@@ -34,7 +34,7 @@ Legend: ✅ first-class · ⚠️ possible but constrained · ❌ not supported 
 | IaC | Bicep | Bicep (Azure side only) + Power Platform solution | Bicep | Bicep (Functions + Foundry) + Power Platform solution |
 | Per-environment promotion | GitHub Actions + Toolkit envs | `pac` + Power Platform DLP-aware envs | GitHub Actions + Foundry envs | All three combined |
 | Time-to-first-demo | Medium | **Lowest** | Low | Low |
-| Operational cost (resting) | Container Apps min-replicas + Cosmos + AI Search | APIM + Container Apps + Power Platform licenses | Foundry + AOAI + Container Apps + Search | **Lowest Azure-side** — Functions Consumption + Foundry pay-per-token; Power Platform licensing on the conversation side |
+| Operational cost (resting) | Container Apps min-replicas + Cosmos + AI Search | APIM + Container Apps + Power Platform licenses | Foundry + Container Apps + Search | **Lowest Azure-side** — Functions Consumption + Foundry pay-per-token; Power Platform licensing on the conversation side |
 | Vendor coupling to M365/Power | Medium (Bot Service) | High (Power Platform) | Medium (Foundry) | High (Power Platform + Foundry) |
 
 ## When each one wins
@@ -58,7 +58,7 @@ Fine-tuning a model on company-specific HR data adds value where **output consis
 | UC6 Triage & escalation | **Required for safety** | Stable `HARASSMENT/CRITICAL` recall regardless of how the employee phrases the complaint |
 | UC7 Performance narrative | **Core value prop** | Grade-level-calibrated drafts; consistency is the entire point of the use case |
 
-See [docs/fine-tuning.md](fine-tuning.md) for the detailed per-UC analysis, the UC6 worked example (dataset shape, Azure OpenAI fine-tuning steps, eval gate), and the full UC7 description.
+See [docs/fine-tuning.md](fine-tuning.md) for the detailed per-UC analysis, the UC6 worked example (dataset shape, Microsoft Foundry fine-tuning steps, eval gate), and the full UC7 description.
 
 ## What is *not* in this comparison
 

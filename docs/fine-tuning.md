@@ -104,14 +104,14 @@ The existing `ticket_categories.json` has seven categories and four sensitivity 
 
 Each line is one HR ticket (user message) + the HR Operations team's agreed classification (assistant message). Collect 50–100 examples per category — 350–700 total for the full schema.
 
-### Fine-tuning on Azure OpenAI
+### Fine-tuning on Microsoft Foundry
 
-Azure OpenAI supports supervised fine-tuning on `gpt-4o-mini` (and `gpt-4o`). Use `gpt-4o-mini` for the classifier: the task is classification, not generation, and the smaller model is faster and cheaper per call.
+Microsoft Foundry supports supervised fine-tuning on `gpt-4o-mini` (and `gpt-4o`). Use `gpt-4o-mini` for the classifier: the task is classification, not generation, and the smaller model is faster and cheaper per call.
 
 ```bash
 # 1. Upload training file
 az cognitiveservices account deployment list \
-  --name <aoai-resource> --resource-group <rg>   # verify the base model is available
+  --name <foundry-resource> --resource-group <rg>   # verify the base model is available
 
 openai api fine_tuning.jobs.create \
   --training-file tickets_train.jsonl \
@@ -246,8 +246,8 @@ See the row for **UC7** in [comparison.md](comparison.md) — UC7 is a fine-tuni
 
 | Solution | Where to fine-tune | Notes |
 |---|---|---|
-| A (M365 Agents SDK) | Azure OpenAI fine-tuning job → new deployment | Register the fine-tuned deployment name in `env/.env.{stage}`. Use a separate deployment for the classifier vs. the generator. |
-| B (Copilot Studio) | Azure OpenAI fine-tuning job → update the AOAI resource wired to generative answers | Copilot Studio's generative answers node can be pointed at a fine-tuned deployment via the Azure OpenAI resource selector. |
+| A (M365 Agents SDK) | Microsoft Foundry fine-tuning job → new deployment | Register the fine-tuned deployment name in `env/.env.{stage}`. Use a separate deployment for the classifier vs. the generator. |
+| B (Copilot Studio) | Microsoft Foundry fine-tuning job → update the Foundry resource wired to generative answers | Copilot Studio's generative answers node can be pointed at a fine-tuned deployment via the Foundry resource selector. |
 | C (Foundry) | Foundry fine-tuning UI or `az cognitiveservices account deployment create` → register as a secondary model deployment | Foundry supports multiple model deployments per project; the agent YAML references the deployment by name. |
 | D (Mixed) | Fine-tuned classifier lives in the Azure Functions backend (same as C); fine-tuned generator lives in the Foundry connected agent (same as C) | The Copilot Studio topics and flows are unaffected — they call the same API endpoints. |
 

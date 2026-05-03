@@ -44,8 +44,8 @@ actions like time-off requests or escalations.
 def build_agent() -> ChatAgent:
     cred = DefaultAzureCredential()
     client = AzureOpenAIChatClient(
-        endpoint=os.environ["AOAI_ENDPOINT"],
-        deployment=os.environ.get("AOAI_DEPLOYMENT", "gpt-4o"),
+        endpoint=os.environ["FOUNDRY_ENDPOINT"],
+        deployment=os.environ.get("FOUNDRY_DEPLOYMENT", "gpt-4o"),
         credential=cred,
     )
     return ChatAgent(

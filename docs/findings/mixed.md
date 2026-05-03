@@ -27,7 +27,7 @@ Compared with pure Solution A in the same demo tenant over a week of internal us
 | AI Search Basic | constant | n/a |
 | APIM Consumption | constant overhead per req | n/a |
 | Functions Consumption | n/a | ~zero idle |
-| Foundry + AOAI | n/a | per token only |
+| Foundry | n/a | per token only |
 
 Total Azure resting cost dropped to a small App Insights + Storage tail. Power Platform per-message licensing applies on the Copilot Studio side.
 

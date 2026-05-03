@@ -1,6 +1,6 @@
 """UC1 — Policy & benefits Q&A.
 
-Uses Azure AI Search for retrieval and Azure OpenAI for generation. The
+Uses Azure AI Search for retrieval and Microsoft Foundry for generation. The
 search index is seeded from ``shared-fixtures/policies/`` by the deployment
 pipeline (`infra/scripts/seed_search.py`).
 """
@@ -14,8 +14,8 @@ from openai import AsyncAzureOpenAI
 
 SEARCH_ENDPOINT = os.environ.get("SEARCH_ENDPOINT", "")
 SEARCH_INDEX = os.environ.get("SEARCH_INDEX", "hr-policies")
-AOAI_ENDPOINT = os.environ.get("AOAI_ENDPOINT", "")
-AOAI_DEPLOYMENT = os.environ.get("AOAI_DEPLOYMENT", "gpt-4o")
+FOUNDRY_ENDPOINT = os.environ.get("FOUNDRY_ENDPOINT", "")
+FOUNDRY_DEPLOYMENT = os.environ.get("FOUNDRY_DEPLOYMENT", "gpt-4o")
 
 SYSTEM_PROMPT = """You are Contoso HR Concierge. Answer ONLY from the provided policy excerpts.
 Always cite the source policy name in [brackets]. If the answer is not in the excerpts,
@@ -40,14 +40,14 @@ async def handle(turn, hr, state) -> None:
             chunks.append(f"[{p['name']}] {doc['content'][:1500]}")
 
     client = AsyncAzureOpenAI(
-        azure_endpoint=AOAI_ENDPOINT,
+        azure_endpoint=FOUNDRY_ENDPOINT,
         azure_ad_token_provider=get_bearer_token_provider(
             cred, "https://cognitiveservices.azure.com/.default"
         ),
         api_version="2024-10-21",
     )
     completion = await client.chat.completions.create(
-        model=AOAI_DEPLOYMENT,
+        model=FOUNDRY_DEPLOYMENT,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": f"Question: {question}\n\nPolicy excerpts:\n" + "\n\n".join(chunks)},

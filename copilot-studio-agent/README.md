@@ -55,11 +55,11 @@ GitHub Actions workflow: `.github/workflows/copilot-studio.yml`. It uses OIDC + 
 
 ## Prerequisites
 
-- Azure subscription (for APIM + Container Apps + AOAI) with Owner on the target resource group.
+- Azure subscription (for APIM + Container Apps + Foundry) with Owner on the target resource group.
 - Microsoft Power Platform environment with Copilot Studio enabled and Dataverse provisioned.
 - `pac` CLI ≥ 1.34, `az` CLI ≥ 2.60 with Bicep extension.
 - A Power Platform service principal with **System Administrator** on the target environment, plus an Entra app registration with federated credentials for GitHub OIDC.
-- Azure OpenAI access in the chosen region.
+- Microsoft Foundry access in the chosen region.
 - SharePoint site with the policy library (or accept the seeded library that the workflow creates).
 
 ## Responsible AI

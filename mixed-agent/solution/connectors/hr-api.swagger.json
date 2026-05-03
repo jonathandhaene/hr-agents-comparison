@@ -302,7 +302,7 @@
       "post": {
         "operationId": "classifyTicket",
         "summary": "Classify HR ticket",
-        "description": "Demo classifier — replace with Azure OpenAI + Azure AI Content Safety for production.",
+        "description": "Demo classifier — replace with Microsoft Foundry + Azure AI Content Safety for production.",
         "x-ms-summary": "Classify HR ticket",
         "x-ms-visibility": "important",
         "parameters": [
