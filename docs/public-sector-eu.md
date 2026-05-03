@@ -1,6 +1,6 @@
 # EU Public Sector — Microsoft Foundry sovereignty story
 
-This document is for teams deploying the Contoso HR Concierge (or any HR agent based on
+This document is for teams deploying the Zava HR Concierge (or any HR agent based on
 this repository) in a **European Union public-sector** context: national governments,
 regional administrations, municipalities, agencies, and publicly funded institutions.
 
@@ -41,7 +41,7 @@ For an HR Concierge agent, the sovereignty story has five layers:
 |---|---|---|
 | **Data residency** | Where is employee data processed and stored? | All Azure resources pinned to an EU region; no data leaves the EU boundary |
 | **Model residency** | Where does model inference run? | Regional deployment (`northeurope`/`westeurope`); avoid `GlobalStandard` until legal sign-off |
-| **Operator control** | Who can read conversation transcripts and logs? | Contoso (or the deploying authority) controls the Log Analytics workspace; Microsoft cannot read customer data without an explicit support ticket |
+| **Operator control** | Who can read conversation transcripts and logs? | Zava (or the deploying authority) controls the Log Analytics workspace; Microsoft cannot read customer data without an explicit support ticket |
 | **Contractual guarantees** | What commitments does Microsoft make to EU public sector? | EU Data Boundary commitment, EUCS-aligned controls, DPA with SCCs |
 | **Auditability** | Can the authority demonstrate compliance to a national supervisory authority? | Fine-tuning dataset, eval results, and system prompt are versioned in Git and archived in the authority's storage account |
 
@@ -71,6 +71,55 @@ resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
 }
 ```
+
+### Step 1b — Use EU-origin models (Mistral) where policy requires it
+
+Some EU public-sector bodies — particularly national ministries, defence-adjacent
+agencies, and institutions governed by national data-sovereignty laws — require that
+AI inference run on **models developed and operated by EU-headquartered companies**.
+Microsoft Foundry supports first-party (OpenAI, Microsoft Phi) and third-party models
+including **Mistral AI** (France), which is the most widely deployed EU-origin LLM in
+European government contexts.
+
+To deploy Mistral instead of (or alongside) GPT-4o, add the following deployment to
+the Foundry account in `foundry-agent/infra/main.bicep` or `mixed-agent/infra/main.bicep`:
+
+```bicep
+@description('Deploy a Mistral model alongside GPT-4o for EU-sovereignty scenarios.')
+param enableMistral bool = false
+
+resource mistral 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = if (enableMistral) {
+  parent: foundry
+  name: 'mistral-large'
+  sku: { name: 'Standard', capacity: 10 }
+  properties: {
+    model: {
+      format: 'MistralAI'
+      name: 'Mistral-Large'
+    }
+  }
+}
+```
+
+Set the `FOUNDRY_MODEL` environment variable to `mistral-large` when deploying the
+agent container. The Python agent code reads this variable and selects the correct
+model at runtime:
+
+```python
+MODEL = os.environ.get("FOUNDRY_MODEL", "gpt-4o")   # override with "mistral-large"
+```
+
+**Model choice guidance for EU public sector:**
+
+| Requirement | Recommended model | Notes |
+|---|---|---|
+| Default / no special restriction | `gpt-4o` (Standard capacity, EU region) | Covered by EU Data Boundary; data does not leave EU |
+| EU-origin model preferred by policy | `Mistral-Large` via Foundry Marketplace | Mistral AI is French; inference runs in Azure EU regions |
+| Highest sensitivity (defence-adjacent) | Consult your national cloud program | May require sovereign cloud; out of scope for this repo |
+
+Both models are available through the same Foundry account/project. You can deploy both
+and toggle the active model via the `FOUNDRY_MODEL` / `FOUNDRY_DEPLOYMENT` environment
+variable without any code changes.
 
 ### Step 2 — Configure the Microsoft Foundry project for EU residency
 
@@ -184,7 +233,7 @@ obligations include:
 
 ## Sovereignty story in one page — for a public-sector procurement committee
 
-> **Contoso HR Concierge** is an HR process AI agent built on **Microsoft Foundry**,
+> **Zava HR Concierge** is an HR process AI agent built on **Microsoft Foundry**,
 > deployed entirely within EU Azure regions (`northeurope` or `westeurope`). No employee
 > data is processed outside the European Union. The Microsoft Foundry stack is covered
 > by the **Microsoft EU Data Boundary commitment**, the **Azure Data Processing Agreement

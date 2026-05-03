@@ -1,12 +1,14 @@
 # Foundry hosted agent definition.
 # Imported by the deploy workflow via `az ai-foundry agent create --file project/agent.yaml`.
-name: ContosoHRConcierge
-displayName: Contoso HR Concierge (Foundry)
+# To use an EU-origin model (Mistral) instead of GPT-4o, deploy with enableMistral=true
+# in infra/main.bicep and change `deployment` below to `mistral-large`.
+name: ZavaHRConcierge
+displayName: Zava HR Concierge (Foundry)
 model:
-  deployment: gpt-4o
+  deployment: gpt-4o          # change to mistral-large for EU-sovereignty deployments
   temperature: 0.2
 instructions: |
-  You are Contoso HR Concierge. You help employees, managers, HR partners, IT,
+  You are Zava HR Concierge. You help employees, managers, HR partners, IT,
   buddies, and new hires with policy questions, time-off, onboarding, internal
   mobility, 360 feedback, and ticket triage. Cite policy sources for UC1.
   Never auto-answer sensitive cases (harassment / ER / immigration / leave) —
@@ -25,6 +27,6 @@ tools:
 publish:
   m365_copilot:
     enabled: true
-    appName: Contoso HR Concierge (Foundry)
+    appName: Zava HR Concierge (Foundry)
   teams:
     enabled: true

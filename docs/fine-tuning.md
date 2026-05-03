@@ -21,7 +21,7 @@ Base models are general-purpose. They produce plausible outputs, but plausible i
 | Primary pattern | RAG over SharePoint or AI Search |
 | Fine-tuning value | **Low** |
 | Reason | The answer is in the retrieved document. The model's job is to quote or paraphrase, not to recall facts from training. Fine-tuning the citation format is achievable but can also be handled with a strong system prompt. |
-| When to revisit | If you have a large library of Q&A pairs that human HR reviewed and approved (e.g., a legacy FAQ database), fine-tuning on those pairs teaches the model *how* Contoso HR answers — not just what it says. This raises the bar above RAG alone for ambiguous questions. |
+| When to revisit | If you have a large library of Q&A pairs that human HR reviewed and approved (e.g., a legacy FAQ database), fine-tuning on those pairs teaches the model *how* Zava HR answers — not just what it says. This raises the bar above RAG alone for ambiguous questions. |
 
 ### UC2 — Time-off request with manager approval
 
@@ -39,7 +39,7 @@ Base models are general-purpose. They produce plausible outputs, but plausible i
 | Primary pattern | Long-running orchestration; template-driven plan generation |
 | Fine-tuning value | **Low–Medium** |
 | Reason | Onboarding plan generation is template-driven. A structured template + few-shot prompting is usually sufficient for plan text. |
-| When to revisit | If Contoso generates hundreds of onboarding plans per month and HR periodically reviews and edits the generated plans, those edits are a gold-standard fine-tuning dataset. After 200–500 such pairs, a fine-tuned model learns the company's onboarding language conventions and reduces HR edit time. |
+| When to revisit | If Zava generates hundreds of onboarding plans per month and HR periodically reviews and edits the generated plans, those edits are a gold-standard fine-tuning dataset. After 200–500 such pairs, a fine-tuned model learns the company's onboarding language conventions and reduces HR edit time. |
 
 ### UC4 — Internal mobility / career coach
 
@@ -47,7 +47,7 @@ Base models are general-purpose. They produce plausible outputs, but plausible i
 |---|---|
 | Primary pattern | Profile-aware retrieval + LLM-generated pitch |
 | Fine-tuning value | **Medium** |
-| Reason | The generated pitch must be aligned with Contoso's internal career framework (grade-level language, competency model, tone). A base model generates plausible pitches but may use language above or below the employee's grade, or reference generic skills rather than Contoso's competencies. |
+| Reason | The generated pitch must be aligned with Zava's internal career framework (grade-level language, competency model, tone). A base model generates plausible pitches but may use language above or below the employee's grade, or reference generic skills rather than Zava's competencies. |
 | When to revisit | Once you have approved pitches from previous successful internal moves, use those as fine-tuning examples. The delta in pitch quality and manager perception is measurable in user testing. |
 | Interaction with UC7 | UC4 pitch generation and UC7 performance narrative generation share the same "calibrated career language" problem; a single fine-tuned model can serve both. |
 
@@ -165,7 +165,7 @@ After 360° feedback is collected (UC5), the **manager** must write a performanc
 ### Pattern
 
 1. **Inputs:** employee profile (grade, tenure, function), 360 feedback responses (from UC5), manager's bullet-point notes.
-2. **Generation:** a fine-tuned model drafts a narrative calibrated to the employee's grade level and Contoso's competency framework.
+2. **Generation:** a fine-tuned model drafts a narrative calibrated to the employee's grade level and Zava's competency framework.
 3. **Human review:** the manager reads, edits, and approves the draft before it is submitted to the review system. The agent presents a diff of any manager edits back to the manager before final submit.
 4. **Participants:** Manager (primary), HR Partner (secondary — receives a copy for calibration).
 5. **Success:** the calibration committee can compare narratives across employees without systematic wording bias introduced by individual managers.
@@ -200,7 +200,7 @@ The dataset for UC7 overlaps with UC5: HR already owns approved narratives from 
 
 ```jsonl
 {"messages": [
-  {"role": "system",    "content": "Draft a performance narrative calibrated for the given grade level and Contoso competency framework. Use the 360 summary and manager notes as grounding."},
+  {"role": "system",    "content": "Draft a performance narrative calibrated for the given grade level and Zava competency framework. Use the 360 summary and manager notes as grounding."},
   {"role": "user",      "content": "{\"grade\": \"L5 Senior Software Engineer\", \"360_summary\": \"...\", \"manager_notes\": \"...\"}"},
   {"role": "assistant", "content": "<the manager-approved final narrative>"}
 ]}
@@ -215,7 +215,7 @@ Add to `shared-fixtures/`:
 ```
 shared-fixtures/
   performance_narratives.json    # sample HR-approved narratives, one per grade level (L3–L7)
-  competency_framework.json      # Contoso's competency descriptors per level
+  competency_framework.json      # Zava's competency descriptors per level
 ```
 
 `performance_narratives.json` structure:

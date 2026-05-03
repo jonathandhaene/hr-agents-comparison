@@ -57,7 +57,7 @@ beginDialog:
       operationId: invokeAgent
       input:
         binding:
-          agentName: ContosoHRMobilityAdvisor
+          agentName: ZavaHRMobilityAdvisor
           input: =concat('Draft a performance narrative for ', Topic.employeeId, ' cycle ', Topic.cycleId, '. Manager notes: ', Topic.managerNotes, if(empty(Topic.feedbackRequestId), '', concat(' 360 request id: ', Topic.feedbackRequestId)))
           context:
             employeeId: =Topic.employeeId
@@ -108,7 +108,7 @@ beginDialog:
           operationId: invokeAgent
           input:
             binding:
-              agentName: ContosoHRMobilityAdvisor
+              agentName: ZavaHRMobilityAdvisor
               input: =concat('Revise the performance narrative based on: ', Topic.managerFeedback)
               context:
                 employeeId: =Topic.employeeId

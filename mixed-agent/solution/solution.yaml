@@ -1,7 +1,7 @@
 # Power Platform solution — mixed (Copilot Studio primary, Foundry connected)
-solutionUniqueName: ContosoHrConciergeMixed
-publisherUniqueName: ContosoHr
-displayName: Contoso HR Concierge (Mixed)
+solutionUniqueName: ZavaHrConciergeMixed
+publisherUniqueName: ZavaHr
+displayName: Zava HR Concierge (Mixed)
 version: 1.0.0.0
 components:
   - type: bot
@@ -16,7 +16,7 @@ components:
       - topics/uc7_performance_narrative.yaml
     knowledgeSources:
       - kind: SharePoint
-        site: https://contoso.sharepoint.com/sites/HR
+        site: https://zava.sharepoint.com/sites/HR
         libraries: [Policies, Handbook]
         generativeAnswers: true
   - type: workflow

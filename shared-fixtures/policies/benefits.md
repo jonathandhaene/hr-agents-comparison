@@ -4,17 +4,17 @@
 
 ## 1. Health insurance (US)
 
-Contoso offers three medical plan options through our partner carrier:
+Zava offers three medical plan options through our partner carrier:
 
 - **Plan A — PPO** (broad network, higher premiums, lower deductible)
 - **Plan B — HDHP + HSA** (lower premiums, higher deductible, employer HSA contribution of $1,000 individual / $2,000 family)
 - **Plan C — HMO** (lowest premiums, in-network only, primary care required)
 
-Contoso pays **80%** of the monthly premium for the employee and **70%** for dependents.
+Zava pays **80%** of the monthly premium for the employee and **70%** for dependents.
 
 ## 2. Dental & vision
 
-Standard dental (preventive, basic, major) and vision (annual exam, lenses, frames allowance) are available. Contoso pays **75%** of the dental premium and **100%** of the vision premium.
+Standard dental (preventive, basic, major) and vision (annual exam, lenses, frames allowance) are available. Zava pays **75%** of the dental premium and **100%** of the vision premium.
 
 ## 3. Mental health & wellness
 

@@ -1,9 +1,9 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Contoso HR API (Copilot Studio Custom Connector)",
+    "title": "Zava HR API (Copilot Studio Custom Connector)",
     "version": "1.1.0",
-    "description": "Custom Connector for the Contoso HR API exposed through APIM. Field names and response shapes match the FastAPI backend exactly so Power Automate flow expressions like outputs('Create_leave_request')['managerId'] resolve correctly."
+    "description": "Custom Connector for the Zava HR API exposed through APIM. Field names and response shapes match the FastAPI backend exactly so Power Automate flow expressions like outputs('Create_leave_request')['managerId'] resolve correctly."
   },
   "host": "${HR_API_HOST}",
   "basePath": "/hr",

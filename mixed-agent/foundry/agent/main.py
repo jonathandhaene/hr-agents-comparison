@@ -15,8 +15,12 @@ from pydantic import Field
 
 HR_API_BASE = os.environ["HR_API_BASE"]  # the Functions app URL, e.g. https://hr-api.azurewebsites.net
 HR_API_KEY = os.environ.get("HR_API_KEY", "")
+# FOUNDRY_MODEL controls which model deployment to use. Defaults to gpt-4o.
+# For EU-sovereignty deployments, set FOUNDRY_MODEL=mistral-large and deploy
+# with enableMistral=true in infra/main.bicep.
+MODEL = os.environ.get("FOUNDRY_MODEL", "gpt-4o")
 
-INSTRUCTIONS = """You are Contoso HR's Mobility, Feedback & Narrative Advisor.
+INSTRUCTIONS = """You are Zava HR's Mobility, Feedback & Narrative Advisor.
 - For mobility questions, call match_internal_jobs and return a 90-word first-person pitch
   for the top role plus a one-line "why this fits" for the runner-up.
 - For feedback summary questions, call summarize_feedback_raw and produce a candid 5-bullet
@@ -84,12 +88,12 @@ def build_agent() -> ChatAgent:
     cred = DefaultAzureCredential()
     client = AzureOpenAIChatClient(
         endpoint=os.environ["FOUNDRY_ENDPOINT"],
-        deployment=os.environ.get("FOUNDRY_DEPLOYMENT", "gpt-4o"),
+        deployment=os.environ.get("FOUNDRY_DEPLOYMENT", MODEL),
         credential=cred,
     )
     return ChatAgent(
         chat_client=client,
-        name="ContosoHRMobilityAdvisor",
+        name="ZavaHRMobilityAdvisor",
         instructions=INSTRUCTIONS,
         tools=[match_internal_jobs, summarize_feedback_raw, draft_performance_narrative, submit_performance_narrative],
     )

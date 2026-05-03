@@ -2,7 +2,7 @@
   {
     "id": "E001",
     "displayName": "Aarav Patel",
-    "email": "aarav.patel@contoso.com",
+    "email": "aarav.patel@zava.com",
     "title": "Senior Software Engineer",
     "department": "Engineering",
     "location": "Seattle, US",
@@ -14,7 +14,7 @@
   {
     "id": "E002",
     "displayName": "Eva Schmidt",
-    "email": "eva.schmidt@contoso.com",
+    "email": "eva.schmidt@zava.com",
     "title": "Software Engineer",
     "department": "Engineering",
     "location": "Berlin, DE",
@@ -26,7 +26,7 @@
   {
     "id": "E003",
     "displayName": "Liam O'Connor",
-    "email": "liam.oconnor@contoso.com",
+    "email": "liam.oconnor@zava.com",
     "title": "Product Designer",
     "department": "Design",
     "location": "Dublin, IE",
@@ -38,7 +38,7 @@
   {
     "id": "E004",
     "displayName": "Mei Tanaka",
-    "email": "mei.tanaka@contoso.com",
+    "email": "mei.tanaka@zava.com",
     "title": "Data Scientist",
     "department": "Analytics",
     "location": "Tokyo, JP",
@@ -50,7 +50,7 @@
   {
     "id": "E005",
     "displayName": "Noah Becker",
-    "email": "noah.becker@contoso.com",
+    "email": "noah.becker@zava.com",
     "title": "Engineering Manager (peer)",
     "department": "Engineering",
     "location": "Seattle, US",
@@ -62,7 +62,7 @@
   {
     "id": "E010",
     "displayName": "Beatrice Lambert",
-    "email": "beatrice.lambert@contoso.com",
+    "email": "beatrice.lambert@zava.com",
     "title": "Engineering Manager",
     "department": "Engineering",
     "location": "Seattle, US",
@@ -74,7 +74,7 @@
   {
     "id": "E011",
     "displayName": "Sara Nilsson",
-    "email": "sara.nilsson@contoso.com",
+    "email": "sara.nilsson@zava.com",
     "title": "Design Manager",
     "department": "Design",
     "location": "Stockholm, SE",
@@ -86,7 +86,7 @@
   {
     "id": "E012",
     "displayName": "Diego Alvarez",
-    "email": "diego.alvarez@contoso.com",
+    "email": "diego.alvarez@zava.com",
     "title": "Analytics Manager",
     "department": "Analytics",
     "location": "Madrid, ES",
@@ -98,7 +98,7 @@
   {
     "id": "E020",
     "displayName": "Priya Subramanian",
-    "email": "priya.subramanian@contoso.com",
+    "email": "priya.subramanian@zava.com",
     "title": "VP Engineering",
     "department": "Engineering",
     "location": "Seattle, US",
@@ -110,7 +110,7 @@
   {
     "id": "H001",
     "displayName": "Carlos Mendes",
-    "email": "carlos.mendes@contoso.com",
+    "email": "carlos.mendes@zava.com",
     "title": "HR Business Partner — Engineering",
     "department": "HR",
     "location": "Seattle, US",
@@ -122,7 +122,7 @@
   {
     "id": "H002",
     "displayName": "Yui Mori",
-    "email": "yui.mori@contoso.com",
+    "email": "yui.mori@zava.com",
     "title": "HR Business Partner — Design & Analytics",
     "department": "HR",
     "location": "Tokyo, JP",
@@ -134,7 +134,7 @@
   {
     "id": "H010",
     "displayName": "Marta Rossi",
-    "email": "marta.rossi@contoso.com",
+    "email": "marta.rossi@zava.com",
     "title": "Director, HR",
     "department": "HR",
     "location": "Milan, IT",
@@ -146,7 +146,7 @@
   {
     "id": "I001",
     "displayName": "Dana Okafor",
-    "email": "dana.okafor@contoso.com",
+    "email": "dana.okafor@zava.com",
     "title": "IT Service Desk Lead",
     "department": "IT",
     "location": "Lagos, NG",
@@ -158,7 +158,7 @@
   {
     "id": "I010",
     "displayName": "Tom Becker",
-    "email": "tom.becker@contoso.com",
+    "email": "tom.becker@zava.com",
     "title": "IT Manager",
     "department": "IT",
     "location": "Seattle, US",
@@ -170,7 +170,7 @@
   {
     "id": "B001",
     "displayName": "Sofia Kowalski",
-    "email": "sofia.kowalski@contoso.com",
+    "email": "sofia.kowalski@zava.com",
     "title": "Senior Software Engineer (Onboarding Buddy)",
     "department": "Engineering",
     "location": "Berlin, DE",

@@ -16,7 +16,7 @@ sensitive topics to a human. The AI reads your instructions and follows them whe
 answers.
 
 **Analogy.** A well-educated new contractor on their first day. They are capable, but
-they only know what you told them in the briefing. Ask them about Contoso's
+they only know what you told them in the briefing. Ask them about Zava's
 parental-leave policy and they will produce a plausible-sounding answer — because they
 never read your handbook. The more detailed your briefing, the better they perform, but
 they still cannot quote facts they were never given.
@@ -61,7 +61,7 @@ Those examples are used to update the model so it produces your standard by defa
 rather than a generic approximation.
 
 **Analogy.** Not a contractor, but a new hire who spent their first month shadowing your
-best HR Operations analyst. They have internalised *how Contoso handles things* — the
+best HR Operations analyst. They have internalised *how Zava handles things* — the
 exact language for a critical escalation, the structure of a Senior Software Engineer
 narrative, the difference between an immigration question and a payroll question. They
 do not need to look it up; it is part of how they think.
@@ -97,7 +97,7 @@ and communicates* those facts once they arrive. For most HR use cases you need b
 | **UC1** Policy & benefits Q&A | ⚠️ Model guesses when the policy is not in its training data | ✅ Grounded, cited answer | Optional | RAG is the primary control. Fine-tuning can standardise citation phrasing but is not required on day one. |
 | **UC2** Time-off approval | ✅ Slot-filling and confirmation messages are reliable | Not needed | Not needed | The model's role is structural: extract dates, check a balance, confirm. Prompting is sufficient. |
 | **UC3** Onboarding orchestration | ✅ Plan text from a template is reliable | Not needed for plan text; useful if role/IT catalogues are retrieved | Optional | Template-driven plan generation works well with prompting. Fine-tuning adds value once you accumulate 200+ manager-edited plan pairs from real cycles. |
-| **UC4** Internal mobility | ⚠️ Generated pitch is generic, not calibrated to Contoso grade levels | ✅ Relevant job matches from internal catalogue | **Recommended** | RAG finds the right jobs; fine-tuning makes the pitch language match Contoso's competency model and grade vocabulary. |
+| **UC4** Internal mobility | ⚠️ Generated pitch is generic, not calibrated to Zava grade levels | ✅ Relevant job matches from internal catalogue | **Recommended** | RAG finds the right jobs; fine-tuning makes the pitch language match Zava's competency model and grade vocabulary. |
 | **UC5** 360° feedback summary | ⚠️ Format and specificity vary across employees — equity risk | Not the primary control | **Required for equity** | Two employees at the same grade must receive summaries of equal depth. A fine-tuned model is the documented standard; a prompted base model produces variation that HR Legal cannot defend. |
 | **UC6** Triage & escalation | ⚠️ Classification drifts across rephrasing — safety risk | Not the primary control | **Required for safety** | A harassment signal must be caught regardless of how the employee phrases it. A fine-tuned classifier is stable across paraphrasing; a prompted model is not. |
 | **UC7** Performance narrative | ⚠️ Generic draft, not grade-calibrated; managers from different teams produce inconsistent results | Not the primary control | **Core value proposition** | Consistent, grade-calibrated narratives across all managers is the entire point of this use case. Fine-tuning is not optional. |

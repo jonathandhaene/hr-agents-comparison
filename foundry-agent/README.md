@@ -90,5 +90,5 @@ Set `enableVoice=false` to skip Speech, the project Speech connection, and ACS w
 
 ```bash
 az group delete -n <rg-name> --yes --no-wait
-az ai-foundry agent delete --name ContosoHRConcierge
+az ai-foundry agent delete --name ZavaHRConcierge
 ```

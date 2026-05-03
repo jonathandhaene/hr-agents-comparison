@@ -16,7 +16,7 @@ from ._client import hr_get
 async def search_policies(
     question: Annotated[str, Field(description="The employee's policy question.")],
 ) -> dict:
-    """Look up Contoso HR policy text for grounding.
+    """Look up Zava HR policy text for grounding.
 
     In production, the hosted agent's File Search tool answers UC1 directly
     from the indexed policies (see `search/index_definition.json`). This

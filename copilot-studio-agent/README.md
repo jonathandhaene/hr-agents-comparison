@@ -85,6 +85,6 @@ If you later need fine-grained call control (custom IVR menus, recording, warm t
 
 ```bash
 az group delete -n <rg-name> --yes --no-wait
-pac solution delete --solution-name ContosoHrConcierge
+pac solution delete --solution-name ZavaHrConcierge
 # unpublish the agent from Copilot Studio and remove the Custom Connector
 ```

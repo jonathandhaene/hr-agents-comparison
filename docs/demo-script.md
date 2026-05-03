@@ -1,4 +1,4 @@
-# Demo script — Contoso HR Concierge (three-way comparison)
+# Demo script — Zava HR Concierge (three-way comparison)
 
 A 25-minute walkthrough that shows the *same seven* HR use cases in **M365 Copilot Chat** (and Teams) across three independent implementations. Switch between agents in M365 Copilot Chat using the agent picker.
 

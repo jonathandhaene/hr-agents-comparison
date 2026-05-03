@@ -170,7 +170,7 @@ resource apim 'Microsoft.ApiManagement/service@2024-05-01' = {
   identity: { type: 'SystemAssigned' }
   properties: {
     publisherEmail: apimPublisherEmail
-    publisherName: 'Contoso HR'
+    publisherName: 'Zava HR'
   }
 }
 

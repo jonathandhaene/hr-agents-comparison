@@ -17,7 +17,7 @@ SEARCH_INDEX = os.environ.get("SEARCH_INDEX", "hr-policies")
 FOUNDRY_ENDPOINT = os.environ.get("FOUNDRY_ENDPOINT", "")
 FOUNDRY_DEPLOYMENT = os.environ.get("FOUNDRY_DEPLOYMENT", "gpt-4o")
 
-SYSTEM_PROMPT = """You are Contoso HR Concierge. Answer ONLY from the provided policy excerpts.
+SYSTEM_PROMPT = """You are Zava HR Concierge. Answer ONLY from the provided policy excerpts.
 Always cite the source policy name in [brackets]. If the answer is not in the excerpts,
 say you cannot find it and suggest contacting an HR Partner."""
 

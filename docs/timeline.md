@@ -6,7 +6,7 @@ A composite story drawn from real engagements. The numbers, names, and use cases
 
 ## The cast
 
-- **Contoso Ltd** — 5,000 employees, single tenant, M365 E5, Power Platform per-user licensing for HR, no existing agents.
+- **Zava** — 5,000 employees, specialty coffee retailer (retail stores + roasting facilities), single tenant, M365 E5, Power Platform per-user licensing for HR, no existing agents.
 - **HR Operations** (12 people) — owns policies, onboarding, feedback cycles, ticketing.
 - **HR Tech / People Analytics** (3 people, one of whom can write Python) — owns the integrations.
 - **Central Platform team** — owns Azure tenancy, networking, security, FinOps.
@@ -145,7 +145,7 @@ Distilled from the timeline above. None of these are about which tool you pick *
 
 ## The one-page recommendation
 
-If you're at day 0 and your shape looks roughly like Contoso's — mixed maker / engineering ownership, M365 E5 already in place, a use-case mix that spans simple Q&A and model-led reasoning — the defaults below are a reasonable starting point. Each one is reversible; none is universal.
+If you're at day 0 and your shape looks roughly like Zava's — mixed maker / engineering ownership, M365 E5 already in place, a use-case mix that spans simple Q&A and model-led reasoning — the defaults below are a reasonable starting point. Each one is reversible; none is universal.
 
 1. Lean toward **Solution D (Mixed)** as the substrate. The day-one cost is modestly higher than B (a Functions backend and a Foundry project) but typically less than the year-2 cost of retrofitting model-led capability. If your use cases are genuinely all maker-shaped, B alone is fine; if they're all code-shaped with no maker audience, A or C alone is fine.
 2. Put your HR backend behind **OpenAPI in Git** with semver from commit one. This is the recommendation with the fewest downsides.

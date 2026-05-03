@@ -34,6 +34,9 @@ param location string = resourceGroup().location
 @description('Microsoft Foundry model deployment name used by the connected agent.')
 param foundryDeployment string = 'gpt-4o'
 
+@description('Deploy a Mistral model alongside GPT-4o for EU-sovereignty scenarios. Set foundryDeployment to "mistral-large" to activate it as the primary model.')
+param enableMistral bool = false
+
 @description('Tags applied to every resource.')
 param tags object = {
   workload: 'hr-concierge'
@@ -210,6 +213,16 @@ resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   name: foundryDeployment
   sku: { name: 'GlobalStandard', capacity: 10 } // low capacity — only UC4/UC5 calls
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
+}
+
+// Optional: Mistral Large (EU-origin model for EU-sovereignty deployments).
+// Enable with -p enableMistral=true. Set foundryDeployment='mistral-large' to use it.
+resource mistral 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = if (enableMistral) {
+  parent: foundry
+  name: 'mistral-large'
+  sku: { name: 'Standard', capacity: 10 }   // Mistral requires Standard, not GlobalStandard
+  properties: { model: { format: 'MistralAI', name: 'Mistral-Large' } }
+  dependsOn: [ gpt ]   // serialize deployments to avoid Foundry conflicts
 }
 
 resource foundryDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {

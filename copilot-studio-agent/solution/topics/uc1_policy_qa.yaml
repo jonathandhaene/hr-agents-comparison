@@ -25,7 +25,7 @@ beginDialog:
           knowledgeSources:
             - kind: SearchSharePoint
               sites:
-                - https://contoso.sharepoint.com/sites/HRPolicies
+                - https://zava.sharepoint.com/sites/HRPolicies
             - kind: KnowledgeSourceUploadedFile
               dataSourceName: hr-policy-docs
         responseStyle: Concise

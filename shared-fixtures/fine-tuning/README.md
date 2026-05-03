@@ -1,4 +1,4 @@
-# Fine-tuning datasets — Contoso HR Concierge
+# Fine-tuning datasets — Zava HR Concierge
 
 Each `.jsonl` file in this folder is a **supervised fine-tuning (SFT) dataset** in the
 [Microsoft Foundry chat-completion format](https://learn.microsoft.com/azure/ai-services/openai/how-to/fine-tuning).

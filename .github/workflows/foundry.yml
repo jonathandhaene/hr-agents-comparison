@@ -102,5 +102,5 @@ jobs:
         run: |
           az ai-foundry agent publish \
             --project-endpoint "${{ steps.out.outputs.project_endpoint }}" \
-            --agent-name ContosoHRConcierge \
+            --agent-name ZavaHRConcierge \
             --target m365-copilot teams
