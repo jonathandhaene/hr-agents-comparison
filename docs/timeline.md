@@ -14,7 +14,7 @@ A composite story drawn from real engagements. The numbers, names, and use cases
 
 ## Day 0 — the brief
 
-> "We want a Copilot agent that answers HR policy questions and books time off. Six use cases by end of quarter."
+> "We want a Copilot agent that answers HR policy questions and books time off. Seven use cases by end of quarter."
 
 Three solutions on the table — A (M365 Agents SDK), B (Copilot Studio), C (Foundry). Mixed (D) wasn't on the slide. The team picks **B (Copilot Studio)** for time-to-demo. Reasonable.
 

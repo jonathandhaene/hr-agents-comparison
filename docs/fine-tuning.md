@@ -269,7 +269,7 @@ Fine-tuning on HR data introduces risks that do not exist with base models. The 
 
 | Topic | Document |
 |---|---|
-| Six core use cases | [docs/scenario.md](scenario.md) |
+| Seven core use cases | [docs/scenario.md](scenario.md) |
 | Technology capability matrix | [docs/comparison.md](comparison.md) |
 | Foundry evaluations guidance | [docs/findings/foundry.md](findings/foundry.md) |
 | Year-2 evolution (when fine-tuning becomes unavoidable) | [docs/timeline.md](timeline.md) — Year 2 section |
