@@ -4,7 +4,9 @@
 //   - Container Registry (managed-identity pull only)
 //   - Container Apps Environment + 2 apps (agent + backend)
 //   - Azure Bot service (Teams + M365 Copilot channels)
-//   - Azure OpenAI (gpt-4o) via Microsoft Foundry / AIServices account
+//   - Microsoft Foundry account (CognitiveServices kind=AIServices) + project
+//     so the agent's AOAI calls go through the Foundry endpoint and evals
+//     (Groundedness, Safety) can be run inside the Foundry project
 //   - Azure AI Search (RBAC only, key auth disabled)
 //   - Cosmos DB (SQL API, key auth disabled, RBAC for the agent UAMI)
 //   - Key Vault (for any future shared secrets)
@@ -236,33 +238,50 @@ resource searchDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' =
   }
 }
 
-// ───────────────────── Azure OpenAI (Foundry account) ──────────────────
+// ─────────────── Microsoft Foundry account + project ────────────────────
+// Using kind=AIServices gives the single Foundry endpoint that unifies AOAI,
+// evaluations, fine-tuning jobs, and the agents runtime under one project.
 
-resource aoai 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
-  name: '${namePrefix}-aoai-${uniq}'
+resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
+  name: '${namePrefix}-fdy-${uniq}'
   location: location
   tags: tags
-  kind: 'OpenAI'
+  kind: 'AIServices'
   sku: { name: 'S0' }
+  identity: { type: 'SystemAssigned' }
   properties: {
-    customSubDomainName: '${namePrefix}-aoai-${uniq}'
+    customSubDomainName: '${namePrefix}-fdy-${uniq}'
     disableLocalAuth: true
     publicNetworkAccess: 'Enabled' // demo only.
   }
 }
 
+// Foundry project — groups the agent runtime, evals, and fine-tuning jobs.
+resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = {
+  parent: foundry
+  name: 'hr-concierge'
+  location: location
+  tags: tags
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    description: 'Foundry project for Solution A (M365 Agents SDK) — hosts evaluations and fine-tuning jobs.'
+    displayName: 'HR Concierge – M365 SDK'
+  }
+}
+
 resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
-  parent: aoai
+  parent: foundry
   name: openAiDeployment
   sku: { name: 'GlobalStandard', capacity: 30 }
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
 }
 
-// Agent UAMI → AOAI (Cognitive Services OpenAI User)
+// Agent UAMI → Foundry account (Cognitive Services OpenAI User).
+// The project MI inherits the same scope via its own system identity.
 var aoaiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
 resource aoaiUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(aoai.id, identity.id, aoaiUserRoleId)
-  scope: aoai
+  name: guid(foundry.id, identity.id, aoaiUserRoleId)
+  scope: foundry
   properties: {
     principalId: identity.properties.principalId
     principalType: 'ServicePrincipal'
@@ -270,9 +289,9 @@ resource aoaiUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
-resource aoaiDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+resource foundryDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   name: 'diag'
-  scope: aoai
+  scope: foundry
   properties: {
     workspaceId: law.id
     logs: [ { categoryGroup: 'allLogs', enabled: true } ]
@@ -350,7 +369,7 @@ resource agent 'Microsoft.App/containerApps@2024-03-01' = {
             { name: 'COSMOS_CONTAINER', value: 'state' }
             { name: 'SEARCH_ENDPOINT', value: 'https://${search.name}.search.windows.net' }
             { name: 'SEARCH_INDEX', value: 'hr-policies' }
-            { name: 'AOAI_ENDPOINT', value: aoai.properties.endpoint }
+            { name: 'AOAI_ENDPOINT', value: foundry.properties.endpoint }
             { name: 'AOAI_DEPLOYMENT', value: openAiDeployment }
             { name: 'APPLICATIONINSIGHTS_CONNECTION_STRING', value: appInsights.properties.ConnectionString }
             { name: 'AZURE_CLIENT_ID', value: identity.properties.clientId }
@@ -405,4 +424,5 @@ output identityClientId string = identity.properties.clientId
 output keyVaultUri string = kv.properties.vaultUri
 output cosmosEndpoint string = cosmos.properties.documentEndpoint
 output searchEndpoint string = 'https://${search.name}.search.windows.net'
-output aoaiEndpoint string = aoai.properties.endpoint
+output foundryEndpoint string = foundry.properties.endpoint
+output projectEndpoint string = '${foundry.properties.endpoint}projects/${project.name}'

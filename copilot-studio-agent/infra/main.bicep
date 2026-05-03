@@ -4,6 +4,10 @@
 //   - Container Registry (managed-identity pull only — admin user disabled)
 //   - Container Apps Environment + 1 app (FastAPI backend) wired to a UAMI
 //   - APIM Consumption tier fronting the backend
+//   - Microsoft Foundry account (CognitiveServices kind=AIServices) + project
+//     for fine-tuning jobs (UC6 triage classifier, UC7 narrative) and offline
+//     safety evaluations. The Copilot Studio generative-answers node calls the
+//     fine-tuned deployment registered here.
 //   - Diagnostic settings forwarding all logs to Log Analytics
 //   - Tags on every resource
 //
@@ -192,9 +196,76 @@ resource apimDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
   }
 }
 
+// ──────────── Microsoft Foundry account + project (evals / fine-tuning) ─────────────
+// The Copilot Studio agent uses Power Platform for its conversational surface, but
+// fine-tuning jobs (UC6 triage classifier, UC7 performance narrative) and safety
+// evaluations must run in a Microsoft Foundry project. Once a fine-tuned deployment
+// is registered here, update the AOAI resource selector in Copilot Studio's
+// Generative Answers node to point at this endpoint.
+
+resource foundry 'Microsoft.CognitiveServices/accounts@2024-10-01' = {
+  name: '${namePrefix}-fdy-${uniq}'
+  location: location
+  tags: tags
+  kind: 'AIServices'
+  sku: { name: 'S0' }
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    customSubDomainName: '${namePrefix}-fdy-${uniq}'
+    disableLocalAuth: true
+    publicNetworkAccess: 'Enabled' // demo only.
+  }
+}
+
+// Foundry project — fine-tuning jobs and evaluation datasets live here.
+resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-preview' = {
+  parent: foundry
+  name: 'hr-concierge'
+  location: location
+  tags: tags
+  identity: { type: 'SystemAssigned' }
+  properties: {
+    description: 'Foundry project for Solution B (Copilot Studio) — hosts fine-tuning jobs and safety evaluations.'
+    displayName: 'HR Concierge – Copilot Studio'
+  }
+}
+
+// Base model deployment for fine-tuning source and evaluation prompts.
+resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
+  parent: foundry
+  name: 'gpt-4o'
+  sku: { name: 'GlobalStandard', capacity: 10 }
+  properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
+}
+
+// Backend UAMI → Foundry (Cognitive Services OpenAI User) so the backend can
+// call the fine-tuned classifier deployment from the Functions/Container Apps tier.
+var aoaiUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
+resource foundryUser 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(foundry.id, identity.id, aoaiUserRoleId)
+  scope: foundry
+  properties: {
+    principalId: identity.properties.principalId
+    principalType: 'ServicePrincipal'
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', aoaiUserRoleId)
+  }
+}
+
+resource foundryDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
+  name: 'diag'
+  scope: foundry
+  properties: {
+    workspaceId: law.id
+    logs: [ { categoryGroup: 'allLogs', enabled: true } ]
+    metrics: [ { category: 'AllMetrics', enabled: true } ]
+  }
+}
+
 // ───────────────────────────── Outputs ────────────────────────────────
 
 output backendUrl string = 'https://${backend.properties.configuration.ingress.fqdn}'
 output apimGatewayUrl string = apim.properties.gatewayUrl
 output acrLoginServer string = acr.properties.loginServer
 output identityClientId string = identity.properties.clientId
+output foundryEndpoint string = foundry.properties.endpoint
+output projectEndpoint string = '${foundry.properties.endpoint}projects/${project.name}'
