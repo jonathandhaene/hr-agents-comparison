@@ -20,9 +20,13 @@ from .tools import uc1, uc2, uc3, uc4, uc5, uc6, uc7
 log = logging.getLogger(__name__)
 
 PROJECT_ENDPOINT = os.environ["FOUNDRY_PROJECT_ENDPOINT"]
+# FOUNDRY_MODEL controls which model deployment to use. Defaults to gpt-4o.
+# For EU-sovereignty deployments, set FOUNDRY_MODEL=mistral-large and deploy
+# with enableMistral=true in infra/main.bicep. Foundry's OpenAI-compatible
+# endpoint supports both OpenAI and Mistral AI models transparently.
 MODEL = os.environ.get("FOUNDRY_MODEL", "gpt-4o")
 
-INSTRUCTIONS = """You are Contoso HR Concierge, a Foundry-hosted agent.
+INSTRUCTIONS = """You are Zava HR Concierge, a Foundry-hosted agent.
 
 Personas you serve: employees, managers, HR partners, IT, buddies, and new hires.
 
@@ -48,12 +52,12 @@ def build_agent() -> ChatAgent:
     cred = DefaultAzureCredential()
     client = AzureOpenAIChatClient(
         endpoint=os.environ["FOUNDRY_ENDPOINT"],
-        deployment=os.environ.get("FOUNDRY_DEPLOYMENT", "gpt-4o"),
+        deployment=os.environ.get("FOUNDRY_DEPLOYMENT", MODEL),
         credential=cred,
     )
     return ChatAgent(
         chat_client=client,
-        name="ContosoHRConcierge",
+        name="ZavaHRConcierge",
         instructions=INSTRUCTIONS,
         tools=[
             uc1.search_policies,

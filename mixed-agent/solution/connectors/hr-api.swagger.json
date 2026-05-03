@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Contoso HR API (mixed)",
+    "title": "Zava HR API (mixed)",
     "version": "1.1.0",
     "description": "Custom Connector to the Azure Functions HR API. Auth: function key in the x-functions-key header (rotate via Functions host configuration). Field names and response shapes match the Functions backend exactly."
   },

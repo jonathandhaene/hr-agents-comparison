@@ -53,7 +53,7 @@ Fine-tuning a model on company-specific HR data adds value where **output consis
 | UC1 Policy Q&A | Optional | Consistent citation format and answer phrasing; RAG is the primary control |
 | UC2 Time-off approval | Low | Slot-filling; format variation is acceptable |
 | UC3 Onboarding | Optional | Consistent plan structure once you accumulate manager-edited plan pairs |
-| UC4 Internal mobility | Recommended | Pitch language calibrated to Contoso grade/competency model |
+| UC4 Internal mobility | Recommended | Pitch language calibrated to Zava grade/competency model |
 | UC5 360° feedback summary | **Required for equity** | Prevents format variation that creates disparate treatment risk |
 | UC6 Triage & escalation | **Required for safety** | Stable `HARASSMENT/CRITICAL` recall regardless of how the employee phrases the complaint |
 | UC7 Performance narrative | **Core value prop** | Grade-level-calibrated drafts; consistency is the entire point of the use case |

@@ -1,11 +1,11 @@
-# Scenario — Contoso HR Concierge
+# Scenario — Zava HR Concierge
 
 ## Company
 
-**Contoso Ltd** is a fictional mid-size company:
+**Zava** is a fictional specialty coffee retailer and supplier (a play on "Java"):
 - ~5,000 employees across 12 countries
 - HQ in Seattle, US
-- Hybrid work model
+- Hybrid work model (retail stores + corporate offices + roasting facilities)
 - Standard HRIS, learning platform, ticketing system, SharePoint-based handbook
 - HR org: shared-services HR Operations + business-aligned HR Partners
 
@@ -70,7 +70,7 @@ UC7 (below) uses a fine-tuned model to generate grade-calibrated performance nar
 - **Trigger:** Manager says "Draft a performance narrative for [employee name] for the H1 review."
 - **Pattern:** Inputs (employee grade + tenure, UC5 360 summary, manager's bullet notes) → fine-tuned model drafts a grade-level-calibrated narrative → manager reviews and edits in-conversation → manager approves → narrative submitted to review system; HR Partner copy sent for calibration session.
 - **Participants:** Manager (primary author), HR Partner (calibration).
-- **Success:** Manager receives a draft narrative calibrated to the employee's grade level and Contoso's competency framework; the manager's edits are minor; the calibration committee can compare narratives across employees without systematic wording bias.
+- **Success:** Manager receives a draft narrative calibrated to the employee's grade level and Zava's competency framework; the manager's edits are minor; the calibration committee can compare narratives across employees without systematic wording bias.
 - **Why fine-tuning is required:** Without it, different managers receive different quality and length of drafts for employees at the same grade. This creates an equity risk that HR Legal cannot accept. A model fine-tuned on HR-approved narratives from prior cycles produces consistent grade-level language, consistent specificity, and consistent structure. See [docs/fine-tuning.md](./fine-tuning.md) for the full worked example.
 
 ## Sample dialogues

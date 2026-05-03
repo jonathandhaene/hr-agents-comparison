@@ -1,16 +1,16 @@
-# Contoso Employee Handbook (excerpt)
+# Zava Employee Handbook (excerpt)
 
 > This is sample content for demo purposes only. It is intentionally brief and does not represent a complete employee handbook.
 
-## 1. Welcome to Contoso
+## 1. Welcome to Zava
 
-Contoso Ltd is a global technology company headquartered in Seattle, Washington. We employ approximately 5,000 people across 12 countries. This handbook summarizes the key policies that apply to all employees regardless of location, with country-specific addenda where applicable.
+Zava is a specialty coffee retailer and supplier headquartered in Seattle, Washington. We employ approximately 5,000 people across 12 countries. This handbook summarizes the key policies that apply to all employees regardless of location, with country-specific addenda where applicable.
 
-## 2. Working at Contoso
+## 2. Working at Zava
 
 ### 2.1 Work model
 
-Contoso operates a **hybrid work model**. Employees are expected to be on-site at their assigned office a minimum of **two (2) days per week**, unless their role is designated fully remote.
+Zava operates a **hybrid work model**. Employees are expected to be on-site at their assigned office a minimum of **two (2) days per week**, unless their role is designated fully remote.
 
 ### 2.2 Working hours
 
@@ -18,7 +18,7 @@ Standard working hours are **40 hours per week**, generally Monday through Frida
 
 ### 2.3 Code of conduct
 
-All Contoso employees are required to complete annual **Code of Conduct training** within 30 days of hire and annually thereafter. Failure to complete required training may result in disciplinary action up to and including termination.
+All Zava employees are required to complete annual **Code of Conduct training** within 30 days of hire and annually thereafter. Failure to complete required training may result in disciplinary action up to and including termination.
 
 ## 3. Compensation & benefits
 
@@ -32,7 +32,7 @@ Newly hired employees have **30 days from start date** to enroll in benefits. An
 
 ### 3.3 Retirement (US)
 
-US employees are eligible for the Contoso 401(k) plan starting on day 1. Contoso matches **100% of the first 6%** of eligible compensation. Vesting is immediate.
+US employees are eligible for the Zava 401(k) plan starting on day 1. Zava matches **100% of the first 6%** of eligible compensation. Vesting is immediate.
 
 ## 4. Time off
 
@@ -42,7 +42,7 @@ See the dedicated [PTO Policy](./pto-policy.md).
 
 ### 5.1 Performance cycles
 
-Contoso runs **two formal review cycles per year** (H1 review in June, H2 review in December). Each cycle includes a self-assessment, peer feedback (360°), and a manager review.
+Zava runs **two formal review cycles per year** (H1 review in June, H2 review in December). Each cycle includes a self-assessment, peer feedback (360°), and a manager review.
 
 ### 5.2 Internal mobility
 

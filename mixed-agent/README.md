@@ -131,6 +131,6 @@ The connected Foundry agent is reached via the same Copilot Studio surface, so i
 
 ```bash
 az group delete -n <rg-name> --yes --no-wait
-pac solution delete --solution-name ContosoHrConciergeMixed
-az ai-foundry agent delete --name ContosoHRMobilityAdvisor
+pac solution delete --solution-name ZavaHrConciergeMixed
+az ai-foundry agent delete --name ZavaHRMobilityAdvisor
 ```

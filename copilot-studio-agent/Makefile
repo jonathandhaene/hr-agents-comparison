@@ -17,7 +17,7 @@ test:
 	. .venv/bin/activate && pytest -q tests
 
 pack:
-	pac solution pack --zipfile out/ContosoHrConcierge.zip --folder solution --packagetype Both
+	pac solution pack --zipfile out/ZavaHrConcierge.zip --folder solution --packagetype Both
 
 import: pack
-	pac solution import --path out/ContosoHrConcierge.zip --activate-plugins --publish-changes
+	pac solution import --path out/ZavaHrConcierge.zip --activate-plugins --publish-changes

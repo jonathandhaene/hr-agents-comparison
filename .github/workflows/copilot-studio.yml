@@ -101,7 +101,7 @@ jobs:
         uses: microsoft/powerplatform-actions/pack-solution@v1
         with:
           solution-folder: copilot-studio-agent/solution
-          solution-file: copilot-studio-agent/out/ContosoHrConcierge.zip
+          solution-file: copilot-studio-agent/out/ZavaHrConcierge.zip
           solution-type: Both
       - name: Import solution
         uses: microsoft/powerplatform-actions/import-solution@v1
@@ -110,6 +110,6 @@ jobs:
           app-id: ${{ secrets.POWER_PLATFORM_APP_ID }}
           client-secret: ${{ secrets.POWER_PLATFORM_CLIENT_SECRET }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          solution-file: copilot-studio-agent/out/ContosoHrConcierge.zip
+          solution-file: copilot-studio-agent/out/ZavaHrConcierge.zip
           activate-plugins: true
           publish-changes: true

@@ -1,7 +1,7 @@
 # Why fine-tuning must be considered — a guide for each stakeholder
 
 This document explains the fine-tuning investment decision in language that is relevant
-to each of the four stakeholder groups who must weigh in before Contoso HR deploys a
+to each of the four stakeholder groups who must weigh in before Zava HR deploys a
 fine-tuned model in production.
 
 Each section is self-contained. Share the relevant section with the relevant audience.
@@ -12,7 +12,7 @@ Each section is self-contained. Share the relevant section with the relevant aud
 
 ### The one-paragraph version
 
-A base AI model answers HR questions plausibly. A fine-tuned model answers them *consistently* — using Contoso's vocabulary, formats, and calibration standards. For HR, that difference is not cosmetic: it is the difference between a tool that deflects routine questions and a tool that can be trusted to produce 360° summaries, ticket triage decisions, and performance drafts that will hold up in a calibration meeting or an employment tribunal. Fine-tuning is the mechanism by which Contoso moves from "AI that is good enough for demos" to "AI that HR would stake its credibility on."
+A base AI model answers HR questions plausibly. A fine-tuned model answers them *consistently* — using Zava's vocabulary, formats, and calibration standards. For HR, that difference is not cosmetic: it is the difference between a tool that deflects routine questions and a tool that can be trusted to produce 360° summaries, ticket triage decisions, and performance drafts that will hold up in a calibration meeting or an employment tribunal. Fine-tuning is the mechanism by which Zava moves from "AI that is good enough for demos" to "AI that HR would stake its credibility on."
 
 ### Why it is a strategic investment, not a feature request
 
@@ -21,7 +21,7 @@ A base AI model answers HR questions plausibly. A fine-tuned model answers them 
 | HR productivity | Agent deflects ~40% of tickets; complex cases still reach HR Operations | Agent deflects ~65% of tickets; triage classification is stable and auditable |
 | Review cycle quality | Manager narratives vary in length and specificity; calibration committee spends extra session aligning | Narratives are grade-calibrated; calibration session starts from a common baseline |
 | Equity and legal exposure | Format variation in 360 summaries creates disparate-treatment risk | Consistent format is the documented standard; auditable against the training dataset |
-| Competitive position | Agents are undifferentiated; any tenant can deploy the same base model | Fine-tuned model embeds Contoso's competency framework and HR vocabulary — this is proprietary IP |
+| Competitive position | Agents are undifferentiated; any tenant can deploy the same base model | Fine-tuned model embeds Zava's competency framework and HR vocabulary — this is proprietary IP |
 
 ### What it costs and what it returns
 
@@ -42,7 +42,7 @@ The agent will continue to work — it just will not be reliable enough to exten
 
 When an employee asks a policy question, a slightly different phrasing from the agent is acceptable. When a manager receives a 360° feedback summary, a significantly shorter or less specific summary than the summary their colleague received for an equivalent employee is not acceptable — it is a fairness problem. When an employee files a harassment complaint and the agent routes it incorrectly because the phrasing was unusual, it is a compliance failure.
 
-Fine-tuning solves each of these by teaching the model how Contoso HR does it — using real HR-approved examples as the curriculum.
+Fine-tuning solves each of these by teaching the model how Zava HR does it — using real HR-approved examples as the curriculum.
 
 ### What HR contributes to fine-tuning
 
@@ -84,23 +84,23 @@ Fine-tuning a language model means sending a dataset of text examples to Microso
 
 | Requirement | How it is met |
 |---|---|
-| Lawful basis for processing | Fine-tuning falls under the employer's legitimate interest in operating a safe and fair HR process (Art. 6(1)(f) GDPR) or, where required, explicit consent of affected employees. Contoso Legal confirms the applicable basis per jurisdiction. |
+| Lawful basis for processing | Fine-tuning falls under the employer's legitimate interest in operating a safe and fair HR process (Art. 6(1)(f) GDPR) or, where required, explicit consent of affected employees. Zava Legal confirms the applicable basis per jurisdiction. |
 | Data minimisation | Training examples are stripped to the minimum needed: no employee names, no identifiers. Employee IDs are replaced with anonymised tokens. The dataset contains HR content, not identity data. |
 | Data residency | Microsoft Foundry fine-tuning jobs are pinned to the same Azure region as the HR data. For EU employees: use `northeurope` or `westeurope`. Do not use `GlobalStandard` without legal sign-off. See [docs/public-sector-eu.md](public-sector-eu.md) for the EU sovereignty details. |
-| Data retention | The fine-tuning dataset is archived in a Contoso-controlled storage account (the same Key Vault and managed-identity posture as the rest of the solution). Microsoft does not retain customer fine-tuning data after the job completes, per the [Microsoft Foundry data privacy documentation](https://learn.microsoft.com/azure/ai-services/openai/concepts/data-privacy). |
-| Right of access / erasure | Individual employee contributions to the training dataset are identifiable at the row level in the Contoso-controlled archive. If an employee exercises a GDPR erasure right, remove their examples from the archive and schedule a re-fine-tune in the next quarterly cycle. |
+| Data retention | The fine-tuning dataset is archived in a Zava-controlled storage account (the same Key Vault and managed-identity posture as the rest of the solution). Microsoft does not retain customer fine-tuning data after the job completes, per the [Microsoft Foundry data privacy documentation](https://learn.microsoft.com/azure/ai-services/openai/concepts/data-privacy). |
+| Right of access / erasure | Individual employee contributions to the training dataset are identifiable at the row level in the Zava-controlled archive. If an employee exercises a GDPR erasure right, remove their examples from the archive and schedule a re-fine-tune in the next quarterly cycle. |
 | Model outputs as personal data | A performance narrative or 360 summary generated for a named employee is personal data. It must be handled under the same retention and access controls as the equivalent human-authored document. |
 
 ### Security controls
 
-- Fine-tuning jobs run inside the Contoso Microsoft Foundry project, authenticated via managed identity. No API keys in the pipeline.
+- Fine-tuning jobs run inside the Zava Microsoft Foundry project, authenticated via managed identity. No API keys in the pipeline.
 - The training dataset is stored in the project's BYO storage account (Azure Storage, key auth disabled, RBAC-only access).
 - The fine-tuned model deployment is registered in the same Foundry project as the base model — no new network surface.
-- Foundry traces (inputs, outputs, latency) are routed to the Contoso-controlled Log Analytics workspace. No employee conversation data leaves Contoso's tenant.
+- Foundry traces (inputs, outputs, latency) are routed to the Zava-controlled Log Analytics workspace. No employee conversation data leaves Zava's tenant.
 
 ### Audit trail
 
-The fine-tuning dataset is the audit artifact. If an employment decision is challenged and the agent's output is in scope, Contoso can produce:
+The fine-tuning dataset is the audit artifact. If an employment decision is challenged and the agent's output is in scope, Zava can produce:
 1. The exact training example that shaped the model's classification or generation for the relevant category.
 2. The version of the dataset used for training (Git SHA of the fixture file).
 3. The evaluation results (precision/recall on the held-out test set) that cleared the deployment gate.
@@ -152,4 +152,4 @@ Under the EU AI Act, AI systems used in employment decisions — including perfo
 | Evaluation results | Retain with the dataset | Same as dataset |
 | Employee conversation transcripts (agent outputs) | Subject to the HR document retention policy applicable to the equivalent human document | Same trigger as the equivalent document type |
 
-The fine-tuning dataset is stored in a Contoso-controlled Azure Storage account, not in Microsoft's training infrastructure. Deletion is within Contoso's control at any time.
+The fine-tuning dataset is stored in a Zava-controlled Azure Storage account, not in Microsoft's training infrastructure. Deletion is within Zava's control at any time.

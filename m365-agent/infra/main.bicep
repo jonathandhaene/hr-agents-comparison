@@ -44,6 +44,9 @@ param botAppId string
 @description('Microsoft Foundry model deployment to call from the agent.')
 param foundryDeployment string = 'gpt-4o'
 
+@description('Deploy a Mistral model alongside GPT-4o for EU-sovereignty scenarios. Set foundryDeployment to "mistral-large" to use it as the primary model.')
+param enableMistral bool = false
+
 @description('Tags applied to every resource.')
 param tags object = {
   workload: 'hr-concierge'
@@ -277,6 +280,16 @@ resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
 }
 
+// Optional: Mistral Large (EU-origin model for EU-sovereignty deployments).
+// Enable with -p enableMistral=true. Set foundryDeployment='mistral-large' to use it.
+resource mistral 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = if (enableMistral) {
+  parent: foundry
+  name: 'mistral-large'
+  sku: { name: 'Standard', capacity: 10 }   // Mistral requires Standard, not GlobalStandard
+  properties: { model: { format: 'MistralAI', name: 'Mistral-Large' } }
+  dependsOn: [ gpt ]   // serialise deployments to avoid Foundry conflicts
+}
+
 // Agent UAMI → Foundry account (Cognitive Services OpenAI User).
 // The project MI inherits the same scope via its own system identity.
 var foundryUserRoleId = '5e0bd9bd-7b93-4f28-af87-19fc36ad61bd'
@@ -392,7 +405,7 @@ resource bot 'Microsoft.BotService/botServices@2022-09-15' = {
   sku: { name: 'F0' }
   kind: 'azurebot'
   properties: {
-    displayName: 'Contoso HR Concierge (M365 SDK)'
+    displayName: 'Zava HR Concierge (M365 SDK)'
     msaAppId: botAppId
     msaAppType: 'UserAssignedMSI'
     msaAppMSIResourceId: identity.id

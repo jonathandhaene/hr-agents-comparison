@@ -27,7 +27,7 @@ from fastapi import FastAPI, HTTPException
 DATA_DIR = Path(os.environ.get("HR_DATA_DIR", Path(__file__).parent.parent / "data"))
 SOLUTION = "copilot-studio-agent"
 
-app = FastAPI(title="Contoso HR API (Copilot Studio)", version="1.0.0")
+app = FastAPI(title="Zava HR API (Copilot Studio)", version="1.0.0")
 
 
 # ---------------------------------------------------------------------------

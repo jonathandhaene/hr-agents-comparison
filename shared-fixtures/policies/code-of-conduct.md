@@ -4,7 +4,7 @@
 
 ## Our values in action
 
-1. **Respect.** We treat each other with dignity. Harassment, discrimination, bullying, and retaliation have no place at Contoso.
+1. **Respect.** We treat each other with dignity. Harassment, discrimination, bullying, and retaliation have no place at Zava.
 2. **Integrity.** We tell the truth, follow through on commitments, and disclose conflicts of interest.
 3. **Customer focus.** We build for our customers and protect their data as if it were our own.
 4. **Inclusion.** We make decisions that bring more voices in, especially those historically underrepresented.

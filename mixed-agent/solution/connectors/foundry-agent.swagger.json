@@ -3,7 +3,7 @@
   "info": {
     "title": "Foundry connected agent (proxied)",
     "version": "1.0.0",
-    "description": "Custom connector that wraps the Microsoft Foundry hosted agent (`ContosoHRMobilityAdvisor`) used by Copilot Studio for UC4 (mobility) and UC5 (feedback summary).\n\nThis connector targets the **mixed-agent Functions backend**, not the Foundry data plane directly: a single `invokeAgent` round-trip from Copilot Studio expands into the Foundry threads/runs API behind a single HTTPS call. The Function uses a managed identity with `Cognitive Services OpenAI User` on the Foundry account, so no shared secrets cross the connector boundary.\n\nAuth: function key (`x-functions-key`)."
+    "description": "Custom connector that wraps the Microsoft Foundry hosted agent (`ZavaHRMobilityAdvisor`) used by Copilot Studio for UC4 (mobility) and UC5 (feedback summary).\n\nThis connector targets the **mixed-agent Functions backend**, not the Foundry data plane directly: a single `invokeAgent` round-trip from Copilot Studio expands into the Foundry threads/runs API behind a single HTTPS call. The Function uses a managed identity with `Cognitive Services OpenAI User` on the Foundry account, so no shared secrets cross the connector boundary.\n\nAuth: function key (`x-functions-key`)."
   },
   "host": "${FUNCTION_APP_HOST}",
   "basePath": "/api",
@@ -52,7 +52,7 @@
       "type": "object",
       "required": ["agentName", "input"],
       "properties": {
-        "agentName": { "type": "string", "x-ms-summary": "Agent name (e.g. ContosoHRMobilityAdvisor)" },
+        "agentName": { "type": "string", "x-ms-summary": "Agent name (e.g. ZavaHRMobilityAdvisor)" },
         "input":     { "type": "string", "x-ms-summary": "User input / prompt" },
         "context": {
           "type": "object",

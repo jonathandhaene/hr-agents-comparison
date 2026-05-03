@@ -49,6 +49,9 @@ param enableVoice bool = true
 @description('Data residency for Azure Communication Services (e.g., United States, Europe, Asia Pacific).')
 param acsDataLocation string = 'United States'
 
+@description('Deploy a Mistral model alongside GPT-4o for EU-sovereignty scenarios. Set foundryDeployment to "mistral-large" to activate it as the primary model.')
+param enableMistral bool = false
+
 @description('Tags applied to every resource.')
 param tags object = {
   workload: 'hr-concierge'
@@ -282,7 +285,7 @@ resource project 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-previ
   location: location
   identity: { type: 'SystemAssigned' }
   properties: {
-    displayName: 'Contoso HR Concierge'
+    displayName: 'Zava HR Concierge'
     description: 'Foundry project hosting the HR Concierge agent.'
   }
 }
@@ -292,6 +295,16 @@ resource gpt 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = {
   name: foundryDeployment
   sku: { name: 'GlobalStandard', capacity: 30 }
   properties: { model: { format: 'OpenAI', name: 'gpt-4o', version: '2024-08-06' } }
+}
+
+// Optional: Mistral Large (EU-origin model for EU-sovereignty deployments).
+// Enable with -p enableMistral=true. Set foundryDeployment='mistral-large' to use it.
+resource mistral 'Microsoft.CognitiveServices/accounts/deployments@2024-10-01' = if (enableMistral) {
+  parent: foundry
+  name: 'mistral-large'
+  sku: { name: 'Standard', capacity: 10 }   // Mistral requires Standard, not GlobalStandard
+  properties: { model: { format: 'MistralAI', name: 'Mistral-Large' } }
+  dependsOn: [ gpt ]   // serialise deployments to avoid Foundry conflicts
 }
 
 resource foundryDiag 'Microsoft.Insights/diagnosticSettings@2021-05-01-preview' = {
@@ -462,7 +475,7 @@ resource evalsProject 'Microsoft.CognitiveServices/accounts/projects@2025-04-01-
   location: location
   identity: { type: 'SystemAssigned' }
   properties: {
-    displayName: 'Contoso HR Concierge — Evaluations'
+    displayName: 'Zava HR Concierge — Evaluations'
     description: 'Offline evaluation harness for the HR Concierge agent (datasets, eval runs, red-team).'
   }
 }

@@ -43,7 +43,7 @@ beginDialog:
               operationId: invokeAgent
               input:
                 binding:
-                  agentName: ContosoHRMobilityAdvisor
+                  agentName: ZavaHRMobilityAdvisor
                   input: ='Summarize feedback request ' + Topic.requestId
               output: { binding: { reply: Topic.reply } }
             - kind: SendActivity
