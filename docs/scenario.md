@@ -22,6 +22,8 @@
 
 Each is implemented in **all three** technologies (UC × Technology = 18 implementations). Where a technology cannot do something cleanly, the limit is documented in [comparison.md](./comparison.md).
 
+UC7 (below) is a **fine-tuning-dependent** use case that is not implemented in the A/B/C/D solutions but is a natural next step once UC5 is running. See [docs/fine-tuning.md](./fine-tuning.md) for the full fine-tuning analysis across all UCs.
+
 ### UC1 — Policy & benefits Q&A
 - **Trigger:** Employee asks "How many vacation days do I get after 5 years?" / "What does our parental leave policy cover?"
 - **Pattern:** Retrieval-augmented generation over the HR handbook + policy PDFs.
@@ -55,12 +57,21 @@ Each is implemented in **all three** technologies (UC × Technology = 18 impleme
 - **Pattern:** Agent suggests reviewer set (peers/reports/skip-level) → sends individual feedback prompts → collects responses → summarizes themes.
 - **Participants:** Employee being reviewed, Manager, 3–6 peers.
 - **Success:** A balanced, theme-grouped summary delivered to the manager.
+- **Fine-tuning note:** Summary format and calibration language must be consistent across all employees. A fine-tuned model trained on HR-approved summary examples significantly reduces format variation and the equity risk of inconsistent specificity. See [docs/fine-tuning.md](./fine-tuning.md).
 
 ### UC6 — HR ticket triage & escalation
 - **Trigger:** Employee describes a sensitive issue: harassment claim, payroll error, immigration question, etc.
 - **Pattern:** Classify → answer if low-sensitivity & well-known → otherwise create a ticket and **hand off** to HR Partner with conversation transcript.
 - **Participants:** Employee → HR Partner.
 - **Success:** Sensitive cases never get auto-answered; HR Partner gets context-rich handoff.
+- **Fine-tuning note:** The sensitivity classifier is a safety control. A base model with a prompt is unstable across rephrasing; a fine-tuned classifier is the recommended production approach for the `HARASSMENT/CRITICAL` and `ER/HIGH` categories. See [docs/fine-tuning.md](./fine-tuning.md) for the worked example.
+
+### UC7 — Calibrated performance narrative generation *(fine-tuning use case)*
+- **Trigger:** Manager says "Draft a performance narrative for [employee name] for the H1 review."
+- **Pattern:** Inputs (employee grade + tenure, UC5 360 summary, manager's bullet notes) → fine-tuned model drafts a grade-level-calibrated narrative → manager reviews and edits in-conversation → manager approves → narrative submitted to review system; HR Partner copy sent for calibration session.
+- **Participants:** Manager (primary author), HR Partner (calibration).
+- **Success:** Manager receives a draft narrative calibrated to the employee's grade level and Contoso's competency framework; the manager's edits are minor; the calibration committee can compare narratives across employees without systematic wording bias.
+- **Why fine-tuning is required:** Without it, different managers receive different quality and length of drafts for employees at the same grade. This creates an equity risk that HR Legal cannot accept. A model fine-tuned on HR-approved narratives from prior cycles produces consistent grade-level language, consistent specificity, and consistent structure. See [docs/fine-tuning.md](./fine-tuning.md) for the full worked example.
 
 ## Sample dialogues
 
@@ -86,12 +97,37 @@ Each is implemented in **all three** technologies (UC × Technology = 18 impleme
 
 **Agent** → "I'm sorry that happened. This sounds like something an HR Partner should handle directly and confidentially. I won't ask you for details here. I've created **case INC-1042** and pinged **Carlos Mendes** (your HR Partner). Carlos will reach out within 1 business day. Would you like a Teams chat opened with Carlos now?"
 
+### UC7 — Performance narrative (fine-tuning)
+
+**Beatrice (Manager)** → "Draft a performance narrative for Aarav Patel for the H1 review."
+
+**Agent** → "Here's a draft calibrated for a **Senior Software Engineer (L5)** narrative, based on his H1 360 feedback and your notes:
+
+---
+*Aarav delivered the Payments v3 API ahead of schedule while coordinating with three cross-functional teams, demonstrating strong ownership and stakeholder management at the L5 level. Peer feedback consistently highlights his ability to simplify complex technical trade-offs for non-engineering partners. One area of focus for H2: extending his impact beyond the immediate team by sharing design patterns more broadly.*
+
+---
+
+Does this reflect your assessment? You can edit the draft directly or ask me to adjust the tone, specificity, or any specific section."
+
+**Beatrice** → "Make the first sentence more specific about the business impact."
+
+**Agent** → "Updated: *Aarav delivered the Payments v3 API three weeks ahead of schedule, unblocking the Q2 merchant launch and directly contributing to €2M in new payment volume.* Does that work?"
+
+**Beatrice** → "Yes, submit it."
+
+**Agent** → "Submitted to the H1 2026 review record. Carlos Mendes (HR Partner) has a copy for the calibration session."
+
 ## Success metrics for the demo
 
 A successful demo run shows, for each technology:
 1. UC1 produces a **cited** answer.
 2. UC2 produces a **proactive Adaptive Card** to the manager and round-trips back.
 3. UC3 produces tasks visible to **at least three different participants**.
+4. UC4 produces **personalized** matches (not generic).
+5. UC5 produces a **summary across multiple inputs**.
+6. UC6 **does not auto-answer** sensitive cases and produces a real handoff artifact.
+7. UC7 (fine-tuning path) produces a **grade-level-calibrated narrative** that the manager approves with minor edits; the calibration committee can compare narratives across employees without systematic wording differences.
 4. UC4 produces **personalized** matches (not generic).
 5. UC5 produces a **summary across multiple inputs**.
 6. UC6 **does not auto-answer** sensitive cases and produces a real handoff artifact.

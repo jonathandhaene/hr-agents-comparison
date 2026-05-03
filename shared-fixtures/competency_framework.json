@@ -1,0 +1,114 @@
+{
+  "levels": [
+    {
+      "grade": "L3",
+      "title": "Associate / Junior",
+      "competencies": [
+        {
+          "name": "Delivery",
+          "descriptor": "Completes assigned tasks reliably and on time with guidance from senior colleagues."
+        },
+        {
+          "name": "Communication",
+          "descriptor": "Communicates clearly within the team; proactively surfaces blockers before they become escalations."
+        },
+        {
+          "name": "Learning",
+          "descriptor": "Actively seeks feedback and incorporates it; demonstrates continuous improvement within their role."
+        },
+        {
+          "name": "Collaboration",
+          "descriptor": "Works well with immediate teammates; builds positive working relationships."
+        }
+      ]
+    },
+    {
+      "grade": "L4",
+      "title": "Mid-level",
+      "competencies": [
+        {
+          "name": "Delivery",
+          "descriptor": "Owns end-to-end delivery of defined work; identifies and manages risks within scope."
+        },
+        {
+          "name": "Communication",
+          "descriptor": "Communicates effectively with stakeholders outside the immediate team; written and verbal communication is clear and concise."
+        },
+        {
+          "name": "Technical depth",
+          "descriptor": "Demonstrates strong domain knowledge; produces high-quality work with minimal rework."
+        },
+        {
+          "name": "Collaboration",
+          "descriptor": "Cross-team collaborator; supports junior colleagues informally."
+        }
+      ]
+    },
+    {
+      "grade": "L5",
+      "title": "Senior",
+      "competencies": [
+        {
+          "name": "Ownership",
+          "descriptor": "Takes end-to-end ownership of significant deliverables; does not require management oversight on execution."
+        },
+        {
+          "name": "Stakeholder influence",
+          "descriptor": "Shapes decisions across teams; translates technical complexity for non-technical partners."
+        },
+        {
+          "name": "Scope amplification",
+          "descriptor": "Multiplies impact beyond own squad — e.g., mentoring, shared tooling, cross-team patterns."
+        },
+        {
+          "name": "Judgment",
+          "descriptor": "Makes sound trade-off decisions independently; escalates the right things at the right time."
+        }
+      ]
+    },
+    {
+      "grade": "L6",
+      "title": "Staff / Lead",
+      "competencies": [
+        {
+          "name": "Organisational impact",
+          "descriptor": "Initiatives have measurable impact on multiple teams or business outcomes."
+        },
+        {
+          "name": "Strategic influence",
+          "descriptor": "Shapes direction at the org level; drives alignment across teams on complex, ambiguous problems."
+        },
+        {
+          "name": "Talent development",
+          "descriptor": "Actively grows L4/L5 colleagues; creates leverage through others."
+        },
+        {
+          "name": "Technical / domain leadership",
+          "descriptor": "Recognised as a go-to authority; sets standards and best practices that others follow."
+        }
+      ]
+    },
+    {
+      "grade": "L7",
+      "title": "Principal / Senior Staff",
+      "competencies": [
+        {
+          "name": "Company-wide impact",
+          "descriptor": "Work is consequential at the company level; decisions have multi-year implications."
+        },
+        {
+          "name": "External recognition",
+          "descriptor": "Recognised externally (customers, partners, or community) as a leader in their domain."
+        },
+        {
+          "name": "Organisational design",
+          "descriptor": "Shapes how teams and processes are structured to deliver outcomes."
+        },
+        {
+          "name": "Thought leadership",
+          "descriptor": "Generates novel ideas that create competitive advantage or step-change improvement."
+        }
+      ]
+    }
+  ]
+}
