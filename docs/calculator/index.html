@@ -179,6 +179,32 @@
   </section>
 </main>
 
+<section class="panel" style="margin:0 32px 24px">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div>
+      <h2 style="margin:0">Capability race — 5-year delivery curve</h2>
+      <div class="sub">Cumulative <em>capability shipped</em> over 60 months for each solution. Velocity per phase is derived from <a style="color:var(--accent)" href="../timeline.md">docs/timeline.md</a>: B sprints early then plateaus on model-led work; A is steady but maker-bottlenecked; C accelerates with model-led use cases; D starts a beat slower than B and sustains the longest.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="reset" id="raceToggle">▶ Play</button>
+      <button class="reset" id="raceReset">Reset</button>
+      <span class="pill" id="raceMonth">Month 0 · Year 0</span>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:14px;grid-template-columns:1.2fr 1fr;gap:18px">
+    <div>
+      <h3>Cumulative capability over time</h3>
+      <svg id="raceLine" viewBox="0 0 700 320" style="width:100%;height:auto;background:#0d1428;border:1px solid var(--line);border-radius:8px"></svg>
+    </div>
+    <div>
+      <h3>Live leaderboard</h3>
+      <svg id="raceBars" viewBox="0 0 500 220" style="width:100%;height:auto;background:#0d1428;border:1px solid var(--line);border-radius:8px"></svg>
+      <div class="note" id="racePhase"></div>
+    </div>
+  </div>
+</section>
+
 <div class="footer">
   Defaults derived from the per-solution READMEs and <a style="color:var(--accent)" href="../comparison.md">docs/comparison.md</a>. Live Azure rates: <a style="color:var(--accent)" href="https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview">prices.azure.com</a>. Copilot Studio billing: <a style="color:var(--accent)" href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management">Microsoft Learn</a>.
 </div>
@@ -475,6 +501,145 @@ renderSolutions();
 renderUcs();
 bindAssumptions();
 recompute();
+
+// =========================================================================
+//  Capability race — 60-month animated visualisation
+// =========================================================================
+const RACE_COLORS = { A:'#5aa9ff', B:'#b59cff', C:'#3ddc97', D:'#ffb648' };
+
+// Velocity phases (capability points per month) drawn from docs/timeline.md.
+// month ranges are [from, to) in months from kickoff.
+const RACE_PHASES = {
+  A: [ // M365 Agents SDK — slow ramp, steady, maker-bottlenecked
+    {to:3, v:1.5, label:'Bot Service + scaffolding'},
+    {to:12, v:4,  label:'Steady engineering pace'},
+    {to:24, v:5,  label:'Patterns established'},
+    {to:60, v:5,  label:'Maker bottleneck caps acceleration'},
+  ],
+  B: [ // Copilot Studio — sprint then plateau
+    {to:3, v:8,   label:'Maker time-to-demo'},
+    {to:12, v:7,  label:'Topics, flows, SharePoint grounding'},
+    {to:24, v:4,  label:'Hits model-led ceiling on UC4/UC5/UC7'},
+    {to:60, v:3,  label:'Plateau — connector sprawl, eval gaps'},
+  ],
+  C: [ // Foundry hosted — medium start, accelerates with evals
+    {to:3, v:3,   label:'Foundry project + hosted agent'},
+    {to:12, v:5,  label:'Tools + File Search'},
+    {to:24, v:7,  label:'Model-led UCs + evaluations land'},
+    {to:60, v:6,  label:'Orchestration friction on multi-actor'},
+  ],
+  D: [ // Mixed — a beat slower than B early, sustains longest
+    {to:3, v:6,   label:'Copilot Studio + Functions + Foundry setup'},
+    {to:12, v:7,  label:'Makers + connected agent in parallel'},
+    {to:24, v:8,  label:'Best of both — maker velocity + model depth'},
+    {to:60, v:8,  label:'Sustained — platforming pays off'},
+  ],
+};
+
+function velocityAt(sol, month){
+  for (const p of RACE_PHASES[sol]) if (month < p.to) return p;
+  return RACE_PHASES[sol].at(-1);
+}
+function cumulativeAt(sol, month){
+  let total = 0; let prev = 0;
+  for (const p of RACE_PHASES[sol]){
+    const end = Math.min(p.to, month);
+    if (end > prev) total += (end - prev) * p.v;
+    prev = p.to;
+    if (month <= p.to) break;
+  }
+  return total;
+}
+
+const RACE = { month:0, max:60, playing:false, timer:null };
+
+function drawRace(){
+  const month = RACE.month;
+  $('raceMonth').textContent = `Month ${month} · Year ${(month/12).toFixed(1)}`;
+
+  // Pre-compute series 0..60 (cached once)
+  if (!drawRace._series){
+    drawRace._series = {};
+    for (const s of ['A','B','C','D']){
+      const arr = [];
+      for (let m=0; m<=RACE.max; m++) arr.push(cumulativeAt(s, m));
+      drawRace._series[s] = arr;
+    }
+    drawRace._yMax = Math.max(...Object.values(drawRace._series).flat());
+  }
+  const series = drawRace._series;
+  const yMax = drawRace._yMax;
+
+  // ---- Line chart
+  const W=700, H=320, padL=44, padR=12, padT=18, padB=30;
+  const innerW = W - padL - padR, innerH = H - padT - padB;
+  const x = m => padL + (m / RACE.max) * innerW;
+  const y = v => padT + innerH - (v / yMax) * innerH;
+
+  const gridLines = [];
+  for (let g=0; g<=5; g++){
+    const yy = padT + innerH * g/5;
+    const val = Math.round(yMax * (1 - g/5));
+    gridLines.push(`<line x1="${padL}" x2="${W-padR}" y1="${yy}" y2="${yy}" stroke="#1f2a48"/>`);
+    gridLines.push(`<text x="${padL-6}" y="${yy+4}" fill="#8b95ad" font-size="10" text-anchor="end">${val}</text>`);
+  }
+  const yearTicks = [];
+  for (let yr=0; yr<=5; yr++){
+    const xx = x(yr*12);
+    yearTicks.push(`<line x1="${xx}" x2="${xx}" y1="${padT}" y2="${padT+innerH}" stroke="#1f2a48" stroke-dasharray="2 3"/>`);
+    yearTicks.push(`<text x="${xx}" y="${H-10}" fill="#8b95ad" font-size="10" text-anchor="middle">Year ${yr}</text>`);
+  }
+
+  const paths = ['A','B','C','D'].map(s=>{
+    const arr = series[s];
+    let d = '';
+    for (let m=0; m<=month; m++) d += (m===0?'M':'L') + x(m) + ' ' + y(arr[m]);
+    return `<path d="${d}" fill="none" stroke="${RACE_COLORS[s]}" stroke-width="2.5"/>` +
+           `<circle cx="${x(month)}" cy="${y(arr[month])}" r="4" fill="${RACE_COLORS[s]}"/>` +
+           `<text x="${x(month)+8}" y="${y(arr[month])+4}" fill="${RACE_COLORS[s]}" font-size="11" font-weight="600">${s}</text>`;
+  }).join('');
+
+  $('raceLine').innerHTML = gridLines.join('') + yearTicks.join('') + paths +
+    `<text x="${padL}" y="${padT-4}" fill="#8b95ad" font-size="10">Capability points (cumulative)</text>`;
+
+  // ---- Bar leaderboard
+  const ranking = ['A','B','C','D'].map(s => ({s, v:series[s][month]})).sort((a,b)=>b.v-a.v);
+  const bw=500, bh=220, bPadL=130, bPadR=20, bPadT=18, bPadB=12;
+  const rowH = (bh - bPadT - bPadB) / 4;
+  const maxBar = bw - bPadL - bPadR;
+  const barMax = Math.max(...ranking.map(r=>r.v), 1);
+  const bars = ranking.map((r,i)=>{
+    const yy = bPadT + i*rowH;
+    const w = (r.v / barMax) * maxBar;
+    const sol = SOLUTIONS.find(x=>x.id===r.s);
+    return `
+      <text x="${bPadL-8}" y="${yy+rowH/2+4}" text-anchor="end" fill="#e7ecf5" font-size="12" font-weight="600">${r.s} — ${sol.name}</text>
+      <rect x="${bPadL}" y="${yy+6}" width="${w}" height="${rowH-12}" rx="4" fill="${RACE_COLORS[r.s]}" opacity="0.9"/>
+      <text x="${bPadL+w+6}" y="${yy+rowH/2+4}" fill="#e7ecf5" font-size="11" font-variant-numeric="tabular-nums">${Math.round(r.v)}</text>`;
+  }).join('');
+  $('raceBars').innerHTML = bars;
+
+  // ---- Phase note (current velocity for each)
+  $('racePhase').innerHTML = ['A','B','C','D'].map(s=>{
+    const p = velocityAt(s, month);
+    return `<span style="color:${RACE_COLORS[s]};font-weight:600">${s}</span> @ ${p.v}/mo — <span style="color:var(--muted)">${p.label}</span>`;
+  }).join('<br/>');
+}
+
+function raceTick(){
+  if (!RACE.playing) return;
+  RACE.month = Math.min(RACE.max, RACE.month + 1);
+  drawRace();
+  if (RACE.month >= RACE.max){ raceStop(); return; }
+  RACE.timer = setTimeout(raceTick, 90);
+}
+function racePlay(){ if (RACE.month >= RACE.max) RACE.month = 0; RACE.playing = true; $('raceToggle').textContent='❚❚ Pause'; raceTick(); }
+function raceStop(){ RACE.playing = false; $('raceToggle').textContent='▶ Play'; if (RACE.timer){ clearTimeout(RACE.timer); RACE.timer=null; } }
+function raceReset(){ raceStop(); RACE.month = 0; drawRace(); }
+
+$('raceToggle').onclick = () => RACE.playing ? raceStop() : racePlay();
+$('raceReset').onclick = raceReset;
+drawRace();
 </script>
 </body>
 </html>
