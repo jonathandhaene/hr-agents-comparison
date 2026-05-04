@@ -83,11 +83,24 @@
     <h2 style="margin-top:18px">2. Pick solutions to compare</h2>
     <div class="pills" id="solutions"></div>
 
-    <h2 style="margin-top:18px">3. Use cases &amp; monthly volume (sessions / month)</h2>
+    <h2 style="margin-top:18px">3. Azure region &amp; live pricing</h2>
+    <div class="grid2">
+      <div class="field">
+        <span>Azure region (used to fetch live AOAI / Foundry Models prices)</span>
+        <select id="region"></select>
+      </div>
+      <div class="field">
+        <span>&nbsp;</span>
+        <button class="reset" type="button" id="refreshPrices">Refresh live prices from prices.azure.com</button>
+      </div>
+    </div>
+    <div class="note" id="priceNote">Click “Refresh live prices” to pull current gpt-4o GlobalStandard rates for the selected region.</div>
+
+    <h2 style="margin-top:18px">4. Use cases &amp; monthly volume (sessions / month)</h2>
     <div id="ucs"></div>
 
     <details>
-      <summary>4. Tweak assumptions</summary>
+      <summary>5. Tweak assumptions</summary>
 
       <h3>Azure OpenAI (gpt-4o GlobalStandard)</h3>
       <div class="grid2">
@@ -217,6 +230,7 @@ const CAN_USE_M365_FREE    = { A:false, B:true, C:false, D:true };
 const DEFAULTS = {
   userCount: 5000,
   licenseModel: 'm365copilot',
+  region: 'eastus',
   aoaiIn:0.0025, aoaiOut:0.01, tkIn:1500, tkOut:500,
   creditUsd:0.01,
   cGenAns:1, cClassic:0.2, cTenantGraph:0.3,
@@ -374,6 +388,82 @@ function bindAssumptions(){
   $('licenseModel').onchange = e => { state.licenseModel = e.target.value; recompute(); };
   $('includeLicenses').checked = state.includeLicenses;
   $('includeLicenses').onchange = e => { state.includeLicenses = e.target.checked; recompute(); };
+  renderRegions();
+  $('region').value = state.region;
+  $('region').onchange = e => { state.region = e.target.value; };
+  $('refreshPrices').onclick = fetchLivePrices;
+}
+
+// ---- Live pricing ---------------------------------------------------------
+const REGIONS = [
+  ['eastus','East US'],['eastus2','East US 2'],['westus','West US'],['westus2','West US 2'],['westus3','West US 3'],
+  ['centralus','Central US'],['southcentralus','South Central US'],['northcentralus','North Central US'],
+  ['canadaeast','Canada East'],['canadacentral','Canada Central'],
+  ['northeurope','North Europe'],['westeurope','West Europe'],
+  ['swedencentral','Sweden Central'],['switzerlandnorth','Switzerland North'],['francecentral','France Central'],
+  ['germanywestcentral','Germany West Central'],['norwayeast','Norway East'],['polandcentral','Poland Central'],
+  ['uksouth','UK South'],['ukwest','UK West'],
+  ['uaenorth','UAE North'],
+  ['southeastasia','Southeast Asia'],['eastasia','East Asia'],['japaneast','Japan East'],['japanwest','Japan West'],
+  ['australiaeast','Australia East'],['koreacentral','Korea Central'],['centralindia','Central India'],
+  ['brazilsouth','Brazil South'],['southafricanorth','South Africa North'],
+];
+function renderRegions(){
+  $('region').innerHTML = REGIONS.map(([k,n])=>`<option value="${k}">${n} (${k})</option>`).join('');
+}
+
+async function fetchLivePrices(){
+  const note = $('priceNote');
+  note.innerHTML = 'Fetching live prices from <code>prices.azure.com</code>…';
+  // gpt-4o GlobalStandard meters live under serviceName "Azure OpenAI" and (newer) "Foundry Models".
+  // We fetch both; meterName patterns include things like "gpt-4o-0806 Global Inp tokens".
+  const filters = [
+    `serviceName eq 'Azure OpenAI' and armRegionName eq '${state.region}' and priceType eq 'Consumption'`,
+    `serviceName eq 'Foundry Models' and armRegionName eq '${state.region}' and priceType eq 'Consumption'`,
+  ];
+  const base = 'https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview&$filter=';
+  try {
+    const results = (await Promise.all(filters.map(f =>
+      fetch(base + encodeURIComponent(f)).then(r => r.ok ? r.json() : { Items: [] })
+    ))).flatMap(r => r.Items || []);
+
+    if (!results.length) {
+      note.innerHTML = `No items returned for <code>${state.region}</code>. gpt-4o GlobalStandard pricing is region-uniform; defaults retained.`;
+      return;
+    }
+
+    // Pick the gpt-4o Global tokens meters (input + output). Names vary across snapshots.
+    const isGpt4o   = n => /gpt-4o/i.test(n) && !/mini/i.test(n) && !/realtime/i.test(n) && !/audio/i.test(n);
+    const isGlobal  = n => /global/i.test(n);
+    const isInput   = n => /(inp|input)\b/i.test(n);
+    const isOutput  = n => /(outp|output)\b/i.test(n);
+
+    const gpt4o = results.filter(i => isGpt4o(i.meterName) && isGlobal(i.meterName));
+    const inItem  = gpt4o.find(i => isInput(i.meterName))  || results.find(i => isGpt4o(i.meterName) && isInput(i.meterName));
+    const outItem = gpt4o.find(i => isOutput(i.meterName)) || results.find(i => isGpt4o(i.meterName) && isOutput(i.meterName));
+
+    let updated = [];
+    if (inItem)  { state.aoaiIn  = inItem.retailPrice  * unitFactor(inItem.unitOfMeasure);  $('aoaiIn').value  = state.aoaiIn;  updated.push(`input ${inItem.meterName} = $${state.aoaiIn}/1K`); }
+    if (outItem) { state.aoaiOut = outItem.retailPrice * unitFactor(outItem.unitOfMeasure); $('aoaiOut').value = state.aoaiOut; updated.push(`output ${outItem.meterName} = $${state.aoaiOut}/1K`); }
+
+    if (updated.length) {
+      note.innerHTML = `Live prices applied (${state.region}, ${new Date().toISOString().slice(0,16).replace('T',' ')}Z): ${updated.join(' · ')}.`;
+      recompute();
+    } else {
+      note.innerHTML = `Could not identify gpt-4o GlobalStandard meters in <code>${state.region}</code>. Defaults retained. Try a different region (e.g. <code>eastus</code>).`;
+    }
+  } catch (err) {
+    note.innerHTML = `Live price fetch failed: ${err.message}. Defaults retained.`;
+  }
+}
+
+// Convert AOAI unitOfMeasure (e.g. "1K", "1,000 tokens", "1M Tokens") to a per-1K-token factor.
+function unitFactor(uom){
+  if (!uom) return 1;
+  const s = uom.toLowerCase();
+  if (/(^|\s)1m\b|1,000,000|million/.test(s)) return 1/1000;   // price is per 1M tokens → divide by 1000 to get per-1K
+  if (/1k\b|1,000|thousand/.test(s))           return 1;        // already per-1K
+  return 1;
 }
 
 function resetAll(){
