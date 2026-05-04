@@ -116,6 +116,13 @@
         <div class="field"><span>D — Mixed (Functions Consumption + Foundry; scales to zero)</span><input id="restD" type="number" /></div>
       </div>
 
+      <h3>Fine-tuned model (UC7)</h3>
+      <div class="grid2">
+        <div class="field"><span>Token cost multiplier vs base gpt-4o</span><input id="ftMultiplier" type="number" step="0.1" /></div>
+        <div class="field"><span>Fine-tune hosting ($ / month, added when UC7 is selected)</span><input id="ftHosting" type="number" /></div>
+      </div>
+      <div class="note">UC7 (calibrated performance narrative) uses a fine-tuned gpt-4o deployment. Inference tokens are billed at a premium and a monthly hosting fee applies regardless of volume. See <a style="color:var(--accent)" href="../fine-tuning.md">docs/fine-tuning.md</a>.</div>
+
       <h3>Per-user Microsoft license fees ($ / user / month)</h3>
       <div class="grid2">
         <div class="field"><span>M365 Copilot license</span><input id="licM365" type="number" step="0.5" /></div>
@@ -178,6 +185,7 @@ const USE_CASES = [
   { id:'uc4', title:'UC4 — Internal mobility',    hint:'Model-led reasoning' },
   { id:'uc5', title:'UC5 — 360° feedback',        hint:'Fan-out + summary' },
   { id:'uc6', title:'UC6 — Triage & escalation',  hint:'Classifier + handoff' },
+  { id:'uc7', title:'UC7 — Performance narrative', hint:'Fine-tuned model — calibrated drafts' },
 ];
 
 // Per-UC, per-solution shape of one session.
@@ -194,6 +202,9 @@ const UC_SHAPES = {
   uc4: { A:{aoai:1.5, _toolFree:1},   B:{tool:1, genAns:1},             C:{aoai:1.5, _toolFree:1}, D:{aoai:1.5, tool:1} },
   uc5: { A:{aoai:1.2, _toolFree:1},   B:{flow:1, tool:1, genAns:1},     C:{aoai:1.2, _toolFree:2}, D:{flow:1, aoai:1, tool:1} },
   uc6: { A:{aoai:0.7, _toolFree:1},   B:{flow:1, tool:1},               C:{aoai:0.7, _toolFree:1}, D:{flow:1, tool:1} },
+  // UC7 uses a fine-tuned deployment; longer generations + a connector/tool hop.
+  // The fine-tune token surcharge is applied via state.ftMultiplier when uc7 is selected.
+  uc7: { A:{aoai:3, _toolFree:1},     B:{flow:1, tool:1},               C:{aoai:3, _toolFree:1},   D:{aoai:3, tool:1}, ft:true },
 };
 
 // Which solutions actually use Copilot Studio billing pipe?
@@ -213,9 +224,11 @@ const DEFAULTS = {
   restA:250, restB:120, restC:200, restD:15,
   licM365:30, licPP:20,
   includeLicenses:false,
-  volumes:{ uc1:2000, uc2:400, uc3:50, uc4:200, uc5:100, uc6:300 },
-  selectedUcs:{ uc1:true, uc2:true, uc3:true, uc4:true, uc5:true, uc6:true },
+  volumes:{ uc1:2000, uc2:400, uc3:50, uc4:200, uc5:100, uc6:300, uc7:80 },
+  selectedUcs:{ uc1:true, uc2:true, uc3:true, uc4:true, uc5:true, uc6:true, uc7:true },
   selectedSols:{ A:true, B:true, C:true, D:true },
+  ftMultiplier:1.5,    // fine-tuned gpt-4o token premium vs base
+  ftHosting:300,       // monthly hosting cost for the fine-tuned deployment (Foundry)
 };
 
 let state = JSON.parse(JSON.stringify(DEFAULTS));
@@ -227,11 +240,16 @@ const fmt2 = n => (n||0).toLocaleString(undefined,{style:'currency',currency:'US
 function aoaiSessionCost(){
   return (state.tkIn * state.aoaiIn + state.tkOut * state.aoaiOut) / 1000;
 }
+function aoaiSessionCostFt(){
+  return aoaiSessionCost() * (state.ftMultiplier || 1);
+}
 
 // Returns { aoai, credits } for one session of (uc, sol) under current license model.
 function sessionParts(uc, sol){
   const shape = (UC_SHAPES[uc] && UC_SHAPES[uc][sol]) || {};
-  const aoai = (shape.aoai||0) * aoaiSessionCost();
+  const ucMeta = UC_SHAPES[uc] || {};
+  const tokenCost = ucMeta.ft ? aoaiSessionCostFt() : aoaiSessionCost();
+  const aoai = (shape.aoai||0) * tokenCost;
   if (!USES_COPILOT_STUDIO[sol]) return { aoai, credits:0 };
 
   const m365Free = state.licenseModel === 'm365copilot' && CAN_USE_M365_FREE[sol];
@@ -270,10 +288,11 @@ function recompute(){
 
   const tBody = $('totals').querySelector('tbody'); tBody.innerHTML='';
   const totals = {};
+  const ftActive = ucs.some(u => UC_SHAPES[u.id] && UC_SHAPES[u.id].ft);
   sols.forEach(s=>{
     let variable = 0;
     ucs.forEach(u=> variable += sessionCost(u.id, s.id) * state.volumes[u.id]);
-    const resting = state['rest'+s.id];
+    const resting = state['rest'+s.id] + (ftActive ? state.ftHosting : 0);
     const lic = licenseFee(s.id);
     totals[s.id] = { resting, variable, lic, total: resting+variable+lic };
   });
@@ -345,7 +364,8 @@ function renderUcs(){
 function bindAssumptions(){
   const numIds = ['userCount','aoaiIn','aoaiOut','tkIn','tkOut','creditUsd',
                   'cGenAns','cClassic','cTenantGraph','cTool','cFlow',
-                  'restA','restB','restC','restD','licM365','licPP'];
+                  'restA','restB','restC','restD','licM365','licPP',
+                  'ftMultiplier','ftHosting'];
   numIds.forEach(id=>{
     const el = $(id); el.value = state[id];
     el.oninput = e => { state[id] = Number(e.target.value)||0; recompute(); };
