@@ -41,6 +41,7 @@ See each solution's `README.md` for prerequisites.
 - [docs/architecture/](./docs/architecture/) — Mermaid diagrams per solution
 - [docs/findings/](./docs/findings/) — build-time observations, gotchas, limits hit
 - [docs/demo-script.md](./docs/demo-script.md) — exact prompts to run in M365 Copilot
+- [docs/calculator/](./docs/calculator/) — interactive **cost calculator** (GitHub Pages: enable Pages on `main` / `/docs`, then visit `https://<owner>.github.io/<repo>/calculator/`). License-aware: M365 Copilot entitlements zero out Copilot Studio knowledge billing automatically.
 
 ## Repository layout
 

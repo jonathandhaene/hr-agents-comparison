@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>HR Concierge — Cost Calculator</title>
+<style>
+  :root {
+    --bg:#0b1020; --panel:#121a32; --ink:#e7ecf5; --muted:#8b95ad;
+    --accent:#5aa9ff; --good:#3ddc97; --warn:#ffb648; --bad:#ff6b6b;
+    --line:#1f2a48;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:14px/1.45 system-ui,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+  header{padding:24px 32px;border-bottom:1px solid var(--line)}
+  h1{margin:0;font-size:22px}
+  h2{margin:0 0 12px;font-size:16px}
+  h3{margin:18px 0 8px;font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+  .sub{color:var(--muted);margin-top:4px;max-width:90ch}
+  main{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;padding:24px 32px}
+  @media (max-width:1100px){main{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px}
+  .uc{display:grid;grid-template-columns:auto 1fr 140px;gap:12px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)}
+  .uc:last-child{border-bottom:0}
+  input[type="number"], select{padding:6px 8px;background:#0d1428;color:var(--ink);border:1px solid var(--line);border-radius:6px}
+  .uc input[type="number"]{width:120px;text-align:right}
+  .uc label{cursor:pointer}
+  .uc small{color:var(--muted);display:block}
+  .pills{display:flex;flex-wrap:wrap;gap:8px}
+  .pills label{background:#0d1428;border:1px solid var(--line);padding:6px 10px;border-radius:999px;cursor:pointer}
+  .pills input{margin-right:6px}
+  table{width:100%;border-collapse:collapse;margin-top:8px}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:right;vertical-align:top}
+  th:first-child,td:first-child{text-align:left}
+  thead th{font-weight:600;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+  tfoot td{font-weight:700;border-top:2px solid var(--line);border-bottom:0}
+  .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;background:#0d1428;border:1px solid var(--line);color:var(--muted);margin-left:6px}
+  .pill.good{color:var(--good);border-color:#1f4a3a}
+  .pill.warn{color:var(--warn);border-color:#4a3b1f}
+  details{margin-top:12px}
+  details summary{cursor:pointer;color:var(--accent);user-select:none}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .num{font-variant-numeric:tabular-nums}
+  .field{display:flex;flex-direction:column;gap:4px;margin:6px 0}
+  .field span{color:var(--muted);font-size:12px}
+  .footer{padding:16px 32px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+  .winner{color:var(--good);font-weight:700}
+  button.reset{background:transparent;border:1px solid var(--line);color:var(--muted);padding:6px 10px;border-radius:6px;cursor:pointer}
+  .note{color:var(--muted);font-size:12px;margin-top:6px}
+  .badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:10px;background:#1f4a3a;color:var(--good);margin-left:6px;letter-spacing:.04em;text-transform:uppercase}
+</style>
+</head>
+<body>
+<header>
+  <h1>HR Concierge — Cost Calculator</h1>
+  <div class="sub">
+    Estimate monthly run-cost for the four reference solutions across the six HR use cases.
+    The calculator <strong>optimises for your licensing</strong>: when employees already have a Microsoft 365 Copilot license, the
+    relevant agent traffic stops accruing Copilot Credits and Copilot Studio messages.
+    <em>Illustrative only</em> — verify against the Azure Pricing Calculator and Copilot Studio billing for your tenant.
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <h2>1. Org &amp; licensing</h2>
+    <div class="grid2">
+      <div class="field">
+        <span>Number of employees using the agent</span>
+        <input id="userCount" type="number" min="0" />
+      </div>
+      <div class="field">
+        <span>License model</span>
+        <select id="licenseModel">
+          <option value="m365copilot">M365 Copilot (employee-facing → free Copilot Studio for in-scope features)</option>
+          <option value="copilotStudioPay">Copilot Studio pay-as-you-go / message packs</option>
+          <option value="external">Customer-/external-facing agent (no M365 entitlement)</option>
+        </select>
+      </div>
+    </div>
+    <div class="note" id="licenseNote"></div>
+
+    <h2 style="margin-top:18px">2. Pick solutions to compare</h2>
+    <div class="pills" id="solutions"></div>
+
+    <h2 style="margin-top:18px">3. Use cases &amp; monthly volume (sessions / month)</h2>
+    <div id="ucs"></div>
+
+    <details>
+      <summary>4. Tweak assumptions</summary>
+
+      <h3>Azure OpenAI (gpt-4o GlobalStandard)</h3>
+      <div class="grid2">
+        <div class="field"><span>Input ($ / 1K tokens)</span><input id="aoaiIn" type="number" step="0.0001" /></div>
+        <div class="field"><span>Output ($ / 1K tokens)</span><input id="aoaiOut" type="number" step="0.0001" /></div>
+        <div class="field"><span>Avg input tokens / session</span><input id="tkIn" type="number" /></div>
+        <div class="field"><span>Avg output tokens / session</span><input id="tkOut" type="number" /></div>
+      </div>
+
+      <h3>Copilot Studio billing rates (credits / unit)</h3>
+      <div class="grid2">
+        <div class="field"><span>Copilot Credit price ($)</span><input id="creditUsd" type="number" step="0.001" /></div>
+        <div class="field"><span>Generative answer (credits / answer)</span><input id="cGenAns" type="number" step="0.1" /></div>
+        <div class="field"><span>Classic answer (credits / answer)</span><input id="cClassic" type="number" step="0.1" /></div>
+        <div class="field"><span>Tenant-graph grounding (credits / answer)</span><input id="cTenantGraph" type="number" step="0.1" /></div>
+        <div class="field"><span>Agent action / connector call (credits)</span><input id="cTool" type="number" step="0.1" /></div>
+        <div class="field"><span>Agent flow run (credits / 100 actions)</span><input id="cFlow" type="number" step="0.1" /></div>
+      </div>
+      <div class="note">M365 Copilot license includes generative answers, classic answers, and tenant-graph grounding for licensed users at <strong>zero credit cost</strong>. The optimiser zeros these out automatically when that license model is selected.</div>
+
+      <h3>Resting Azure infra ($ / month)</h3>
+      <div class="grid2">
+        <div class="field"><span>A — M365 Agents SDK (Container Apps min-replicas + Cosmos + AI Search + Bot Service)</span><input id="restA" type="number" /></div>
+        <div class="field"><span>B — Copilot Studio (APIM + Container Apps backend)</span><input id="restB" type="number" /></div>
+        <div class="field"><span>C — Foundry (Foundry + AOAI + Search + Container Apps + Cosmos)</span><input id="restC" type="number" /></div>
+        <div class="field"><span>D — Mixed (Functions Consumption + Foundry; scales to zero)</span><input id="restD" type="number" /></div>
+      </div>
+
+      <h3>Per-user Microsoft license fees ($ / user / month)</h3>
+      <div class="grid2">
+        <div class="field"><span>M365 Copilot license</span><input id="licM365" type="number" step="0.5" /></div>
+        <div class="field"><span>Power Platform / Copilot Studio per-user (if applicable)</span><input id="licPP" type="number" step="0.5" /></div>
+      </div>
+      <div class="note">License fees are added <em>only to the solutions that require them</em>. Toggle "Include license fees" below to exclude (e.g., when comparing Azure-only run-cost).</div>
+      <div class="field" style="margin-top:8px">
+        <label><input type="checkbox" id="includeLicenses" /> Include per-user license fees in totals</label>
+      </div>
+
+      <button class="reset" onclick="resetAll()" style="margin-top:12px">Reset to defaults</button>
+    </details>
+  </section>
+
+  <section class="panel">
+    <h2>Monthly cost (USD)</h2>
+    <table id="totals">
+      <thead><tr><th>Solution</th><th>Resting</th><th>Variable</th><th>Licenses</th><th>Total</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="note" id="optimNote"></div>
+
+    <h2 style="margin-top:18px">Per use-case variable cost</h2>
+    <table id="breakdown">
+      <thead><tr><th>Use case</th></tr></thead>
+      <tbody></tbody>
+      <tfoot><tr><td>Subtotal</td></tr></tfoot>
+    </table>
+
+    <details open>
+      <summary>Why these numbers</summary>
+      <ul style="color:var(--muted)">
+        <li><strong>AOAI session cost</strong> = (in_tokens × $/1K + out_tokens × $/1K) / 1000 × calls_per_session.</li>
+        <li><strong>Copilot Studio cost</strong> = (gen_answers + classic + tenant_graph + tools + flows) × credits × $0.01.</li>
+        <li><strong>Optimisation</strong>: with the <em>M365 Copilot</em> license model, generative/classic answers and tenant-graph grounding are <strong>billed at zero</strong> for in-scope HR scenarios. Copilot Studio agent flows and custom connector calls remain billable.</li>
+        <li><strong>Solution A (M365 Agents SDK)</strong> never accrues Copilot Studio credits — its conversation surface is the Agents SDK / Bot Service, not Copilot Studio.</li>
+        <li><strong>Solution C (Foundry hosted agent)</strong> bills only AOAI tokens for sessions; no Copilot Studio credits even without the M365 Copilot license.</li>
+        <li><strong>Solution D (Mixed)</strong> uses Copilot Studio for the conversation surface (B-style billing) <em>plus</em> AOAI tokens only on UC4 + UC5-summary that delegate to Foundry.</li>
+      </ul>
+    </details>
+  </section>
+</main>
+
+<div class="footer">
+  Defaults derived from the per-solution READMEs and <a style="color:var(--accent)" href="../comparison.md">docs/comparison.md</a>. Live Azure rates: <a style="color:var(--accent)" href="https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview">prices.azure.com</a>. Copilot Studio billing: <a style="color:var(--accent)" href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management">Microsoft Learn</a>.
+</div>
+
+<script>
+const SOLUTIONS = [
+  { id:'A', name:'M365 Agents SDK' },
+  { id:'B', name:'Copilot Studio' },
+  { id:'C', name:'Foundry agent' },
+  { id:'D', name:'Mixed' },
+];
+
+const USE_CASES = [
+  { id:'uc1', title:'UC1 — Policy Q&A',           hint:'RAG over handbook' },
+  { id:'uc2', title:'UC2 — Time-off + approval',  hint:'HITL with manager' },
+  { id:'uc3', title:'UC3 — Onboarding',           hint:'Long-running, multi-actor' },
+  { id:'uc4', title:'UC4 — Internal mobility',    hint:'Model-led reasoning' },
+  { id:'uc5', title:'UC5 — 360° feedback',        hint:'Fan-out + summary' },
+  { id:'uc6', title:'UC6 — Triage & escalation',  hint:'Classifier + handoff' },
+];
+
+// Per-UC, per-solution shape of one session.
+//   aoai      : AOAI gpt-4o calls of avg-token size
+//   genAns    : Copilot Studio generative-answer calls (M365-Copilot-free)
+//   classic   : Copilot Studio classic-answer calls    (M365-Copilot-free)
+//   tg        : tenant-graph grounding calls           (M365-Copilot-free)
+//   tool      : Copilot Studio agent action / connector call (always billable)
+//   flow      : Copilot Studio agent-flow runs              (always billable)
+const UC_SHAPES = {
+  uc1: { A:{aoai:1},                  B:{genAns:1, tg:1},               C:{aoai:1},                D:{genAns:1, tg:1} },
+  uc2: { A:{aoai:0.5, _toolFree:1},   B:{flow:1, tool:1},               C:{aoai:0.5, _toolFree:1}, D:{flow:1, tool:1} },
+  uc3: { A:{aoai:0.5, _toolFree:2},   B:{flow:2, tool:2},               C:{aoai:0.5, _toolFree:2}, D:{flow:2, tool:2} },
+  uc4: { A:{aoai:1.5, _toolFree:1},   B:{tool:1, genAns:1},             C:{aoai:1.5, _toolFree:1}, D:{aoai:1.5, tool:1} },
+  uc5: { A:{aoai:1.2, _toolFree:1},   B:{flow:1, tool:1, genAns:1},     C:{aoai:1.2, _toolFree:2}, D:{flow:1, aoai:1, tool:1} },
+  uc6: { A:{aoai:0.7, _toolFree:1},   B:{flow:1, tool:1},               C:{aoai:0.7, _toolFree:1}, D:{flow:1, tool:1} },
+};
+
+// Which solutions actually use Copilot Studio billing pipe?
+const USES_COPILOT_STUDIO = { A:false, B:true, C:false, D:true };
+// Which solutions require Power Platform / Copilot Studio per-user license?
+const NEEDS_PP_LICENSE     = { A:false, B:true, C:false, D:true };
+// Which solutions can leverage M365 Copilot's free entitlements?
+const CAN_USE_M365_FREE    = { A:false, B:true, C:false, D:true };
+
+const DEFAULTS = {
+  userCount: 5000,
+  licenseModel: 'm365copilot',
+  aoaiIn:0.0025, aoaiOut:0.01, tkIn:1500, tkOut:500,
+  creditUsd:0.01,
+  cGenAns:1, cClassic:0.2, cTenantGraph:0.3,
+  cTool:1, cFlow:1,
+  restA:250, restB:120, restC:200, restD:15,
+  licM365:30, licPP:20,
+  includeLicenses:false,
+  volumes:{ uc1:2000, uc2:400, uc3:50, uc4:200, uc5:100, uc6:300 },
+  selectedUcs:{ uc1:true, uc2:true, uc3:true, uc4:true, uc5:true, uc6:true },
+  selectedSols:{ A:true, B:true, C:true, D:true },
+};
+
+let state = JSON.parse(JSON.stringify(DEFAULTS));
+
+const $ = id => document.getElementById(id);
+const fmt = n => (n||0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:0});
+const fmt2 = n => (n||0).toLocaleString(undefined,{style:'currency',currency:'USD',maximumFractionDigits:2});
+
+function aoaiSessionCost(){
+  return (state.tkIn * state.aoaiIn + state.tkOut * state.aoaiOut) / 1000;
+}
+
+// Returns { aoai, credits } for one session of (uc, sol) under current license model.
+function sessionParts(uc, sol){
+  const shape = (UC_SHAPES[uc] && UC_SHAPES[uc][sol]) || {};
+  const aoai = (shape.aoai||0) * aoaiSessionCost();
+  if (!USES_COPILOT_STUDIO[sol]) return { aoai, credits:0 };
+
+  const m365Free = state.licenseModel === 'm365copilot' && CAN_USE_M365_FREE[sol];
+  const genAnsRate    = m365Free ? 0 : state.cGenAns;
+  const classicRate   = m365Free ? 0 : state.cClassic;
+  const tgRate        = m365Free ? 0 : state.cTenantGraph;
+  const toolRate      = state.cTool;     // always billable
+  const flowRate      = state.cFlow;     // always billable
+
+  const credits =
+      (shape.genAns ||0) * genAnsRate
+    + (shape.classic||0) * classicRate
+    + (shape.tg     ||0) * tgRate
+    + (shape.tool   ||0) * toolRate
+    + (shape.flow   ||0) * flowRate;
+  return { aoai, credits: credits * state.creditUsd };
+}
+
+function sessionCost(uc, sol){
+  const p = sessionParts(uc, sol);
+  return p.aoai + p.credits;
+}
+
+function licenseFee(sol){
+  if (!state.includeLicenses) return 0;
+  let perUser = 0;
+  if (state.licenseModel === 'm365copilot') perUser += state.licM365;
+  if (NEEDS_PP_LICENSE[sol] && state.licenseModel !== 'm365copilot') perUser += state.licPP;
+  // Note: with M365 Copilot, Copilot Studio entitlements ride on the M365 license; no extra PP seat fee.
+  return perUser * state.userCount;
+}
+
+function recompute(){
+  const sols = SOLUTIONS.filter(s=>state.selectedSols[s.id]);
+  const ucs  = USE_CASES.filter(u=>state.selectedUcs[u.id]);
+
+  const tBody = $('totals').querySelector('tbody'); tBody.innerHTML='';
+  const totals = {};
+  sols.forEach(s=>{
+    let variable = 0;
+    ucs.forEach(u=> variable += sessionCost(u.id, s.id) * state.volumes[u.id]);
+    const resting = state['rest'+s.id];
+    const lic = licenseFee(s.id);
+    totals[s.id] = { resting, variable, lic, total: resting+variable+lic };
+  });
+  const minTotal = sols.length ? Math.min(...sols.map(s=>totals[s.id].total)) : 0;
+  sols.forEach(s=>{
+    const t = totals[s.id];
+    const isMin = t.total === minTotal && sols.length>1;
+    const optimBadge = (state.licenseModel==='m365copilot' && CAN_USE_M365_FREE[s.id])
+      ? '<span class="badge">M365 optimised</span>' : '';
+    tBody.insertAdjacentHTML('beforeend',`
+      <tr>
+        <td>${s.id} — ${s.name}${optimBadge}${isMin?' <span class="pill good">cheapest</span>':''}</td>
+        <td class="num">${fmt(t.resting)}</td>
+        <td class="num">${fmt(t.variable)}</td>
+        <td class="num">${fmt(t.lic)}</td>
+        <td class="num ${isMin?'winner':''}">${fmt(t.total)}</td>
+      </tr>`);
+  });
+
+  const bd = $('breakdown');
+  bd.querySelector('thead tr').innerHTML = '<th>Use case</th>' + sols.map(s=>`<th>${s.id}</th>`).join('');
+  bd.querySelector('tfoot tr').innerHTML = '<td>Variable subtotal</td>' + sols.map(s=>`<td class="num">${fmt(totals[s.id].variable)}</td>`).join('');
+  const bb = bd.querySelector('tbody'); bb.innerHTML='';
+  ucs.forEach(u=>{
+    const cells = sols.map(s=>{
+      const c = sessionCost(u.id, s.id) * state.volumes[u.id];
+      const p = sessionParts(u.id, s.id);
+      const tip = `AOAI ${fmt2(p.aoai)} + Credits ${fmt2(p.credits)} per session`;
+      return `<td class="num" title="${tip}">${fmt(c)}</td>`;
+    }).join('');
+    bb.insertAdjacentHTML('beforeend',
+      `<tr><td>${u.title} <small style="color:var(--muted)">(${state.volumes[u.id].toLocaleString()} / mo)</small></td>${cells}</tr>`);
+  });
+
+  // License note
+  const notes = {
+    m365copilot: 'M365 Copilot license model — Copilot Studio generative answers, classic answers and tenant-graph grounding are <strong>$0</strong> for in-scope HR usage. Only agent flows, connector/tool calls, and AOAI tokens accrue variable cost.',
+    copilotStudioPay: 'Copilot Studio pay-as-you-go / message packs — every generative answer, classic answer, tenant-graph grounding, tool call, and flow run consumes Copilot Credits at $0.01 each.',
+    external: 'External / customer-facing — no M365 entitlement applies; Copilot Studio is fully metered.',
+  };
+  $('licenseNote').innerHTML = notes[state.licenseModel];
+  $('optimNote').innerHTML = state.licenseModel==='m365copilot'
+    ? 'Cost optimiser active: M365 Copilot entitlements zero out Copilot Studio knowledge billing on solutions B &amp; D.'
+    : '';
+}
+
+function renderSolutions(){
+  $('solutions').innerHTML = SOLUTIONS.map(s=>`
+    <label><input type="checkbox" data-sol="${s.id}" ${state.selectedSols[s.id]?'checked':''}/>${s.id} — ${s.name}</label>
+  `).join('');
+  $('solutions').querySelectorAll('input').forEach(el=>{
+    el.onchange = e => { state.selectedSols[e.target.dataset.sol] = e.target.checked; recompute(); };
+  });
+}
+
+function renderUcs(){
+  $('ucs').innerHTML = USE_CASES.map(u=>`
+    <div class="uc">
+      <input type="checkbox" id="${u.id}-on" ${state.selectedUcs[u.id]?'checked':''}/>
+      <label for="${u.id}-on"><strong>${u.title}</strong><small>${u.hint}</small></label>
+      <input type="number" min="0" step="10" id="${u.id}-vol" value="${state.volumes[u.id]}" />
+    </div>`).join('');
+  USE_CASES.forEach(u=>{
+    $(`${u.id}-on`).onchange = e => { state.selectedUcs[u.id]=e.target.checked; recompute(); };
+    $(`${u.id}-vol`).oninput = e => { state.volumes[u.id]=Number(e.target.value)||0; recompute(); };
+  });
+}
+
+function bindAssumptions(){
+  const numIds = ['userCount','aoaiIn','aoaiOut','tkIn','tkOut','creditUsd',
+                  'cGenAns','cClassic','cTenantGraph','cTool','cFlow',
+                  'restA','restB','restC','restD','licM365','licPP'];
+  numIds.forEach(id=>{
+    const el = $(id); el.value = state[id];
+    el.oninput = e => { state[id] = Number(e.target.value)||0; recompute(); };
+  });
+  $('licenseModel').value = state.licenseModel;
+  $('licenseModel').onchange = e => { state.licenseModel = e.target.value; recompute(); };
+  $('includeLicenses').checked = state.includeLicenses;
+  $('includeLicenses').onchange = e => { state.includeLicenses = e.target.checked; recompute(); };
+}
+
+function resetAll(){
+  state = JSON.parse(JSON.stringify(DEFAULTS));
+  renderSolutions(); renderUcs(); bindAssumptions(); recompute();
+}
+
+renderSolutions();
+renderUcs();
+bindAssumptions();
+recompute();
+</script>
+</body>
+</html>
