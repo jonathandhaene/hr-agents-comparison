@@ -91,10 +91,10 @@
       </div>
       <div class="field">
         <span>&nbsp;</span>
-        <button class="reset" type="button" id="refreshPrices">Refresh live prices from prices.azure.com</button>
+        <button class="reset" type="button" id="refreshPrices">Load live prices for region</button>
       </div>
     </div>
-    <div class="note" id="priceNote">Click “Refresh live prices” to pull current gpt-4o GlobalStandard rates for the selected region.</div>
+    <div class="note" id="priceNote">Click “Load live prices for region” to apply the latest cached gpt-4o GlobalStandard rates (snapshot refreshed weekly via GitHub Actions).</div>
 
     <h2 style="margin-top:18px">4. Use cases &amp; monthly volume (sessions / month)</h2>
     <div id="ucs"></div>
@@ -206,7 +206,7 @@
 </section>
 
 <div class="footer">
-  Defaults derived from the per-solution READMEs and <a style="color:var(--accent)" href="../comparison.md">docs/comparison.md</a>. Live Azure rates: <a style="color:var(--accent)" href="https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview">prices.azure.com</a>. Copilot Studio billing: <a style="color:var(--accent)" href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management">Microsoft Learn</a>.
+  Defaults derived from the per-solution READMEs and <a style="color:var(--accent)" href="../comparison.md">docs/comparison.md</a>. Live Azure rates: cached <a style="color:var(--accent)" href="./prices.json">prices.json</a> snapshot from <a style="color:var(--accent)" href="https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview">prices.azure.com</a> (refreshed weekly by GitHub Actions). Copilot Studio billing: <a style="color:var(--accent)" href="https://learn.microsoft.com/en-us/microsoft-copilot-studio/requirements-messages-management">Microsoft Learn</a>.
 </div>
 
 <script>
@@ -416,7 +416,7 @@ function bindAssumptions(){
   $('includeLicenses').onchange = e => { state.includeLicenses = e.target.checked; recompute(); };
   renderRegions();
   $('region').value = state.region;
-  $('region').onchange = e => { state.region = e.target.value; };
+  $('region').onchange = e => { state.region = e.target.value; fetchLivePrices(); };
   $('refreshPrices').onclick = fetchLivePrices;
 }
 
@@ -440,46 +440,30 @@ function renderRegions(){
 
 async function fetchLivePrices(){
   const note = $('priceNote');
-  note.innerHTML = 'Fetching live prices from <code>prices.azure.com</code>…';
-  // gpt-4o GlobalStandard meters live under serviceName "Azure OpenAI" and (newer) "Foundry Models".
-  // We fetch both; meterName patterns include things like "gpt-4o-0806 Global Inp tokens".
-  const filters = [
-    `serviceName eq 'Azure OpenAI' and armRegionName eq '${state.region}' and priceType eq 'Consumption'`,
-    `serviceName eq 'Foundry Models' and armRegionName eq '${state.region}' and priceType eq 'Consumption'`,
-  ];
-  const base = 'https://prices.azure.com/api/retail/prices?api-version=2023-01-01-preview&$filter=';
+  note.innerHTML = 'Loading cached prices…';
+  // We read a static snapshot maintained by .github/workflows/refresh-prices.yml
+  // (the prices.azure.com API does not send CORS headers, so we cannot call it
+  // from the browser). The snapshot is gpt-4o GlobalStandard input/output rates
+  // by Azure region.
   try {
-    const results = (await Promise.all(filters.map(f =>
-      fetch(base + encodeURIComponent(f)).then(r => r.ok ? r.json() : { Items: [] })
-    ))).flatMap(r => r.Items || []);
-
-    if (!results.length) {
-      note.innerHTML = `No items returned for <code>${state.region}</code>. gpt-4o GlobalStandard pricing is region-uniform; defaults retained.`;
+    const r = await fetch('./prices.json', { cache: 'no-store' });
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    const row = data.regions && data.regions[state.region];
+    const stamp = (data.generated || '').replace('T',' ').replace('Z',' UTC');
+    if (!row) {
+      const known = Object.keys(data.regions || {}).sort().join(', ') || '(none)';
+      note.innerHTML = `No cached price for <code>${state.region}</code> (snapshot ${stamp}). Available: ${known}. Defaults retained.`;
       return;
     }
-
-    // Pick the gpt-4o Global tokens meters (input + output). Names vary across snapshots.
-    const isGpt4o   = n => /gpt-4o/i.test(n) && !/mini/i.test(n) && !/realtime/i.test(n) && !/audio/i.test(n);
-    const isGlobal  = n => /global/i.test(n);
-    const isInput   = n => /(inp|input)\b/i.test(n);
-    const isOutput  = n => /(outp|output)\b/i.test(n);
-
-    const gpt4o = results.filter(i => isGpt4o(i.meterName) && isGlobal(i.meterName));
-    const inItem  = gpt4o.find(i => isInput(i.meterName))  || results.find(i => isGpt4o(i.meterName) && isInput(i.meterName));
-    const outItem = gpt4o.find(i => isOutput(i.meterName)) || results.find(i => isGpt4o(i.meterName) && isOutput(i.meterName));
-
-    let updated = [];
-    if (inItem)  { state.aoaiIn  = inItem.retailPrice  * unitFactor(inItem.unitOfMeasure);  $('aoaiIn').value  = state.aoaiIn;  updated.push(`input ${inItem.meterName} = $${state.aoaiIn}/1K`); }
-    if (outItem) { state.aoaiOut = outItem.retailPrice * unitFactor(outItem.unitOfMeasure); $('aoaiOut').value = state.aoaiOut; updated.push(`output ${outItem.meterName} = $${state.aoaiOut}/1K`); }
-
-    if (updated.length) {
-      note.innerHTML = `Live prices applied (${state.region}, ${new Date().toISOString().slice(0,16).replace('T',' ')}Z): ${updated.join(' · ')}.`;
-      recompute();
-    } else {
-      note.innerHTML = `Could not identify gpt-4o GlobalStandard meters in <code>${state.region}</code>. Defaults retained. Try a different region (e.g. <code>eastus</code>).`;
-    }
+    state.aoaiIn  = row.input_per_1k;
+    state.aoaiOut = row.output_per_1k;
+    $('aoaiIn').value  = state.aoaiIn;
+    $('aoaiOut').value = state.aoaiOut;
+    note.innerHTML = `Live prices applied for <code>${state.region}</code> · input $${row.input_per_1k}/1K · output $${row.output_per_1k}/1K · snapshot ${stamp} · meters <code>${row.meter_input}</code> / <code>${row.meter_output}</code>.`;
+    recompute();
   } catch (err) {
-    note.innerHTML = `Live price fetch failed: ${err.message}. Defaults retained.`;
+    note.innerHTML = `Live price load failed: ${err.message}. The cached <code>prices.json</code> snapshot is refreshed weekly by GitHub Actions; defaults retained.`;
   }
 }
 
@@ -501,6 +485,8 @@ renderSolutions();
 renderUcs();
 bindAssumptions();
 recompute();
+// Auto-load cached prices on boot (best-effort).
+fetchLivePrices();
 
 // =========================================================================
 //  Capability race — 60-month animated visualisation

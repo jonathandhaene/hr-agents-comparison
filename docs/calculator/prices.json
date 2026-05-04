@@ -1,0 +1,168 @@
+{
+  "currency": "USD",
+  "generated": "2026-05-04T11:40:00Z",
+  "model": "gpt-4o GlobalStandard",
+  "regions": {
+    "australiaeast": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "brazilsouth": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "canadaeast": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "centralus": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "eastus": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "eastus2": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-FT-inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-FT-outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "francecentral": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "germanywestcentral": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "japaneast": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "koreacentral": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "northcentralus": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-FT-outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "norwayeast": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "polandcentral": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "southafricanorth": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "southcentralus": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "southeastasia": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "swedencentral": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-FT-outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "switzerlandnorth": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "uaenorth": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "uksouth": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "westeurope": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "westus": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "westus3": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    }
+  }
+}
