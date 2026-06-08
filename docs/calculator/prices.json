@@ -1,6 +1,6 @@
 {
   "currency": "USD",
-  "generated": "2026-06-01T11:45:08Z",
+  "generated": "2026-06-08T11:06:22Z",
   "model": "gpt-4o GlobalStandard",
   "regions": {
     "australiaeast": {
@@ -77,6 +77,13 @@
       "input_per_1k": 0.0025,
       "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
       "meter_output": "gpt-4o-0806-FT-outp-glbl Tokens",
+      "output_per_1k": 0.01,
+      "service": "Foundry Models"
+    },
+    "northeurope": {
+      "input_per_1k": 0.0025,
+      "meter_input": "gpt-4o-0806-Inp-glbl Tokens",
+      "meter_output": "gpt-4o-0806-Outp-glbl Tokens",
       "output_per_1k": 0.01,
       "service": "Foundry Models"
     },
